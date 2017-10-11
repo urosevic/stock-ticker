@@ -1,0 +1,51 @@
+#stock_ticker_settings {
+    .stock_ticker_wrapper {
+        display: table;
+
+        .content_cell {
+            display: table-cell;
+
+        }
+
+        .sidebar_container {
+            display: table-cell;
+            padding: 0 0 0 20px;
+            width: 25%;
+
+            .aust-button {
+                display: block;
+                background: #fff;
+                border-radius: 7px;
+                border: 1px solid rgba(0,0,0,0.1);
+                box-shadow: 0 0 0 5px rgba(0,0,0,0.1);
+                padding: 11px 15px;
+                white-space: nowrap;
+                line-height: 18px;
+                color: #bdbdbd;
+                text-shadow: 1px 1px #fff;
+                text-decoration: none;
+                position: relative;
+                min-width: 120px;
+
+                &:hover {
+                    color: #6796a9;
+                    background-color: #c2edff;
+                }
+
+                &.paypal_donate:after {
+                    content: ' ';
+                    background-image: url(../img/paypal.png);
+                    background-repeat: no-repeat;
+                    background-position: center right;
+                    width: 62px;
+                    height: 100%;
+                    display: inline-block;
+                    position: absolute;
+                    right: 15px;
+                    top: 0;
+                    bottom: 0;
+                }
+            }
+        }
+    }
+}
