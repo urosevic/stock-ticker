@@ -12,17 +12,19 @@ var stock_tickers_load = function() {
 					'action': 'stock_ticker_load',
 					'symbols': jQuery(this).data('stockticker_symbols'),
 					'show': jQuery(this).data('stockticker_show'),
+					'number_format': jQuery(this).data('stockticker_number_format'),
+					'decimals': jQuery(this).data('stockticker_decimals'),
 					'static': jQuery(this).data('stockticker_static'),
-					'nolink': jQuery(this).data('stockticker_nolink'),
 					'class': jQuery(this).data('stockticker_class'),
 					'speed': jQuery(this).data('stockticker_speed'),
 					'empty': jQuery(this).data('stockticker_empty'),
 					'duplicate': jQuery(this).data('stockticker_duplicate')
 				},
 				success: function(response) {
-					stock_ticker_loaded = true;
-					obj.html(response.message);
 					if ( response.status == 'success' ) {
+						console.log(response);
+						stock_ticker_loaded = true;
+						obj.html(response.message);
 						if ( ! obj.data('stockticker_static') ) {
 							jQuery(obj).find('.stock_ticker').stockTicker({ startEmpty:jQuery(obj).data('stockticker_empty'), duplicate:jQuery(obj).data('stockticker_duplicate'), speed:jQuery(obj).data('stockticker_speed') });
 						}
@@ -42,12 +44,26 @@ jQuery(document).ready(function() {
 			stock_tickers_load();
 		}
 	}, 5000);
+	// Update AlphaVantage quotes
+	setTimeout(function() {
+		jQuery.ajax({
+			type: 'post',
+			dataType: 'json',
+			url: stockTickerJs.ajax_url,
+			data: {
+				'action': 'stock_ticker_update_quotes'
+			},
+			success: function(response) {
+				console.log( 'Stock Ticker update quotes response: ' + response );
+			}
+		});
+	}, 2000);
 
 	// Short-circuit selective refresh events if not in customizer preview or pre-4.5.
 	if ( 'undefined' === typeof wp || ! wp.customize || ! wp.customize.selectiveRefresh ) {
 		return;
 	}
-	// Re-load Twitter widgets when a partial is rendered.
+	// Re-load Stock Ticker widgets when a partial is rendered.
 	wp.customize.selectiveRefresh.bind( 'partial-content-rendered', function( placement ) {
 		if ( placement.container ) {
 			stock_tickers_load();

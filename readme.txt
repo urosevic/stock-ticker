@@ -12,9 +12,6 @@ Easy add customizable moving or static ticker tapes with stock information for c
 
 == Description ==
 
-*IMPORTANT NOTICE*
-Google in September 2017 completely abandoned free stock API we used for Stock Ticker plugin. That is reason why plugin does not work anymore. We'll try to find other stock resource allowed by wordpress.org rules and update plugin. If you have any advise or example of free stock API, feel free to contact us at https://urosevic.net/c/
-
 A simple and easy configurable plugin that allows you to insert stock ticker with stock price information (data provided by Google Finance). Insertion is enabled by shortcode or multi instance widget.
 
 Stock Ticker is enhanced animated variation of [Stock Quote](https://wordpress.org/plugins/stock-quote/) plugin.
@@ -188,6 +185,30 @@ data licensors endorses or is responsible for the content of any advertisement
 or any goods or services offered therein.
 
 == Changelog ==
+
+= 0.2.99-alpha5 (20171011) =
+* Fix: Number format and Decimal places setting are not saved
+
+= 0.2.99-alpha4 (20171010) =
+* Fix: Fatal error: Using $this when not in object context
+
+= 0.2.99-alpha3 (20171009) =
+* Add: plugin update script
+* Add: customizable default 'Loading...' message
+* Add: customizable number format and decimal places (globally, per shortcode and per widget)
+* Add: fallback when AlphaVantage.co return second day with zeros
+* Change: rewrite settings page
+* Change: better handling update cache
+* Change: option to unlink quotes because with AlphaVantage.co we don't have where to link
+* Fix: typos
+
+= 0.2.99-alpha2 (20170926) =
+* Change: AlphaVantage update quotes action after 2s (instead 5s) after documentready
+* Change: Prevent ticker loader to display 'Unfortunately...' message until we have stock data
+* Add: List of Stock Exchanges supported by AlphaVantage API
+
+= 0.2.99-alpha1 (20170926) =
+* Change: Remove Google and use AlphaVantage.co API
 
 = 0.2.3 (20170520) =
 * (20170606) Fix: ticker initialization does not work on some GoDaddy hosts, so add ticker re-initialization on 5 second interval

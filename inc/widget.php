@@ -51,9 +51,11 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 			ob_start();
 		}
 
+		global $wpau_stockticker;
+
 		// Get defaults in instance is empty (for customizer).
 		if ( empty( $instance ) ) {
-			$instance = Wpau_Stock_Ticker::defaults();
+			$instance = $wpau_stockticker->defaults;
 			$instance['title'] = __( 'Stock Ticker', 'wpaust' );
 		}
 
@@ -66,11 +68,12 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 			return;
 		}
 
-		$instance['static']    = empty( $instance['static'] ) ? '0' : '1';
-		$instance['nolink']    = empty( $instance['nolink'] ) ? '0' : '1';
-		$instance['prefill']   = empty( $instance['prefill'] ) ? '0' : '1';
-		$instance['duplicate'] = empty( $instance['duplicate'] ) ? '0' : '1';
-		$instance['speed']     = isset( $instance['speed'] ) ? intval( $instance['speed'] ) : 50;
+		$instance['number_format'] = empty( $instance['number_format'] ) ? 'dc' : $instance['number_format'];
+		$instance['decimals']      = empty( $instance['decimals'] ) ? 2 : $instance['decimals'];
+		$instance['static']        = empty( $instance['static'] ) ? '0' : '1';
+		$instance['prefill']       = empty( $instance['prefill'] ) ? '0' : '1';
+		$instance['duplicate']     = empty( $instance['duplicate'] ) ? '0' : '1';
+		$instance['speed']         = isset( $instance['speed'] ) ? intval( $instance['speed'] ) : 50;
 
 		// Output live stock ticker widget.
 		echo $args['before_widget'];
@@ -79,7 +82,7 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 			echo $args['before_title'] . $title . $args['after_title'];
 		}
 
-		echo Wpau_Stock_Ticker::shortcode( $instance );
+		echo $wpau_stockticker->shortcode( $instance );
 
 		echo $args['after_widget'];
 
@@ -97,8 +100,10 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 	 */
 	public function form( $instance ) {
 
+		global $wpau_stockticker;
+
 		// Get defaults.
-		$defaults = Wpau_Stock_Ticker::defaults();
+		$defaults = $wpau_stockticker->defaults;
 
 		// Outputs the options form on admin.
 		if ( isset( $instance['title'] ) ) {
@@ -123,11 +128,7 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 			$static = '0';
 		}
 
-		if ( isset( $instance['nolink'] ) ) {
-			$nolink = $instance['nolink'];
-		} else {
-			$nolink = '0';
-		}
+		$nolink = '0';
 
 		if ( isset( $instance['prefill'] ) ) {
 			$prefill = $instance['prefill'];
@@ -153,6 +154,17 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 			$speed = $defaults['speed'];
 		}
 
+		if ( isset( $instance['number_format'] ) ) {
+			$number_format = $instance['number_format'];
+		} else {
+			$number_format = $defaults['number_format'];
+		}
+		if ( isset( $instance['decimals'] ) ) {
+			$decimals = $instance['decimals'];
+		} else {
+			$decimals = $defaults['decimals'];
+		}
+
 		?>
 		<p>
 		<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php esc_attr_e( 'Title' ); ?>:</label>
@@ -160,7 +172,7 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		</p>
 		<p>
 		<label for="<?php echo $this->get_field_id( 'symbols' ); ?>"><?php esc_attr_e( 'Stock Symbols', 'wpaust' ); ?>:</label>
-		<input class="widefat" id="<?php echo $this->get_field_id( 'symbols' ); ?>" name="<?php echo $this->get_field_name( 'symbols' ); ?>" type="text" value="<?php echo esc_attr( $symbols ); ?>" title="<?php esc_html_e( 'For currencies use format EURGBP=X; for Dow Jones use ^DJI; for specific stock exchange use format EXCHANGE:SYMBOL like LON:FFX', 'wpaust' ); ?>" />
+		<input class="widefat" id="<?php echo $this->get_field_id( 'symbols' ); ?>" name="<?php echo $this->get_field_name( 'symbols' ); ?>" type="text" value="<?php echo esc_attr( $symbols ); ?>" title="<?php esc_html_e( 'For currencies use format EURGBP=X; for Dow Jones use .DJI; for specific stock exchange use format EXCHANGE:SYMBOL like LON:FFX', 'wpaust' ); ?>" />
 		</p>
 
 		<p>
@@ -170,20 +182,26 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 			<option <?php echo ('symbol' == $show) ? 'selected="selected"' : ''; ?> value="symbol"><?php esc_attr_e( 'Stock Symbol', 'wpaust' ); ?></option>
 		</select>
 		</p>
-		<?php /*
+
 		<p>
-		<label for="<?php echo $this->get_field_id( 'zero' ); ?>"><?php esc_attr_e( 'Unchanged Quote', 'wpaust' ); ?>:</label><br />
-		<input class="wpau-color-field" id="<?php echo $this->get_field_id( 'zero' ); ?>" name="<?php echo $this->get_field_name( 'zero' ); ?>" type="text" value="<?php echo esc_attr( $zero ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'number_format' ); ?>"><?php esc_attr_e( 'Number format', 'wpaust' ); ?>:</label>
+		<select class="widefat" id="<?php echo $this->get_field_id( 'number_format' ); ?>" name="<?php echo $this->get_field_name( 'number_format' ); ?>">
+			<option <?php echo ('cd' == $number_format) ? 'selected="selected"' : ''; ?> value="cd">0,000.00</option>
+			<option <?php echo ('dc' == $number_format) ? 'selected="selected"' : ''; ?> value="dc">0.000,00</option>
+			<option <?php echo ('sd' == $number_format) ? 'selected="selected"' : ''; ?> value="sd">0 000.00</option>
+			<option <?php echo ('sc' == $number_format) ? 'selected="selected"' : ''; ?> value="sc">0 000,00</option>
+		</select>
 		</p>
+
 		<p>
-		<label for="<?php echo $this->get_field_id( 'minus' ); ?>"><?php esc_attr_e( 'Negative Change', 'wpaust' ); ?>:</label><br />
-		<input class="wpau-color-field" id="<?php echo $this->get_field_id( 'minus' ); ?>" name="<?php echo $this->get_field_name( 'minus' ); ?>" type="text" value="<?php echo esc_attr( $minus ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'decimals' ); ?>"><?php esc_attr_e( 'Decimal places', 'wpaust' ); ?>:</label>
+		<select class="widefat" id="<?php echo $this->get_field_id( 'decimals' ); ?>" name="<?php echo $this->get_field_name( 'decimals' ); ?>">
+			<option <?php echo (1 == $decimals) ? 'selected="selected"' : ''; ?> value="1">One</option>
+			<option <?php echo (2 == $decimals) ? 'selected="selected"' : ''; ?> value="2">Two</option>
+			<option <?php echo (3 == $decimals) ? 'selected="selected"' : ''; ?> value="3">Three</option>
+			<option <?php echo (4 == $decimals) ? 'selected="selected"' : ''; ?> value="4">Four</option>
+		</select>
 		</p>
-		<p>
-		<label for="<?php echo $this->get_field_id( 'plus' ); ?>"><?php esc_attr_e( 'Positive Change', 'wpaust' ); ?>:</label><br />
-		<input class="wpau-color-field" id="<?php echo $this->get_field_id( 'plus' ); ?>" name="<?php echo $this->get_field_name( 'plus' ); ?>" type="text" value="<?php echo esc_attr( $plus ); ?>" />
-		</p>
-		*/ ?>
 
 		<p>
 		<label for="<?php echo $this->get_field_id( 'speed' ); ?>"><?php esc_attr_e( 'Ticker Speed', 'wpaust' ); ?>:</label>
@@ -194,11 +212,6 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		<label for="<?php echo $this->get_field_id( 'static' ); ?>">
 		<input class="checkbox" id="<?php echo $this->get_field_id( 'static' ); ?>" name="<?php echo $this->get_field_name( 'static' ); ?>" type="checkbox" value="1" <?php checked( $static, true, true ); ?> />
 		<?php esc_attr_e( 'Make this ticker static (disable scrolling)', 'wpaust' ); ?>
-		</label>
-		<br />
-		<label for="<?php echo $this->get_field_id( 'nolink' ); ?>">
-		<input class="checkbox" id="<?php echo $this->get_field_id( 'nolink' ); ?>" name="<?php echo $this->get_field_name( 'nolink' ); ?>" type="checkbox" value="1" <?php checked( $nolink, true, true ); ?> />
-		<?php esc_attr_e( 'Do not link quotes', 'wpaust' ); ?>
 		</label>
 		<br />
 		<label for="<?php echo $this->get_field_id( 'prefill' ); ?>">
@@ -215,31 +228,6 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		<label for="<?php echo $this->get_field_id( 'class' ); ?>"><?php esc_attr_e( 'Cusom Class', 'wpaust' ); ?>:</label>
 		<input class="widefat" id="<?php echo $this->get_field_id( 'class' ); ?>" name="<?php echo $this->get_field_name( 'class' ); ?>" type="text" value="<?php echo esc_attr( $class ); ?>" title="<?php esc_html_e( 'Set custom CSS class to customize block look', 'wpaust' ); ?>" />
 		</p>
-<?php /*
-<script type="text/javascript">
-//<![CDATA[
-jQuery(document).ready(function($)
-{
-	$('#widgets-right .wpau-color-field').each(function(){
-		if ( $(this).parent().attr('class') != 'wp-picker-input-wrap' )
-		{
-			$(this).wpColorPicker();
-		}
-	});
-});
-// now deal with fresh added widget
-jQuery('#widgets-right .widgets-sortables').on('sortstop', function(event,ui){
-	jQuery(this).find('div[id*="stock_ticker"]').each(function(){
-		var ticker_id = jQuery(this).attr('id');
-		if ( jQuery(ticker_id).find('.wpau-color-field').parent().attr('class') != 'wp-picker-input-wrap' )
-		{
-			jQuery(ticker_id).find('.wpau-color-field').wpColorPicker();
-		}
-	});
-});
-//]]>
-</script>
-*/ ?>
 		<?php
 	}
 
@@ -252,15 +240,16 @@ jQuery('#widgets-right .widgets-sortables').on('sortstop', function(event,ui){
 	public function update( $new_instance, $old_instance ) {
 		// Processes widget options to be saved.
 		$instance = array();
-		$instance['title']     = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
-		$instance['symbols']   = ( ! empty( $new_instance['symbols'] ) ) ? strip_tags( $new_instance['symbols'] ) : '';
-		$instance['show']      = ( ! empty( $new_instance['show'] ) ) ? strip_tags( $new_instance['show'] ) : '';
-		$instance['static']    = ( ! empty( $new_instance['static'] ) ) ? '1' : '0';
-		$instance['nolink']    = ( ! empty( $new_instance['nolink'] ) ) ? '1' : '0';
-		$instance['prefill']   = ( ! empty( $new_instance['prefill'] ) ) ? '1' : '0';
-		$instance['duplicate'] = ( ! empty( $new_instance['duplicate'] ) ) ? '1' : '0';
-		$instance['class']     = ( ! empty( $new_instance['class'] ) ) ? strip_tags( $new_instance['class'] ) : '';
-		$instance['speed']     = ( ! empty( $new_instance['speed'] ) ) ? intval( $new_instance['speed'] ) : 50;
+		$instance['title']         = ( ! empty( $new_instance['title'] ) ) ? strip_tags( $new_instance['title'] ) : '';
+		$instance['symbols']       = ( ! empty( $new_instance['symbols'] ) ) ? strip_tags( $new_instance['symbols'] ) : '';
+		$instance['show']          = ( ! empty( $new_instance['show'] ) ) ? strip_tags( $new_instance['show'] ) : '';
+		$instance['number_format'] = ( ! empty( $new_instance['number_format'] ) ) ? strip_tags( $new_instance['number_format'] ) : 'dc';
+		$instance['decimals']      = ( ! empty( $new_instance['decimals'] ) ) ? intval( $new_instance['decimals'] ) : 2;
+		$instance['static']        = ( ! empty( $new_instance['static'] ) ) ? '1' : '0';
+		$instance['prefill']       = ( ! empty( $new_instance['prefill'] ) ) ? '1' : '0';
+		$instance['duplicate']     = ( ! empty( $new_instance['duplicate'] ) ) ? '1' : '0';
+		$instance['class']         = ( ! empty( $new_instance['class'] ) ) ? strip_tags( $new_instance['class'] ) : '';
+		$instance['speed']         = ( ! empty( $new_instance['speed'] ) ) ? intval( $new_instance['speed'] ) : 50;
 
 		return $instance;
 	}
