@@ -199,6 +199,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 		/**
 		 * Initialize Settings link for Plugins page and create Settings page
+		 *
 		 */
 		function admin_init() {
 
@@ -414,7 +415,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$defaults = $this->defaults;
 
 				// Prepare number format
-				if ( ! empty( $number_format ) && in_array( $number_format, array( 'dc','sd','sc','cd' ) ) ) {
+				if ( ! empty( $number_format ) && in_array( $number_format, array( 'dc', 'sd', 'sc', 'cd' ) ) ) {
 					$defaults['number_format'] = $number_format;
 				} else if ( ! isset( $defaults['number_format'] ) ) {
 					$defaults['number_format'] = 'cd';
@@ -466,11 +467,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// @deprecated ID not required since v0.2.0
 				$id = 'stock_ticker_' . substr( md5( mt_rand() ), 0, 4 );
 				if ( ! empty( $static ) && 1 == $static ) { $class .= ' static'; }
-				
+
 				// Prepare out vars
 				$out_start = sprintf( '<ul id="%s" class="stock_ticker %s">', $id, $class );
 				$out_end = '</ul>';
-				$out_error_msg ="<li class=\"error\">{$defaults['error_message']}</li>";
+				$out_error_msg = "<li class=\"error\">{$defaults['error_message']}</li>";
 
 				$stock_data = get_transient( $st_transient_id );
 				if ( empty( $stock_data ) ) {

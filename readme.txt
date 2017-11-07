@@ -3,7 +3,7 @@ Contributors: urkekg
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
-Tested up to: 4.8.0
+Tested up to: 4.8.3
 Stable tag: 0.2.3
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -12,7 +12,7 @@ Easy add customizable moving or static ticker tapes with stock information for c
 
 == Description ==
 
-A simple and easy configurable plugin that allows you to insert stock ticker with stock price information (data provided by Google Finance). Insertion is enabled by shortcode or multi instance widget.
+A simple and easy configurable plugin that allows you to insert stock ticker with stock price information (data provided by AlphaVantage.co). Insertion is enabled by shortcode or multi instance widget.
 
 Stock Ticker is enhanced animated variation of [Stock Quote](https://wordpress.org/plugins/stock-quote/) plugin.
 
@@ -69,6 +69,19 @@ Easy install Stock Ticker as any other ordinary WordPress plugin
 1. Search for `Stock Ticker` plugin
 1. Install and activate `Stock Ticker`
 1. Configure default plugin options and insert shortcode `[stock_ticker]` to page or post, or `Stock Ticker` Widget to preferred Widget Area
+
+= To install ALPHA version of plugin =
+
+1. Download package from https://github.com/urosevic/stock-ticker/tree/alphavantage
+1. Extract ZIP archive to your local computer and rename directory from `stock-ticker-alphavantage` to `stock-ticker`
+1. Upload directory `stock-ticker` from your local computer to your WordPress website to `wp-content/plugins/`
+1. Login to WordPress Dashboard and go to `Plugins` -> `Installed Plugins` page
+1. Click `Activate` link for Stock Ticker plugin.
+1. Get a free API Key from [AlphaVantage.io](https://www.alphavantage.co/support/#api-key)
+1. In WordPress Dashboard go to `Settings` -> `Stock Ticker`
+1. Enter in field `AlphaVantage.co API Key` Alpha Vantage API Key you got in previous step (check [this screenshot](https://goo.gl/3PKxLM))
+1. In field `All Stock Symbols` enter all stock symbols you’ll use on website, separated by comma. This field is used to fetch stock data from AlphaVantage.co API by AJAX in background. Because AV have only API to get data for single symbol, that can take a while to get. Please note, for default symbols we still have field in Default Settings section of plugin.
+1. Enable `Auto Refresh` option because on first load if we do not have data downloaded from AV.co they will be loaded through AJAX after a while.
 
 == Screenshots ==
 
