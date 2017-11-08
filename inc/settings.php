@@ -30,7 +30,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Get default values.
 			$this->slug = $wpau_stockticker->plugin_slug;
 			$this->option_name = $wpau_stockticker->plugin_option;
-			$this->defaults = $wpau_stockticker->defaults; // get_option( $this->option_name );
+			$this->defaults = $wpau_stockticker->defaults; // get_site_option( $this->option_name );
 
 			add_action( 'admin_init', array( &$this, 'register_settings' ) );
 			add_action( 'admin_menu', array( &$this, 'add_menu' ) );
@@ -587,7 +587,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		 */
 		public function sanitize_options( $options ) {
 
-			$sanitized = get_option( $this->option_name );
+			$sanitized = get_site_option( $this->option_name );
 			$previous_options = $sanitized;
 
 			// If there is no POST option_page keyword, return initial plugin options

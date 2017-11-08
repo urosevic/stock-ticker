@@ -14,7 +14,7 @@ function au_stockticker_update() {
 	set_time_limit( 0 );
 
 	// this is the current database schema version number
-	$current_db_ver = get_option( 'stockticker_db_ver', 0 );
+	$current_db_ver = get_site_option( 'stockticker_db_ver', 0 );
 
 	// this is the target version that we need to reach
 	$target_db_ver = Wpau_Stock_Ticker::DB_VER;
@@ -34,11 +34,11 @@ function au_stockticker_update() {
 
 		// update the option in the database, so that this process can always
 		// pick up where it left off
-		update_option( 'stockticker_db_ver', $current_db_ver );
+		update_site_option( 'stockticker_db_ver', $current_db_ver );
 	}
 
 	// Update plugin version number
-	update_option( 'stockticker_version', Wpau_Stock_Ticker::VER );
+	update_site_option( 'stockticker_version', Wpau_Stock_Ticker::VER );
 
 } // END function au_stockticker_update()
 
@@ -49,45 +49,45 @@ function au_stockticker_update() {
 function au_stockticker_update_routine_1() {
 
 	// Move settings from old option to new option and delete old option
-	if ( $old_option_value = get_option( 'stock_ticker_defaults' ) ) {
-		add_option( 'stockticker_defaults', $old_option_value );
-		delete_option( 'stock_ticker_defaults' );
+	if ( $old_option_value = get_site_option( 'stock_ticker_defaults' ) ) {
+		add_site_option( 'stockticker_defaults', $old_option_value );
+		delete_site_option( 'stock_ticker_defaults' );
 	}
 
 	// Migrate legacy settings if still exists
-	$defaults = get_option( 'stockticker_defaults' );
+	$defaults = get_site_option( 'stockticker_defaults' );
 
-	if ( get_option( 'st_symbols' ) ) {
-		$defaults['symbols'] = get_option( 'st_symbols' );
-		delete_option( 'st_symbols' );
+	if ( get_site_option( 'st_symbols' ) ) {
+		$defaults['symbols'] = get_site_option( 'st_symbols' );
+		delete_site_option( 'st_symbols' );
 	}
-	if ( get_option( 'st_show' ) ) {
-		$defaults['show'] = get_option( 'st_show' );
-		delete_option( 'st_show' );
+	if ( get_site_option( 'st_show' ) ) {
+		$defaults['show'] = get_site_option( 'st_show' );
+		delete_site_option( 'st_show' );
 	}
-	if ( get_option( 'st_quote_zero' ) ) {
-		$defaults['zero'] = get_option( 'st_quote_zero' );
-		delete_option( 'st_quote_zero' );
+	if ( get_site_option( 'st_quote_zero' ) ) {
+		$defaults['zero'] = get_site_option( 'st_quote_zero' );
+		delete_site_option( 'st_quote_zero' );
 	}
-	if ( get_option( 'st_quote_minus' ) ) {
-		$defaults['minus'] = get_option( 'st_quote_minus' );
-		delete_option( 'st_quote_minus' );
+	if ( get_site_option( 'st_quote_minus' ) ) {
+		$defaults['minus'] = get_site_option( 'st_quote_minus' );
+		delete_site_option( 'st_quote_minus' );
 	}
-	if ( get_option( 'st_quote_plus' ) ) {
-		$defaults['plus'] = get_option( 'st_quote_plus' );
-		delete_option( 'st_quote_plus' );
+	if ( get_site_option( 'st_quote_plus' ) ) {
+		$defaults['plus'] = get_site_option( 'st_quote_plus' );
+		delete_site_option( 'st_quote_plus' );
 	}
 
 	// Add 0.3.0 options
-	if ( ! isset( $defaults['avapikey'] ) ) {
-		$defaults['avapikey'] => '';
+	if ( empty( $defaults['avapikey'] ) ) {
+		$defaults['avapikey'] = '';
 	}
-	$defaults['loading_message'] => 'Loading stock data...';
-	$defaults['number_format']   => 'dc';
-	$defaults['decimals']        => 2;
+	$defaults['loading_message'] = 'Loading stock data...';
+	$defaults['number_format']   = 'dc';
+	$defaults['decimals']        = 2;
 
 	// Update options
-	update_option( 'stockticker_defaults', $defaults );
+	update_site_option( 'stockticker_defaults', $defaults );
 
 	// Clean alpha transients
 	global $wpdb;
@@ -97,3 +97,32 @@ function au_stockticker_update_routine_1() {
 	unset( $old_option_value, $defaults );
 
 } // END function au_stockticker_update_routine_1()
+
+function au_stockticker_update_routine_2() {
+
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'stock_ticker_data';
+	$charset_collate = $wpdb->get_charset_collate();
+
+	$sql = "CREATE TABLE $table_name (
+		`symbol` varchar(20) NOT NULL,
+		`raw` text NOT NULL,
+		`last_refreshed` datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+		`tz` varchar(20) NOT NULL,
+		`last_open` decimal(13,4) NOT NULL,
+		`last_high` decimal(13,4) NOT NULL,
+		`last_low` decimal(13,4) NOT NULL,
+		`last_close` decimal(13,4) NOT NULL,
+		`last_volume` int NOT NULL,
+		`change` decimal(13,4) NOT NULL,
+		`changep` decimal(13,4) NOT NULL,
+		`range` varchar(60) DEFAULT '' NOT NULL,
+		PRIMARY KEY  (`symbol`),
+		UNIQUE `symbol` (`symbol`)
+	) $charset_collate;";
+
+	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+	dbDelta( $sql );
+
+} // END function au_stockticker_update_routine_2()

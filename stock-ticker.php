@@ -51,7 +51,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	 */
 	class Wpau_Stock_Ticker {
 
-		const DB_VER = 1;
+		const DB_VER = 2;
 		const VER = '0.2.99';
 
 		public $plugin_name   = 'Stock Ticker';
@@ -177,9 +177,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'decimals'        => 2,
 			);
 
-			add_option( 'stockticker_version', self::VER, '', 'no' );
-			add_option( 'stockticker_db_ver', self::DB_VER, '', 'no' );
-			add_option( $this->plugin_option, $init, '', 'no' );
+			add_site_option( 'stockticker_version', self::VER, '', 'no' );
+			add_site_option( 'stockticker_db_ver', self::DB_VER, '', 'no' );
+			add_site_option( $this->plugin_option, $init, '', 'no' );
 
 			return $init;
 
@@ -190,7 +190,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 */
 		function maybe_update() {
 			// Bail if this plugin data doesn't need updating
-			if ( get_option( 'stockticker_db_ver' ) >= self::DB_VER ) {
+			if ( get_site_option( 'stockticker_db_ver' ) != self::DB_VER ) {
 				return;
 			}
 			require_once( dirname( __FILE__ ) . '/update.php' );
@@ -337,7 +337,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * @return array Latest global defaults
 		 */
 		public function defaults() {
-			$defaults = get_option( $this->plugin_option );
+			$defaults = get_site_option( $this->plugin_option );
 			if ( empty( $defaults ) ) {
 				$defaults = $this->init_options();
 			}

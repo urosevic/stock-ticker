@@ -199,6 +199,11 @@ or any goods or services offered therein.
 
 == Changelog ==
 
+= 0.2.99-alpha6 (20171108) =
+* Add: Create table `stock_ticker_data` to store stock data to DB by cron instead of the loading on page load
+* Fix: default settings conversion from 0.2.3 to 0.2.99alpha5
+* Change: preparation for multisite WP
+
 = 0.2.99-alpha5 (20171011) =
 * Fix: Number format and Decimal places setting are not saved
 
