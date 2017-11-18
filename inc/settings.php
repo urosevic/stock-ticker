@@ -318,6 +318,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					),
 				)
 			);
+			/*
 			// Caching timeout field.
 			add_settings_field(
 				$this->option_name . 'cache_timeout',
@@ -335,6 +336,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'step'        => 5,
 				)
 			);
+			*/
 			// Fetch timeout field.
 			add_settings_field(
 				$this->option_name . 'timeout',
@@ -623,10 +625,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					case 'template':
 						$value = strip_tags( $value, '<span><em><strong>' );
 						break;
-					case 'cache_timeout':
-						$value = (int) $value;
-						$value = ! empty( $value ) ? $value : 180;
-						break;
+					// case 'cache_timeout':
+					// 	$value = (int) $value;
+					// 	$value = ! empty( $value ) ? $value : 180;
+					// 	break;
 					case 'fetch_timeout':
 					case 'timeout':
 						$value = (int) $value;
@@ -701,14 +703,17 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 
 			// Clear transient but only if changed one of:
 			// API key, All Stock Symbols, Cache Timeout or Fetch Timeout
+			// @TODO remove cache_timeout
 			if (
 				$previous_options['avapikey'] !== $sanitized['avapikey'] ||
 				$previous_options['all_symbols'] !== $sanitized['all_symbols'] ||
-				$previous_options['cache_timeout'] !== $sanitized['cache_timeout'] ||
+				// $previous_options['cache_timeout'] !== $sanitized['cache_timeout'] ||
 				$previous_options['timeout'] !== $sanitized['timeout']
 			) {
-				error_log( 'Stock Ticker: clean transients after settings have been updated' );
-				Wpau_Stock_Ticker::clean_transients();
+				error_log( 'Stock Ticker: restarting data fetching from first symbol' );
+				// Wpau_Stock_Ticker::clean_transients();
+				// error_log( 'Stock Ticker: clean transients after settings have been updated' );
+				Wpau_Stock_Ticker::restart_av_fetching();
 			}
 
 			return $sanitized;

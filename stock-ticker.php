@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 0.2.99-alpha5
+Version: 0.2.99-alpha7
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -51,7 +51,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	 */
 	class Wpau_Stock_Ticker {
 
-		const DB_VER = 2;
+		const DB_VER = 3;
 		const VER = '0.2.99';
 
 		public $plugin_name   = 'Stock Ticker';
@@ -462,7 +462,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				}
 
 				// Get fresh or from transient cache stock quote.
-				$st_transient_id = 'stockticker_av_' . $defaults['cache_timeout'];
+				// $st_transient_id = 'stockticker_av_' . $defaults['cache_timeout'];
 
 				$matrix = explode( "\n", $defaults['legend'] );
 				$msize = count( $matrix );
@@ -484,7 +484,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$out_end = '</ul>';
 				$out_error_msg = "<li class=\"error\">{$defaults['error_message']}</li>";
 
-				$stock_data = get_transient( $st_transient_id );
+				// $stock_data = get_transient( $st_transient_id );
+				$stock_data = self::get_stock_from_db( $symbols );
 				if ( empty( $stock_data ) ) {
 					// Log new fetch for cache if WP debugging is enabled
 					if ( WP_DEBUG ) {
@@ -508,11 +509,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 					// Assign object elements to vars.
 					$q_symbol  = $symbol;
-					$q_name    = $stock_data[ $symbol ]['t']; // No nicename on AlphaVantage.io so use ticker instead.
-					$q_change  = $stock_data[ $symbol ]['c'];
-					$q_price   = $stock_data[ $symbol ]['l'];
-					$q_changep = $stock_data[ $symbol ]['cp'];
-					$q_ltrade  = $stock_data[ $symbol ]['lt'];
+					$q_name    = $stock_data[ $symbol ]['symbol']; // ['t']; // No nicename on AlphaVantage.io so use ticker instead.
+					$q_change  = $stock_data[ $symbol ]['change']; // ['c'];
+					$q_price   = $stock_data[ $symbol ]['last_open']; // ['l'];
+					$q_changep = $stock_data[ $symbol ]['changep']; // ['cp'];
+					$q_ltrade  = $stock_data[ $symbol ]['last_refreshed']; // ['lt'];
 
 					// Extract Exchange from Symbol
 					$q_exch = '';
@@ -683,7 +684,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// put all in the query and prepare
 			$stock_sql = $wpdb->prepare(
 				"
-				SELECT `symbol`,`tz`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
+				SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
 				FROM {$wpdb->prefix}stock_ticker_data
 				WHERE symbol IN ($format)
 				",
@@ -736,29 +737,29 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// Make array of global symbols
 			$symbols_arr = explode( ',', $symbols );
-			error_log('array='.print_r($symbols_arr,1));
+			// error_log('array='.print_r($symbols_arr,1));
 
 			// Default symbol to fetch first (first form array)
 			$symbol_to_fetch = $symbols_arr[0];
 
 			// Get last fetched symbol
 			$last_fetched = get_option( 'stockticker_av_last' );
-			error_log('last_fetched='.$last_fetched);
+			// error_log('last_fetched='.$last_fetched);
 			// Find which symbol we should fetch
 			if ( ! empty( $last_fetched ) ) {
 				$last_symbol_index = array_search( $last_fetched, $symbols_arr );
 				$current_symbol_index = $last_symbol_index + 1;
 				// If we have less than next symbol, then rewind to beginning
-				error_log( 'items in array='.count( $symbols_arr ). ' | current_index='.$current_symbol_index);
+				// error_log( 'items in array='.count( $symbols_arr ). ' | current_index='.$current_symbol_index);
 				if ( count( $symbols_arr ) <= $current_symbol_index ) {
 					$current_symbol_index = 0;
-					error_log('reset index to 0');
+					// error_log('reset index to 0');
 				}
 				$symbol_to_fetch = $symbols_arr[ $current_symbol_index ];
-				error_log( 'last_index='.$last_symbol_index );
+				// error_log( 'last_index='.$last_symbol_index );
 			}
 
-			error_log( 'symbol_to_fetch=' . $symbol_to_fetch );
+			// error_log( 'symbol_to_fetch=' . $symbol_to_fetch );
 
 			// If no symbol to fetch, exit
 			if ( empty( $symbol_to_fetch ) ) {
@@ -816,7 +817,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// and release processing for next run
 			update_option( 'stockticker_av_progress', false );
 
-			return 'testing...';
+			return 'OK';
 			/*
 			$transient_key = 'stockticker_av_' . $defaults['cache_timeout'];
 			$transient_key_check = 'stockticker_av_doing';
@@ -861,6 +862,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		} // END function get_alphavantage_quotes( $symbols )
 
 		function fetch_alphavantage_feed( $symbol ) {
+
+			error_log( "Fetching data for symbol {$symbol}..." );
 
 			// Get defaults (for API key)
 			$defaults = $this->defaults;
@@ -1007,7 +1010,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 						'v'   => $last_volume,
 						// 'raw' => $json,
 					);
-					error_log(print_r($data_arr,1));
+					// error_log(print_r($data_arr,1));
 					$data_arr['raw'] = $json;
 
 				}

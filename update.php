@@ -126,3 +126,9 @@ function au_stockticker_update_routine_2() {
 	dbDelta( $sql );
 
 } // END function au_stockticker_update_routine_2()
+
+function au_stockticker_update_routine_3() {
+	// Delete all transients as we don't use them anymore since 0.2.99alpha7
+	global $wpdb;
+	$ret = $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '%\_transient\_stockticker\_av\_%' OR option_name LIKE '%\_transient\_timeout\_stockticker\_av\_%'" );
+} // END function au_stockticker_update_routine_3()

@@ -199,6 +199,12 @@ or any goods or services offered therein.
 
 == Changelog ==
 
+= 0.2.99-alpha7 (20171118) =
+* Remove: cahe timeout option because now stock data have been fetched in background and stored in database
+* Change: packaged data from alphavantage
+* Add: store stock data to database after success fetch
+* Fix: currency get INF change_p during weekend
+
 = 0.2.99-alpha6 (20171108) =
 * Add: Create table `stock_ticker_data` to store stock data to DB by cron instead of the loading on page load
 * Fix: default settings conversion from 0.2.3 to 0.2.99alpha5
