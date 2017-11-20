@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 0.2.99-alpha7
+Version: 0.2.99-alpha8
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -52,7 +52,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 3;
-		const VER = '0.2.99';
+		const VER = '0.2.99-alpha8';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -178,9 +178,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'decimals'        => 2,
 			);
 
-			add_site_option( 'stockticker_version', self::VER, '', 'no' );
-			add_site_option( 'stockticker_db_ver', self::DB_VER, '', 'no' );
-			add_site_option( $this->plugin_option, $init, '', 'no' );
+			add_option( 'stockticker_version', self::VER, '', 'no' );
+			add_option( 'stockticker_db_ver', self::DB_VER, '', 'no' );
+			add_option( $this->plugin_option, $init, '', 'no' );
 
 			return $init;
 
@@ -191,7 +191,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 */
 		function maybe_update() {
 			// Bail if this plugin data doesn't need updating
-			if ( get_site_option( 'stockticker_db_ver' ) != self::DB_VER ) {
+			if ( get_option( 'stockticker_db_ver' ) != self::DB_VER ) {
 				return;
 			}
 			require_once( dirname( __FILE__ ) . '/update.php' );
@@ -338,7 +338,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * @return array Latest global defaults
 		 */
 		public function defaults() {
-			$defaults = get_site_option( $this->plugin_option );
+			$defaults = get_option( $this->plugin_option );
 			if ( empty( $defaults ) ) {
 				$defaults = $this->init_options();
 			}
@@ -350,6 +350,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 */
 		public static function restart_av_fetching() {
 			update_option( 'stockticker_av_latest', '' );
+			$expired_timestamp = time() - ( 10 * YEAR_IN_SECONDS );
+			update_option( 'stockticker_av_latest_timestamp', $expired_timestamp );
 			update_option( 'stockticker_av_progress', false );
 		} // END public static function restart_av_fetching() {
 
@@ -921,6 +923,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// If we have WP error log it and return none
 			if ( is_wp_error( $response ) ) {
 				error_log( 'Stock Ticker got error fetching feed from AlphaVantage.io: ' . $response->get_error_message() );
+				return 'Stock Ticker got error fetching feed from AlphaVantage.io: ' . $response->get_error_message();
 			} else {
 				// Get response from AV and parse it - look for error
 				$json = wp_remote_retrieve_body( $response );
@@ -928,6 +931,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// If we got some error from AV, log to error_log and return none
 				if ( ! empty( $response_arr['Error Message'] ) ) {
 					error_log( 'Stock Ticker connected to AlphaVantage but got error: ' . $response_arr['Error Message'] );
+					return 'Stock Ticker connected to AlphaVantage but got error: ' . $response_arr['Error Message'];
 					// $json = '';
 				} else {
 
@@ -1054,12 +1058,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 		private function lock_fetch() {
 			update_option( 'stockticker_av_progress', true );
-			error_log(__FUNCTION__);
 			return;
 		}
 		private function unlock_fetch() {
 			update_option( 'stockticker_av_progress', false );
-			error_log(__FUNCTION__);
 			return;
 		}
 

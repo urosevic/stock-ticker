@@ -14,7 +14,7 @@ function au_stockticker_update() {
 	set_time_limit( 0 );
 
 	// this is the current database schema version number
-	$current_db_ver = get_site_option( 'stockticker_db_ver', 0 );
+	$current_db_ver = get_option( 'stockticker_db_ver', 0 );
 
 	// this is the target version that we need to reach
 	$target_db_ver = Wpau_Stock_Ticker::DB_VER;
@@ -34,11 +34,11 @@ function au_stockticker_update() {
 
 		// update the option in the database, so that this process can always
 		// pick up where it left off
-		update_site_option( 'stockticker_db_ver', $current_db_ver );
+		update_option( 'stockticker_db_ver', $current_db_ver );
 	}
 
 	// Update plugin version number
-	update_site_option( 'stockticker_version', Wpau_Stock_Ticker::VER );
+	update_option( 'stockticker_version', Wpau_Stock_Ticker::VER );
 
 } // END function au_stockticker_update()
 
@@ -49,33 +49,33 @@ function au_stockticker_update() {
 function au_stockticker_update_routine_1() {
 
 	// Move settings from old option to new option and delete old option
-	if ( $old_option_value = get_site_option( 'stock_ticker_defaults' ) ) {
-		add_site_option( 'stockticker_defaults', $old_option_value );
-		delete_site_option( 'stock_ticker_defaults' );
+	if ( $old_option_value = get_option( 'stock_ticker_defaults' ) ) {
+		add_option( 'stockticker_defaults', $old_option_value );
+		delete_option( 'stock_ticker_defaults' );
 	}
 
 	// Migrate legacy settings if still exists
-	$defaults = get_site_option( 'stockticker_defaults' );
+	$defaults = get_option( 'stockticker_defaults' );
 
-	if ( get_site_option( 'st_symbols' ) ) {
-		$defaults['symbols'] = get_site_option( 'st_symbols' );
-		delete_site_option( 'st_symbols' );
+	if ( get_option( 'st_symbols' ) ) {
+		$defaults['symbols'] = get_option( 'st_symbols' );
+		delete_option( 'st_symbols' );
 	}
-	if ( get_site_option( 'st_show' ) ) {
-		$defaults['show'] = get_site_option( 'st_show' );
-		delete_site_option( 'st_show' );
+	if ( get_option( 'st_show' ) ) {
+		$defaults['show'] = get_option( 'st_show' );
+		delete_option( 'st_show' );
 	}
-	if ( get_site_option( 'st_quote_zero' ) ) {
-		$defaults['zero'] = get_site_option( 'st_quote_zero' );
-		delete_site_option( 'st_quote_zero' );
+	if ( get_option( 'st_quote_zero' ) ) {
+		$defaults['zero'] = get_option( 'st_quote_zero' );
+		delete_option( 'st_quote_zero' );
 	}
-	if ( get_site_option( 'st_quote_minus' ) ) {
-		$defaults['minus'] = get_site_option( 'st_quote_minus' );
-		delete_site_option( 'st_quote_minus' );
+	if ( get_option( 'st_quote_minus' ) ) {
+		$defaults['minus'] = get_option( 'st_quote_minus' );
+		delete_option( 'st_quote_minus' );
 	}
-	if ( get_site_option( 'st_quote_plus' ) ) {
-		$defaults['plus'] = get_site_option( 'st_quote_plus' );
-		delete_site_option( 'st_quote_plus' );
+	if ( get_option( 'st_quote_plus' ) ) {
+		$defaults['plus'] = get_option( 'st_quote_plus' );
+		delete_option( 'st_quote_plus' );
 	}
 
 	// Add 0.3.0 options
@@ -87,7 +87,7 @@ function au_stockticker_update_routine_1() {
 	$defaults['decimals']        = 2;
 
 	// Update options
-	update_site_option( 'stockticker_defaults', $defaults );
+	update_option( 'stockticker_defaults', $defaults );
 
 	// Clean alpha transients
 	global $wpdb;

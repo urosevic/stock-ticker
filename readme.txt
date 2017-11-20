@@ -3,7 +3,7 @@ Contributors: urkekg
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
-Tested up to: 4.8.3
+Tested up to: 4.9
 Stable tag: 0.2.3
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -203,6 +203,7 @@ or any goods or services offered therein.
 * Revert: bring back cache timeout so we can have dellay between finished fetching and next round start
 * Add: routine to pause fetching of next round until cache timeout expire
 * Improve: do not mark symbol as fetched if AlphaVantage return some error (timeout or similar)
+* Fix: broken options on multisite WordPress
 
 = 0.2.99-alpha7 (20171118) =
 * Remove: cahe timeout option because now stock data have been fetched in background and stored in database
