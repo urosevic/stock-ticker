@@ -723,7 +723,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 
 			// Set fetch progress as active
-			update_option( 'stockticker_av_progress', true );
+			// update_option( 'stockticker_av_progress', true );
+			self::lock_fetch();
 
 			// Get defaults (for API key)
 			$defaults = $this->defaults;
@@ -740,7 +741,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// error_log('array='.print_r($symbols_arr,1));
 
 			// Default symbol to fetch first (first form array)
-			$symbol_to_fetch = $symbols_arr[0];
+			$current_symbol_index = 0;
+			$symbol_to_fetch = $symbols_arr[ $current_symbol_index ];
 
 			// Get last fetched symbol
 			$last_fetched = get_option( 'stockticker_av_last' );
@@ -766,56 +768,84 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// After finished update, set last fetched symbol
 				update_option( 'stockticker_av_last', $symbol_to_fetch );
 				// and release processing for next run
-				update_option( 'stockticker_av_progress', false );
+				// update_option( 'stockticker_av_progress', false );
+				self::unlock_fetch();
 				return 'No symbol to fetch!';
 			}
 
-			// Now call AlphaVantage fetcher for current symbol
-			// Initialize Stock Data
-			$stock_data = $this->fetch_alphavantage_feed( $symbol_to_fetch );
-			if ( ! empty( $stock_data ) ) {
-				// Save data to database
-				global $wpdb;
-				$ret = $wpdb->replace(
-					$wpdb->prefix . 'stock_ticker_data',
-					array(
-						'symbol'         => $stock_data['t'],
-						'raw'            => $stock_data['raw'],
-						'last_refreshed' => $stock_data['lt'],
-						'tz'             => $stock_data['ltz'],
-						'last_open'      => $stock_data['o'],
-						'last_high'      => $stock_data['h'],
-						'last_low'       => $stock_data['low'],
-						'last_close'     => $stock_data['l'],
-						'last_volume'    => $stock_data['v'],
-						'change'         => $stock_data['c'],
-						'changep'        => $stock_data['cp'],
-						'range'          => $stock_data['r'],
-					),
-					array(
-						'%s', // symbol
-						'%s', // raw
-						'%s', // last_refreshed
-						'%s', // tz
-						'%f', // last_open
-						'%f', // last_high
-						'%f', // last_low
-						'%f', // last_close
-						'%d', // last_volume
-						'%f', // last_change
-						'%f', // last_changep
-						'%s', // range
-					)
-				);
-				// REPLACE
+			// If current_symbol_index is 0 and cache timeout not expired, do not attempt to fetch again
+			// but wait to timeout expire for next loop (UTC)
+			// error_log( '$current_symbol_index=' . $current_symbol_index );
+			if ( 0 == $current_symbol_index ) {
+				$current_timestamp = time();
+				$last_fetched_timestamp = get_option( 'stockticker_av_last_timestamp', $current_timestamp );
+				$target_timestamp = $current_timestamp - (int) $defaults['cache_timeout'];
+				// error_log( "current=$current_timestamp | target=$target_timestamp | last=$last_fetched_timestamp" );
+				// If timestamp not expired, do not fetch but exit
+				if ( $last_fetched_timestamp > $target_timestamp ) {
+					// error_log( "last timestamp < target timestamp, we'll not fetch next loop");
+					// update_option( 'stockticker_av_progress', false );
+					self::unlock_fetch();
+					return 'Cache timeout has not expired, no need to fetch new loop at the moment.';
+				} else {
+					// If timestamp expired, set new value and proceed
+					// error_log( "we'll do next loop");
+					update_option( 'stockticker_av_last_timestamp', $current_timestamp );
+				}
 			}
 
+			// Now call AlphaVantage fetcher for current symbol
+			$stock_data = $this->fetch_alphavantage_feed( $symbol_to_fetch );
 			// error_log( print_r($stock_data,1));
+
+			// If we have not got array with stock data, exit w/o updating DB
+			if ( ! is_array( $stock_data ) ) {
+				// Release processing for next run
+				// update_option( 'stockticker_av_progress', false );
+				self::unlock_fetch();
+				return $stock_data;
+			}
+
+			// With success stock data in array, save data to database
+			global $wpdb;
+			$ret = $wpdb->replace(
+				$wpdb->prefix . 'stock_ticker_data',
+				array(
+					'symbol'         => $stock_data['t'],
+					'raw'            => $stock_data['raw'],
+					'last_refreshed' => $stock_data['lt'],
+					'tz'             => $stock_data['ltz'],
+					'last_open'      => $stock_data['o'],
+					'last_high'      => $stock_data['h'],
+					'last_low'       => $stock_data['low'],
+					'last_close'     => $stock_data['l'],
+					'last_volume'    => $stock_data['v'],
+					'change'         => $stock_data['c'],
+					'changep'        => $stock_data['cp'],
+					'range'          => $stock_data['r'],
+				),
+				array(
+					'%s', // symbol
+					'%s', // raw
+					'%s', // last_refreshed
+					'%s', // tz
+					'%f', // last_open
+					'%f', // last_high
+					'%f', // last_low
+					'%f', // last_close
+					'%d', // last_volume
+					'%f', // last_change
+					'%f', // last_changep
+					'%s', // range
+				)
+			);
 
 			// After finished update, set last fetched symbol
 			update_option( 'stockticker_av_last', $symbol_to_fetch );
-			// and release processing for next run
-			update_option( 'stockticker_av_progress', false );
+
+			// Release processing for next run
+			// update_option( 'stockticker_av_progress', false );
+			self::unlock_fetch();
 
 			return 'OK';
 			/*
@@ -1021,6 +1051,17 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			return $data_arr;
 
 		} // END function fetch_alphavantage_feed( $symbol )
+
+		private function lock_fetch() {
+			update_option( 'stockticker_av_progress', true );
+			error_log(__FUNCTION__);
+			return;
+		}
+		private function unlock_fetch() {
+			update_option( 'stockticker_av_progress', false );
+			error_log(__FUNCTION__);
+			return;
+		}
 
 	} // END class Wpau_Stock_Ticker
 

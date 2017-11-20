@@ -318,7 +318,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					),
 				)
 			);
-			/*
 			// Caching timeout field.
 			add_settings_field(
 				$this->option_name . 'cache_timeout',
@@ -328,7 +327,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				'wpaust_advanced',
 				array(
 					'field'       => $this->option_name . '[cache_timeout]',
-					'description' => __( 'Define cache timeout for single quote set, in seconds', 'wpaust' ),
+					'description' => __( 'Define timeout before next round of fetching symbol data start, in seconds', 'wpaust' ),
 					'class'       => 'num',
 					'value'       => isset( $this->defaults['cache_timeout'] ) ? $this->defaults['cache_timeout'] : 180,
 					'min'         => 0,
@@ -336,7 +335,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'step'        => 5,
 				)
 			);
-			*/
 			// Fetch timeout field.
 			add_settings_field(
 				$this->option_name . 'timeout',

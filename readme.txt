@@ -199,6 +199,11 @@ or any goods or services offered therein.
 
 == Changelog ==
 
+= 0.2.99-alpha8 (20171120) =
+* Revert: bring back cache timeout so we can have dellay between finished fetching and next round start
+* Add: routine to pause fetching of next round until cache timeout expire
+* Improve: do not mark symbol as fetched if AlphaVantage return some error (timeout or similar)
+
 = 0.2.99-alpha7 (20171118) =
 * Remove: cahe timeout option because now stock data have been fetched in background and stored in database
 * Change: packaged data from alphavantage

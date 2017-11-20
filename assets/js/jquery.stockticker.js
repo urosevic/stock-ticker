@@ -33,7 +33,7 @@ var stock_tickers_load = function() {
 			});
 		});
 	}
-}
+};
 
 jQuery(document).ready(function() {
 	stock_tickers_load();
