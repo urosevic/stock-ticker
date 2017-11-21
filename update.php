@@ -38,7 +38,7 @@ function au_stockticker_update() {
 	}
 
 	// Update plugin version number
-	update_option( 'stockticker_version', Wpau_Stock_Ticker::VER );
+	update_option( 'stockticker_version', $target_db_ver );
 
 } // END function au_stockticker_update()
 
@@ -99,7 +99,7 @@ function au_stockticker_update_routine_1() {
 } // END function au_stockticker_update_routine_1()
 
 function au_stockticker_update_routine_2() {
-
+	// Create database table for stock data caching since version 0.2.99alpha6
 	global $wpdb;
 
 	$table_name = $wpdb->prefix . 'stock_ticker_data';

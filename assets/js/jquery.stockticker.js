@@ -1,15 +1,15 @@
-var stock_ticker_loaded = false;
-var stock_tickers_load = function() {
-	var stock_tickers = jQuery('.stock-ticker-wrapper');
-	if ( 'undefined' !== typeof stock_tickers ) {
-		jQuery.each(stock_tickers, function(i,v){
+var stockticker_loaded = false;
+var stocktickers_load = function() {
+	var stocktickers = jQuery('.stock-ticker-wrapper');
+	if ( 'undefined' !== typeof stocktickers ) {
+		jQuery.each(stocktickers, function(i,v){
 			var obj = jQuery(this);
 			jQuery.ajax({
 				type: 'post',
 				dataType: 'json',
 				url: stockTickerJs.ajax_url,
 				data: {
-					'action': 'stock_ticker_load',
+					'action': 'stockticker_load',
 					'symbols': jQuery(this).data('stockticker_symbols'),
 					'show': jQuery(this).data('stockticker_show'),
 					'number_format': jQuery(this).data('stockticker_number_format'),
@@ -23,7 +23,7 @@ var stock_tickers_load = function() {
 				success: function(response) {
 					if ( response.status == 'success' ) {
 						console.log(response);
-						stock_ticker_loaded = true;
+						stockticker_loaded = true;
 						obj.html(response.message);
 						if ( ! obj.data('stockticker_static') ) {
 							jQuery(obj).find('.stock_ticker').stockTicker({ startEmpty:jQuery(obj).data('stockticker_empty'), duplicate:jQuery(obj).data('stockticker_duplicate'), speed:jQuery(obj).data('stockticker_speed') });
@@ -36,12 +36,12 @@ var stock_tickers_load = function() {
 };
 
 jQuery(document).ready(function() {
-	stock_tickers_load();
+	stocktickers_load();
 	var stockTickerReload = setInterval(function() {
-		if ( stock_ticker_loaded ) {
+		if ( stockticker_loaded ) {
 			clearInterval(stockTickerReload);
 		} else {
-			stock_tickers_load();
+			stocktickers_load();
 		}
 	}, 5000);
 	// Update AlphaVantage quotes
@@ -51,7 +51,7 @@ jQuery(document).ready(function() {
 			dataType: 'json',
 			url: stockTickerJs.ajax_url,
 			data: {
-				'action': 'stock_ticker_update_quotes'
+				'action': 'stockticker_update_quotes'
 			},
 			success: function(response) {
 				console.log( 'Stock Ticker update quotes response: ' + response );
@@ -66,7 +66,7 @@ jQuery(document).ready(function() {
 	// Re-load Stock Ticker widgets when a partial is rendered.
 	wp.customize.selectiveRefresh.bind( 'partial-content-rendered', function( placement ) {
 		if ( placement.container ) {
-			stock_tickers_load();
+			stocktickers_load();
 		}
 	} );
 });

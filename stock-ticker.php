@@ -24,13 +24,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 /*
  * @TODO:
- * * update documentation and remove Google referrals
- * * add admin notification for AlphaVantage.io API Key and default symbols
- * * test currencies, indexes, various exchanges (LON:FFX)
+ * * add admin notification for AlphaVantage.co API Key and default symbols
  */
 
 // Exit if accessed directly
@@ -52,7 +50,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 3;
-		const VER = '0.2.99-alpha8';
+		const VER = '0.2.99-alpha9';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -60,30 +58,30 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		public $plugin_url;
 
 		public static $exchanges = array(
-			'ASX' => 'Australian Securities Exchange',
-			'BOM' => 'Bombay Stock Exchange',
-			'BIT' => 'Borsa Italiana Milan Stock Exchange',
-			'TSE' => 'Canadian/Toronto Securities Exchange',
-			'FRA' => 'Deutsche Boerse Frankfurt Stock Exchange',
-			'ETR' => 'Deutsche Boerse Frankfurt Stock Exchange',
-			'AMS' => 'Euronext Amsterdam',
-			'EBR' => 'Euronext Brussels',
-			'ELI' => 'Euronext Lisbon',
-			'EPA' => 'Euronext Paris',
-			'LON' => 'London Stock Exchange',
-			'MCX' => 'Moscow Exchange',
+			'ASX'    => 'Australian Securities Exchange',
+			'BOM'    => 'Bombay Stock Exchange',
+			'BIT'    => 'Borsa Italiana Milan Stock Exchange',
+			'TSE'    => 'Canadian/Toronto Securities Exchange',
+			'FRA'    => 'Deutsche Boerse Frankfurt Stock Exchange',
+			'ETR'    => 'Deutsche Boerse Frankfurt Stock Exchange',
+			'AMS'    => 'Euronext Amsterdam',
+			'EBR'    => 'Euronext Brussels',
+			'ELI'    => 'Euronext Lisbon',
+			'EPA'    => 'Euronext Paris',
+			'LON'    => 'London Stock Exchange',
+			'MCX'    => 'Moscow Exchange',
 			'NASDAQ' => 'NASDAQ Exchange',
-			'CPH' => 'NASDAQ OMX Copenhagen',
-			'HEL' => 'NASDAQ OMX Helsinki',
-			'ICE' => 'NASDAQ OMX Iceland',
-			'STO' => 'NASDAQ OMX Stockholm',
-			'NSE' => 'National Stock Exchange of India',
-			'NYSE' => 'New York Stock Exchange',
-			'SGX' => 'Singapore Exchange',
-			'SHA' => 'Shanghai Stock Exchange',
-			'SHE' => 'Shenzhen Stock Exchange',
-			'TPE' => 'Taiwan Stock Exchange',
-			'TYO' => 'Tokyo Stock Exchange',
+			'CPH'    => 'NASDAQ OMX Copenhagen',
+			'HEL'    => 'NASDAQ OMX Helsinki',
+			'ICE'    => 'NASDAQ OMX Iceland',
+			'STO'    => 'NASDAQ OMX Stockholm',
+			'NSE'    => 'National Stock Exchange of India',
+			'NYSE'   => 'New York Stock Exchange',
+			'SGX'    => 'Singapore Exchange',
+			'SHA'    => 'Shanghai Stock Exchange',
+			'SHE'    => 'Shenzhen Stock Exchange',
+			'TPE'    => 'Taiwan Stock Exchange',
+			'TYO'    => 'Tokyo Stock Exchange',
 		);
 
 		/**
@@ -100,22 +98,22 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
 
 			// Maybe update trigger.
-			add_action( 'plugins_loaded', array( &$this, 'maybe_update' ) );
+			add_action( 'plugins_loaded', array( $this, 'maybe_update' ) );
 
 			// Cleanup transients
 			if ( ! empty( $_GET['stockticker_purge_cache'] ) ) {
-				// self::clean_transients();
 				self::restart_av_fetching();
 			}
 
 			// Initialize default settings
 			$this->defaults = self::defaults();
 
-			// Register AJAX
-			add_action( 'wp_ajax_stock_ticker_load', array( $this, 'ajax_stock_ticker_load' ) );
-			add_action( 'wp_ajax_nopriv_stock_ticker_load', array( $this, 'ajax_stock_ticker_load' ) );
-			add_action( 'wp_ajax_stock_ticker_update_quotes', array( $this, 'ajax_stock_ticker_update_quotes' ) );
-			add_action( 'wp_ajax_nopriv_stock_ticker_update_quotes', array( $this, 'ajax_stock_ticker_update_quotes' ) );
+			// Register AJAX ticker loader
+			add_action( 'wp_ajax_stockticker_load', array( $this, 'ajax_stockticker_load' ) );
+			add_action( 'wp_ajax_nopriv_stockticker_load', array( $this, 'ajax_stockticker_load' ) );
+			// Register AJAX stock updater
+			add_action( 'wp_ajax_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
+			add_action( 'wp_ajax_nopriv_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
 
 			if ( is_admin() ) {
 				// Initialize Plugin Settings Magic
@@ -191,7 +189,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 */
 		function maybe_update() {
 			// Bail if this plugin data doesn't need updating
-			if ( get_option( 'stockticker_db_ver' ) != self::DB_VER ) {
+			if ( get_option( 'stockticker_db_ver' ) >= self::DB_VER ) {
 				return;
 			}
 			require_once( dirname( __FILE__ ) . '/update.php' );
@@ -355,18 +353,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			update_option( 'stockticker_av_progress', false );
 		} // END public static function restart_av_fetching() {
 
-		/**
-		 * Delete Stock Ticker Transients
-		 * @DEPRECATED
-		 */
-		/*
-		public static function clean_transients() {
-			global $wpdb;
-			$ret = $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '%\_transient\_stockticker\_av\_%' OR option_name LIKE '%\_transient\_timeout\_stockticker\_av\_%'" );
-		} // END public static function clean_transients() {
-		*/
-		function ajax_stock_ticker_load() {
-			##TODO: Provide error message if any of params missing + add nonce check
+		function ajax_stockticker_load() {
+			// @TODO Provide error message if any of params missing + add nonce check
 			if ( ! empty( $_POST['symbols'] ) ) {
 				// Sanitize data
 				$symbols       = strip_tags( $_POST['symbols'] );
@@ -397,16 +385,16 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$result = json_encode( $result );
 			echo $result;
 			wp_die();
-		} // END function ajax_stock_ticker_load() {
+		} // END function ajax_stockticker_load() {
 
 		/**
-		 * AJAX to update AlphaVantage.io quotes
+		 * AJAX to update AlphaVantage.co quotes
 		 */
-		function ajax_stock_ticker_update_quotes() {
+		function ajax_stockticker_update_quotes() {
 			$response = $this->get_alphavantage_quotes();
 			echo $response;
 			wp_die();
-		} // END function ajax_stock_ticker_update_quotes()
+		} // END function ajax_stockticker_update_quotes()
 
 		/**
 		 * Generate and output stock ticker block
@@ -422,174 +410,169 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 */
 		public function stock_ticker( $symbols, $show, $number_format = null, $decimals = null, $static, $empty = true, $duplicate = false, $class = '' ) {
 
-			if ( ! empty( $symbols ) ) {
-
-				// Get legend for company names.
-				$defaults = $this->defaults;
-
-				// Prepare number format
-				if ( ! empty( $number_format ) && in_array( $number_format, array( 'dc', 'sd', 'sc', 'cd' ) ) ) {
-					$defaults['number_format'] = $number_format;
-				} else if ( ! isset( $defaults['number_format'] ) ) {
-					$defaults['number_format'] = 'cd';
-				}
-				switch ( $defaults['number_format'] ) {
-					case 'dc': // 0.000,00
-						$thousands_sep = '.';
-						$dec_point     = ',';
-						break;
-					case 'sd': // 0 000.00
-						$thousands_sep = ' ';
-						$dec_point     = '.';
-						break;
-					case 'sc': // 0 000,00
-						$thousands_sep = ' ';
-						$dec_point     = ',';
-						break;
-					default: // 0,000.00
-						$thousands_sep = ',';
-						$dec_point     = '.';
-				}
-
-				// Prepare number of decimals
-				if ( null !== $decimals ) {
-					// From shortcode or widget
-					$decimals = (int) $decimals;
-				} else {
-					// From settings
-					if ( ! isset( $defaults['decimals'] ) ) {
-						$defaults['decimals'] = 2;
-					}
-					$decimals = (int) $defaults['decimals'];
-				}
-
-				// Get fresh or from transient cache stock quote.
-				// $st_transient_id = 'stockticker_av_' . $defaults['cache_timeout'];
-
-				$matrix = explode( "\n", $defaults['legend'] );
-				$msize = count( $matrix );
-				for ( $m = 0; $m < $msize; ++$m ) {
-					$line = explode( ';', $matrix[ $m ] );
-					if ( ! empty( $line[0] ) && ! empty( $line[1] ) ) {
-						$legend[ strtoupper( trim( $line[0] ) ) ] = trim( $line[1] );
-					}
-				}
-				unset( $m, $msize, $matrix, $line );
-
-				// Prepare ticker.
-				// @deprecated ID not required since v0.2.0
-				$id = 'stock_ticker_' . substr( md5( mt_rand() ), 0, 4 );
-				if ( ! empty( $static ) && 1 == $static ) { $class .= ' static'; }
-
-				// Prepare out vars
-				$out_start = sprintf( '<ul id="%s" class="stock_ticker %s">', $id, $class );
-				$out_end = '</ul>';
-				$out_error_msg = "<li class=\"error\">{$defaults['error_message']}</li>";
-
-				// $stock_data = get_transient( $st_transient_id );
-				$stock_data = self::get_stock_from_db( $symbols );
-				if ( empty( $stock_data ) ) {
-					// Log new fetch for cache if WP debugging is enabled
-					if ( WP_DEBUG ) {
-						// error_log( "We don't have stock data cached, fetch/update in background and cache for {$defaults['cache_timeout']} seconds" );
-					}
-					return "{$out_start}{$out_error_msg}{$out_end}";
-				}
-
-				// --- Process quotes.
-
-				// Start ticker string.
-				$q = '';
-
-				// Parse results and extract data to display.
-				$symbols_arr = explode( ',', $symbols );
-				foreach ( $symbols_arr as $symbol ) {
-
-					if ( empty( $stock_data[ $symbol ] ) ) {
-						continue;
-					}
-
-					// Assign object elements to vars.
-					$q_symbol  = $symbol;
-					$q_name    = $stock_data[ $symbol ]['symbol']; // ['t']; // No nicename on AlphaVantage.io so use ticker instead.
-					$q_change  = $stock_data[ $symbol ]['change']; // ['c'];
-					$q_price   = $stock_data[ $symbol ]['last_open']; // ['l'];
-					$q_changep = $stock_data[ $symbol ]['changep']; // ['cp'];
-					$q_ltrade  = $stock_data[ $symbol ]['last_refreshed']; // ['lt'];
-
-					// Extract Exchange from Symbol
-					$q_exch = '';
-					if ( strpos( $symbol, ':' ) !== false ) {
-						list( $q_exch, $q_symbol ) = explode( ':', $symbol );
-					}
-
-					// Define class based on change.
-					$prefix    = '';
-					if ( $q_change < 0 ) {
-						$chclass = 'minus';
-					} elseif ( $q_change > 0 ) {
-						$chclass = 'plus';
-						$prefix = '+';
-					} else {
-						$chclass = 'zero';
-						$q_change = '0.00';
-					}
-
-					// Get custom company name if exists.
-					if ( ! empty( $legend[ $q_exch . ':' . $q_symbol ] ) ) {
-						// First in format EXCHANGE:SYMBOL.
-						$q_name = $legend[ $q_exch . ':' . $q_symbol ];
-					} elseif ( ! empty( $legend[ $q_symbol ] ) ) {
-						// Then in format SYMBOL.
-						$q_name = $legend[ $q_symbol ];
-					}
-
-					// What to show: Symbol or Company Name?
-					if ( 'name' == $show ) {
-						$company_show = $q_name;
-					} else {
-						$company_show = $q_symbol;
-					}
-					// Open stock quote item.
-					$q .= "<li class=\"{$chclass}\">";
-
-					// Format numbers.
-					$q_price   = number_format( $q_price, $decimals, $dec_point, $thousands_sep );
-					$q_change  = $prefix . number_format( $q_change, $decimals, $dec_point, $thousands_sep );
-					$q_changep = $prefix . number_format( $q_changep, $decimals, $dec_point, $thousands_sep );
-
-					$url_query = $q_symbol;
-					if ( ! empty( $q_exch ) ) {
-						$quote_title = $q_name . ' (' . self::$exchanges[ $q_exch ] . ', Last trade ' . $q_ltrade . ')';
-					} else {
-						$quote_title = $q_name . ' (Last trade ' . $q_ltrade . ')';
-					}
-
-					// Value template.
-					$template = $defaults['template'];
-					$template = str_replace( '%company%', $company_show, $template );
-					$template = str_replace( '%symbol%', $q_symbol, $template );
-					$template = str_replace( '%exch_symbol%', $url_query, $template );
-					$template = str_replace( '%price%', $q_price, $template );
-					$template = str_replace( '%change%', $q_change, $template );
-					$template = str_replace( '%changep%', "{$q_changep}%", $template );
-
-					$q .= '<span class="sqitem" title="' . $quote_title . '">' . $template . '</span>';
-
-					// Close stock quote item.
-					$q .= '</li>';
-
-				} // END foreach ( $symbols_arr as $symbol ) {
-
-				// No results were returned?
-				if ( empty( $q ) ) {
-					return "{$out_start}{$out_error_msg}{$out_end}";
-				}
-
-				// Print ticker content if we have it.
-				return "{$out_start}{$q}{$out_end}";
-
+			if ( empty( $symbols ) ) {
+				return;
 			}
+
+			// Get legend for company names.
+			$defaults = $this->defaults;
+
+			// Prepare number format
+			if ( ! empty( $number_format ) && in_array( $number_format, array( 'dc', 'sd', 'sc', 'cd' ) ) ) {
+				$defaults['number_format'] = $number_format;
+			} else if ( ! isset( $defaults['number_format'] ) ) {
+				$defaults['number_format'] = 'cd';
+			}
+			switch ( $defaults['number_format'] ) {
+				case 'dc': // 0.000,00
+					$thousands_sep = '.';
+					$dec_point     = ',';
+					break;
+				case 'sd': // 0 000.00
+					$thousands_sep = ' ';
+					$dec_point     = '.';
+					break;
+				case 'sc': // 0 000,00
+					$thousands_sep = ' ';
+					$dec_point     = ',';
+					break;
+				default: // 0,000.00
+					$thousands_sep = ',';
+					$dec_point     = '.';
+			}
+
+			// Prepare number of decimals
+			if ( null !== $decimals ) {
+				// From shortcode or widget
+				$decimals = (int) $decimals;
+			} else {
+				// From settings
+				if ( ! isset( $defaults['decimals'] ) ) {
+					$defaults['decimals'] = 2;
+				}
+				$decimals = (int) $defaults['decimals'];
+			}
+
+			// Parse legend
+			$matrix = explode( "\n", $defaults['legend'] );
+			$msize = count( $matrix );
+			for ( $m = 0; $m < $msize; ++$m ) {
+				$line = explode( ';', $matrix[ $m ] );
+				if ( ! empty( $line[0] ) && ! empty( $line[1] ) ) {
+					$legend[ strtoupper( trim( $line[0] ) ) ] = trim( $line[1] );
+				}
+			}
+			unset( $m, $msize, $matrix, $line );
+
+			// Prepare ticker.
+			if ( ! empty( $static ) && 1 == $static ) { $class .= ' static'; }
+
+			// Prepare out vars
+			$out_start = sprintf( '<ul class="stock_ticker %s">', $class );
+			$out_end = '</ul>';
+			$out_error_msg = "<li class=\"error\">{$defaults['error_message']}</li>";
+
+			// Get stock data from database
+			$stock_data = self::get_stock_from_db( $symbols );
+			if ( empty( $stock_data ) ) {
+				return "{$out_start}{$out_error_msg}{$out_end}";
+			}
+
+			// Start ticker string.
+			$q = '';
+
+			// Parse results and extract data to display.
+			$symbols_arr = explode( ',', $symbols );
+			foreach ( $symbols_arr as $symbol ) {
+
+				if ( empty( $stock_data[ $symbol ] ) ) {
+					continue;
+				}
+
+				// Assign object elements to vars.
+				$q_symbol  = $symbol;
+				$q_name    = $stock_data[ $symbol ]['symbol']; // ['t']; // No nicename on AlphaVantage.co so use ticker instead.
+				$q_change  = $stock_data[ $symbol ]['change']; // ['c'];
+				$q_price   = $stock_data[ $symbol ]['last_open']; // ['l'];
+				$q_changep = $stock_data[ $symbol ]['changep']; // ['cp'];
+				$q_volume  = $stock_data[ $symbol ]['last_volume'];
+				$q_tz      = $stock_data[ $symbol ]['tz'];
+				$q_ltrade  = $stock_data[ $symbol ]['last_refreshed']; // ['lt'];
+				$q_ltrade  = str_replace( ' 00:00:00', '', $q_ltrade ); // Strip zero time from last trade date string
+				$q_ltrade  = "{$q_ltrade} {$q_tz}";
+				// Extract Exchange from Symbol
+				$q_exch = '';
+				if ( strpos( $symbol, ':' ) !== false ) {
+					list( $q_exch, $q_symbol ) = explode( ':', $symbol );
+				}
+
+				// Define class based on change.
+				$prefix = '';
+				if ( $q_change < 0 ) {
+					$chclass = 'minus';
+				} elseif ( $q_change > 0 ) {
+					$chclass = 'plus';
+					$prefix = '+';
+				} else {
+					$chclass = 'zero';
+					$q_change = '0.00';
+				}
+
+				// Get custom company name if exists.
+				if ( ! empty( $legend[ $q_exch . ':' . $q_symbol ] ) ) {
+					// First in format EXCHANGE:SYMBOL.
+					$q_name = $legend[ $q_exch . ':' . $q_symbol ];
+				} elseif ( ! empty( $legend[ $q_symbol ] ) ) {
+					// Then in format SYMBOL.
+					$q_name = $legend[ $q_symbol ];
+				}
+
+				// What to show: Symbol or Company Name?
+				if ( 'name' == $show ) {
+					$company_show = $q_name;
+				} else {
+					$company_show = $q_symbol;
+				}
+				// Open stock quote item.
+				$q .= "<li class=\"{$chclass}\">";
+
+				// Format numbers.
+				$q_price   = number_format( $q_price, $decimals, $dec_point, $thousands_sep );
+				$q_change  = $prefix . number_format( $q_change, $decimals, $dec_point, $thousands_sep );
+				$q_changep = $prefix . number_format( $q_changep, $decimals, $dec_point, $thousands_sep );
+
+				$url_query = $q_symbol;
+				if ( ! empty( $q_exch ) ) {
+					$quote_title = $q_name . ' (' . self::$exchanges[ $q_exch ] . ', Volume ' . $q_volume . ', Last trade ' . $q_ltrade . ')';
+				} else {
+					$quote_title = $q_name . ' (Last trade ' . $q_ltrade . ')';
+				}
+
+				// Value template.
+				$template = $defaults['template'];
+				$template = str_replace( '%company%', $company_show, $template );
+				$template = str_replace( '%symbol%', $q_symbol, $template );
+				$template = str_replace( '%exch_symbol%', $url_query, $template );
+				$template = str_replace( '%price%', $q_price, $template );
+				$template = str_replace( '%change%', $q_change, $template );
+				$template = str_replace( '%changep%', "{$q_changep}%", $template );
+				$template = str_replace( '%volume%', $q_volume, $template );
+
+				$q .= '<span class="sqitem" title="' . $quote_title . '">' . $template . '</span>';
+
+				// Close stock quote item.
+				$q .= '</li>';
+
+			} // END foreach ( $symbols_arr as $symbol ) {
+
+			// No results were returned?
+			if ( empty( $q ) ) {
+				return "{$out_start}{$out_error_msg}{$out_end}";
+			}
+
+			// Print ticker content if we have it.
+			return "{$out_start}{$q}{$out_end}";
+
 		} // END public function stock_ticker()
 
 		/**
@@ -599,11 +582,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 */
 		public function shortcode( $atts ) {
 			$defaults = $this->defaults;
-
-			// Get symbols as string
-			// $symbols = 'AAPL,MSFT';
-			// self::get_stock_from_db( $symbols );
-			// return;
 
 			$atts = shortcode_atts( array(
 				'symbols'         => $defaults['symbols'],
@@ -692,10 +670,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				",
 				$symbols_arr
 			);
-			#error_log( 'sql=' . $stock_sql );
+
 			// retrieve the results from database
 			$stock_data_a = $wpdb->get_results( $stock_sql, ARRAY_A );
-			#error_log( print_r( $stock_data_a, 1 ) );
 
 			// If we don't have anything retrieved, just exit
 			if ( empty( $stock_data_a ) ) {
@@ -707,13 +684,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			foreach ( $stock_data_a as $stock_data_item ) {
 				$stock_data[ $stock_data_item['symbol'] ] = $stock_data_item;
 			}
-			#error_log( 'new_stock=' . print_r($stock_data,1));
+
 			// Return re-composed assiciated array
 			return $stock_data;
 		} // END private function get_stock_from_db( $symbols ) {
 
 		/**
-		 * Download stock quotes from AlphaVantage.io and store them all to single transient
+		 * Download stock quotes from AlphaVantage.co and store them all to single transient
 		 */
 		function get_alphavantage_quotes() {
 
@@ -725,7 +702,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 
 			// Set fetch progress as active
-			// update_option( 'stockticker_av_progress', true );
 			self::lock_fetch();
 
 			// Get defaults (for API key)
@@ -740,7 +716,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// Make array of global symbols
 			$symbols_arr = explode( ',', $symbols );
-			// error_log('array='.print_r($symbols_arr,1));
 
 			// Default symbol to fetch first (first form array)
 			$current_symbol_index = 0;
@@ -748,62 +723,50 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// Get last fetched symbol
 			$last_fetched = get_option( 'stockticker_av_last' );
-			// error_log('last_fetched='.$last_fetched);
+
 			// Find which symbol we should fetch
 			if ( ! empty( $last_fetched ) ) {
 				$last_symbol_index = array_search( $last_fetched, $symbols_arr );
 				$current_symbol_index = $last_symbol_index + 1;
 				// If we have less than next symbol, then rewind to beginning
-				// error_log( 'items in array='.count( $symbols_arr ). ' | current_index='.$current_symbol_index);
 				if ( count( $symbols_arr ) <= $current_symbol_index ) {
 					$current_symbol_index = 0;
-					// error_log('reset index to 0');
 				}
 				$symbol_to_fetch = $symbols_arr[ $current_symbol_index ];
-				// error_log( 'last_index='.$last_symbol_index );
 			}
-
-			// error_log( 'symbol_to_fetch=' . $symbol_to_fetch );
 
 			// If no symbol to fetch, exit
 			if ( empty( $symbol_to_fetch ) ) {
 				// After finished update, set last fetched symbol
 				update_option( 'stockticker_av_last', $symbol_to_fetch );
 				// and release processing for next run
-				// update_option( 'stockticker_av_progress', false );
 				self::unlock_fetch();
 				return 'No symbol to fetch!';
 			}
 
 			// If current_symbol_index is 0 and cache timeout not expired, do not attempt to fetch again
 			// but wait to timeout expire for next loop (UTC)
-			// error_log( '$current_symbol_index=' . $current_symbol_index );
 			if ( 0 == $current_symbol_index ) {
 				$current_timestamp = time();
 				$last_fetched_timestamp = get_option( 'stockticker_av_last_timestamp', $current_timestamp );
 				$target_timestamp = $current_timestamp - (int) $defaults['cache_timeout'];
-				// error_log( "current=$current_timestamp | target=$target_timestamp | last=$last_fetched_timestamp" );
-				// If timestamp not expired, do not fetch but exit
 				if ( $last_fetched_timestamp > $target_timestamp ) {
-					// error_log( "last timestamp < target timestamp, we'll not fetch next loop");
-					// update_option( 'stockticker_av_progress', false );
+					// If timestamp not expired, do not fetch but exit
 					self::unlock_fetch();
 					return 'Cache timeout has not expired, no need to fetch new loop at the moment.';
 				} else {
 					// If timestamp expired, set new value and proceed
-					// error_log( "we'll do next loop");
 					update_option( 'stockticker_av_last_timestamp', $current_timestamp );
 				}
 			}
 
 			// Now call AlphaVantage fetcher for current symbol
 			$stock_data = $this->fetch_alphavantage_feed( $symbol_to_fetch );
-			// error_log( print_r($stock_data,1));
 
 			// If we have not got array with stock data, exit w/o updating DB
 			if ( ! is_array( $stock_data ) ) {
+				self::log( "No proper data got from Alpha Vantage, but we got this: {$stock_data}" );
 				// Release processing for next run
-				// update_option( 'stockticker_av_progress', false );
 				self::unlock_fetch();
 				return $stock_data;
 			}
@@ -842,67 +805,31 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				)
 			);
 
-			// After finished update, set last fetched symbol
-			update_option( 'stockticker_av_last', $symbol_to_fetch );
+			// Is successfully updated data in DB?
+			if ( (int) $ret > 0 ) {
+				self::log( "Stock data for {$symbol_to_fetch} has been updated in database." );
+				// After success update in database, set last fetched symbol
+				update_option( 'stockticker_av_last', $symbol_to_fetch );
+			} else {
+				self::log( "Error: Failed to save stock data for {$symbol_to_fetch} to database!" );
+			}
 
 			// Release processing for next run
-			// update_option( 'stockticker_av_progress', false );
 			self::unlock_fetch();
 
 			return 'OK';
-			/*
-			$transient_key = 'stockticker_av_' . $defaults['cache_timeout'];
-			$transient_key_check = 'stockticker_av_doing';
-			// First check do we need to proceed for new stock data?
-			if ( false === ( $stock_data = get_transient( $transient_key ) ) || empty( $stock_data ) ) {
-
-				// If we started update in other thread, skip this time
-				if ( false === ( $stock_fetch_started = get_transient( $transient_key_check ) ) || empty( $stock_fetch_started ) ) {
-					error_log( 'Stock Ticker fetching data from AlphaVantage.co started...' );
-					set_transient( $transient_key_check, '1', YEAR_IN_SECONDS );
-
-					// Make array of global symbols
-					$symbols_arr = explode( ',', $symbols );
-
-					// Initialize Stock Data
-					$stock_data = array();
-					foreach ( $symbols_arr as $symbol ) {
-						$json = $this->fetch_alphavantage_feed( $symbol );
-						if ( ! empty( $json ) ) {
-							$stock_data[ $symbol ] = $json;
-						}
-					}
-
-					// error_log( print_r($stock_data,1));
-
-					if ( ! empty( $stock_data ) ) {
-						set_transient( $transient_key, $stock_data, $defaults['cache_timeout'] );
-						set_transient( $transient_key_check, '0', YEAR_IN_SECONDS );
-						error_log( 'Stock Ticker fetching data from AlphaVantage.co finished!' );
-						error_log( 'Stock Ticker have new data and will set that to transient ' . $transient_key );
-						return 'Stock Ticker have new data and will set that to transient ' . $transient_key;
-					} else {
-						// allow next re-fetch of data
-						set_transient( $transient_key_check, '0', YEAR_IN_SECONDS );
-					}
-				}
-			} // END if ( false === ( $json = get_transient( $transient_key ) ) || empty( $json ) )
-
-			error_log( 'Stock Ticker do not need to fetch feed from AlphaVantage.co at the moment.' );
-			return 'Stock Ticker do not need to fetch feed from AlphaVantage.co at the moment.';
-			/**/
 		} // END function get_alphavantage_quotes( $symbols )
 
 		function fetch_alphavantage_feed( $symbol ) {
 
-			error_log( "Fetching data for symbol {$symbol}..." );
+			self::log( "Fetching data for symbol {$symbol}..." );
 
 			// Get defaults (for API key)
 			$defaults = $this->defaults;
 
 			// Exit if we don't have API Key
 			if ( empty( $defaults['avapikey'] ) ) {
-				error_log( 'Stock Ticker can not fetch stock data from AlphaVantage.io because you don`t have set API Key!' );
+				self::log( 'Stock Ticker can not fetch stock data from AlphaVantage.co because you don`t have set API Key!' );
 				return false;
 			}
 
@@ -914,7 +841,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'timeout' => intval( $defaults['timeout'] ),
 			);
 
-			// error_log( 'Fetching data from AV: ' . $feed_url );
+			// self::log( 'Fetching data from AV: ' . $feed_url );
 			$response = wp_remote_get( $feed_url, $wparg );
 
 			// Initialize empty $json variable
@@ -922,23 +849,22 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// If we have WP error log it and return none
 			if ( is_wp_error( $response ) ) {
-				error_log( 'Stock Ticker got error fetching feed from AlphaVantage.io: ' . $response->get_error_message() );
-				return 'Stock Ticker got error fetching feed from AlphaVantage.io: ' . $response->get_error_message();
+				self::log( 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message() );
+				return 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message();
 			} else {
 				// Get response from AV and parse it - look for error
 				$json = wp_remote_retrieve_body( $response );
 				$response_arr = json_decode( $json, true );
-				// If we got some error from AV, log to error_log and return none
+				// If we got some error from AV, log to self::log and return none
 				if ( ! empty( $response_arr['Error Message'] ) ) {
-					error_log( 'Stock Ticker connected to AlphaVantage but got error: ' . $response_arr['Error Message'] );
+					self::log( 'Stock Ticker connected to AlphaVantage but got error: ' . $response_arr['Error Message'] );
 					return 'Stock Ticker connected to AlphaVantage but got error: ' . $response_arr['Error Message'];
-					// $json = '';
 				} else {
-
 					// Crunch data from AlphaVantage for symbol and prepare compact array
+					self::log( "We got data from AlphaVantage for $symbol, so now let we crunch them and save to database..." );
 
 					// Get basics
-					$ticker_symbol      = $response_arr['Meta Data']['2. Symbol'];
+					// $ticker_symbol      = $response_arr['Meta Data']['2. Symbol']; // We don't use this at the moment, but requested symbol
 					$last_trade_refresh = $response_arr['Meta Data']['3. Last Refreshed'];
 					$last_trade_tz      = $response_arr['Meta Data']['5. Time Zone'];
 
@@ -968,52 +894,59 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 						++$i;
 					}
 
-					$last_open   = $last_trade['1. open']; //  74.3100
-					$last_high   = $last_trade['2. high']; //  74.9450
-					$last_low    = $last_trade['3. low']; //  74.3100
-					$last_close  = $last_trade['4. close']; //  74.7600
-					$last_volume = $last_trade['5. volume']; //  17462292
+					$last_open   = $last_trade['1. open'];
+					$last_high   = $last_trade['2. high'];
+					$last_low    = $last_trade['3. low'];
+					$last_close  = $last_trade['4. close'];
+					$last_volume = (int) $last_trade['5. volume'];
 
-					$prev_open   = $prev_trade['1. open']; //  74.3100
-					$prev_high   = $prev_trade['2. high']; //  74.9450
-					$prev_low    = $prev_trade['3. low']; //  74.3100
-					$prev_close  = $prev_trade['4. close']; //  74.7600
-					$prev_volume = $prev_trade['5. volume']; //  17462292
+					$prev_open   = $prev_trade['1. open'];
+					$prev_high   = $prev_trade['2. high'];
+					$prev_low    = $prev_trade['3. low'];
+					$prev_close  = $prev_trade['4. close'];
+					$prev_volume = (int) $prev_trade['5. volume'];
 
 					// Try fallback for previous data if AV return zero for second day
 					if ( '0.0000' == $prev_open ) {
-						$prev_open   = $prev_trade_2['1. open']; //  74.3100
+						$prev_open   = $prev_trade_2['1. open'];
 						// 3rd day (weekend)
 						if ( '0.0000' == $prev_open ) {
 							$prev_open   = $prev_trade_3['1. open'];
 						}
 					}
 					if ( '0.0000' == $prev_high ) {
-						$prev_high   = $prev_trade_2['2. high']; //  74.9450
+						$prev_high   = $prev_trade_2['2. high'];
 						// 3rd day (weekend)
 						if ( '0.0000' == $prev_high ) {
 							$prev_high   = $prev_trade_3['2. high'];
 						}
 					}
 					if ( '0.0000' == $prev_low ) {
-						$prev_low    = $prev_trade_2['3. low']; //  74.3100
+						$prev_low    = $prev_trade_2['3. low'];
 						// 3rd day (weekend)
 						if ( '0.0000' == $prev_low ) {
 							$prev_low    = $prev_trade_3['3. low'];
 						}
 					}
 					if ( '0.0000' == $prev_close ) {
-						$prev_close  = $prev_trade_2['4. close']; //  74.7600
+						$prev_close  = $prev_trade_2['4. close'];
 						// 3rd day (weekend)
 						if ( '0.0000' == $prev_close ) {
 							$prev_close  = $prev_trade_3['4. close'];
 						}
 					}
-					if ( '0' == $prev_volume ) {
-						$prev_volume = $prev_trade_2['5. volume']; //  17462292
-						// 3rd day (weekend)
-						if ( '0' == $prev_volume ) {
-							$prev_volume = $prev_trade_3['5. volume'];
+
+					// Volume (1st day)
+					if ( 0 == $last_volume ) {
+						// 2nd day
+						$last_volume = (int) $prev_trade['5. volume'];
+						// 3rd day
+						if ( 0 == $last_volume ) {
+							$last_volume = (int) $prev_trade_2['5. volume'];
+							// 4th day
+							if ( 0 == $last_volume ) {
+								$last_volume = (int) $prev_trade_3['5. volume'];
+							}
 						}
 					}
 
@@ -1042,16 +975,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 						'h'   => $last_high,
 						'low' => $last_low,
 						'v'   => $last_volume,
-						// 'raw' => $json,
 					);
-					// error_log(print_r($data_arr,1));
 					$data_arr['raw'] = $json;
 
 				}
 				unset( $response_arr );
 			}
 
-			// error_log( "Stock Ticker fetched data for $symbol: " . print_r( $data_arr, true ) );
 			return $data_arr;
 
 		} // END function fetch_alphavantage_feed( $symbol )
@@ -1064,7 +994,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			update_option( 'stockticker_av_progress', false );
 			return;
 		}
-
+		private function log( $str ) {
+			$log_file = trailingslashit( WP_CONTENT_DIR ) . 'stockticker.log';
+			$date = date( 'c' );
+			error_log( "{$date}: {$str}\n", 3, $log_file );
+		}
 	} // END class Wpau_Stock_Ticker
 
 } // END if(!class_exists('Wpau_Stock_Ticker'))
@@ -1075,4 +1009,4 @@ if ( class_exists( 'Wpau_Stock_Ticker' ) ) {
 	if ( empty( $wpau_stockticker ) ) {
 		$wpau_stockticker = new Wpau_Stock_Ticker();
 	}
-} // END class_exists('Wpau_Stock_Ticker')
+} // END class_exists( 'Wpau_Stock_Ticker' )

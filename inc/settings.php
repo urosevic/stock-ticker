@@ -290,7 +290,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'field'       => $this->option_name . '[template]',
 					'description' => sprintf(
 						__( 'Custom template for item. You can use macro keywords %1$s and %2$s mixed with HTML tags %3$s and/or %4$s.', 'wpaust' ),
-						'%exch_symbol%, %symbol%, %company%, %price%, %change%',
+						'%exch_symbol%, %symbol%, %company%, %price%, %volume%, %change%',
 						'%changep%',
 						'&lt;span&gt;, &lt;em&gt;',
 						'&lt;strong&gt;'
@@ -411,7 +411,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				'wpaust_advanced',
 				array(
 					'field'       => $this->option_name . '[globalassets]',
-					'description' => __( 'By default, Stock Ticker will load corresponding JavaScript files on demand. But, if you need to load assets on all pages, check this option. (For example, if you plan to load have some plugin that load widgets or content via Ajax, you need to check this option)', 'wpaust' ),
+					'description' => __( 'By default, Stock Ticker will load corresponding JavaScript files on demand. But, if you need to load assets on all pages, check this option. (For example, if you have some plugin that load widgets or content via Ajax, you should enable this option)', 'wpaust' ),
 					'class'       => 'checkbox',
 					'value'       => isset( $this->defaults['globalassets'] ) ? $this->defaults['globalassets'] : false,
 				) // args

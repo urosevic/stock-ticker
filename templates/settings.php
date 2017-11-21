@@ -35,8 +35,16 @@ global $wpau_stockticker;
 			<a href="https://wordpress.org/plugins/stock-ticker/faq/" class="aust-button" target="_blank">FAQ</a>
 			<br />
 			<a href="https://wordpress.org/support/plugin/stock-ticker" class="aust-button" target="_blank">Community Support</a>
-			<h2><?php esc_attr_e( 'Free Tip', 'wpaust' ); ?></h2>
-			<p>If you wish to insert quotes as inline elements in your posts or pages, consider using our related plugin <a href="https://wordpress.org/plugins/stock-quote/" target="_blank">Stock Quote</a>.</p>
+			<h2><?php esc_attr_e( 'Disclaimer', 'wpaust' ); ?></h2>
+			<p class="description"><?php
+				printf(
+				__( 'Since %1$s version %2$s source for all stock data used in plugin is provided by %3$s, displayed for informational and educational purposes only and should not be considered as investment advise. <br />Author of the plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.' ),
+				__( 'Stock Ticker', 'wpaust' ),
+				'0.3.0',
+				'<strong>Alpha Vantage</strong>'
+				);
+			?></p>
+
 		</div><!-- .sidebar_container -->
 	</div><!-- .stock_ticker_wrapper -->
 
@@ -56,36 +64,19 @@ global $wpau_stockticker;
 
 			</ul>
 		</p>
-		<h2><?php esc_attr_e( 'Disclaimer', 'wpaust' ); ?></h2>
-		<p class="description">Since version 0.3.0 source for stock data for Stock Ticker has been changed to AlphaVantage.co, which provide free API with realtime and historical equity data.</p>
-		<p>Stock exchanges currently supported:
-			<ul>
-				<li><strong>ASX</strong> - Australian Securities Exchange</li>
-				<li><strong>BOM</strong> - Bombay Stock Exchange</li>
-				<li><strong>BIT</strong> - Borsa Italiana Milan Stock Exchange</li>
-				<li><strong>TSE</strong> - Canadian/Toronto Securities Exchange</li>
-				<li><strong>FRA</strong> - Deutsche Boerse Frankfurt Stock Exchange</li>
-				<li><strong>ETR</strong> - Deutsche Boerse Frankfurt Stock Exchange</li>
-				<li><strong>AMS</strong> - Euronext Amsterdam</li>
-				<li><strong>EBR</strong> - Euronext Brussels</li>
-				<li><strong>ELI</strong> - Euronext Lisbon</li>
-				<li><strong>EPA</strong> - Euronext Paris</li>
-				<li><strong>LON</strong> - London Stock Exchange</li>
-				<li><strong>MCX</strong> - Moscow Exchange</li>
-				<li><strong>NASDAQ</strong> - NASDAQ Exchange</li>
-				<li><strong>CPH</strong> - NASDAQ OMX Copenhagen</li>
-				<li><strong>HEL</strong> - NASDAQ OMX Helsinki</li>
-				<li><strong>ICE</strong> - NASDAQ OMX Iceland</li>
-				<li><strong>STO</strong> - NASDAQ OMX Stockholm</li>
-				<li><strong>NSE</strong> - National Stock Exchange of India</li>
-				<li><strong>NYSE</strong> - New York Stock Exchange</li>
-				<li><strong>SGX</strong> - Singapore Exchange</li>
-				<li><strong>SHA</strong> - Shanghai Stock Exchange</li>
-				<li><strong>SHE</strong> - Shenzhen Stock Exchange</li>
-				<li><strong>TPE</strong> - Taiwan Stock Exchange</li>
-				<li><strong>TYO</strong> - Tokyo Stock Exchange</li>
-			</ul>
-		</p>
+
+		<h2><?php esc_attr_e( 'Supported Stock Exchanges', 'wpaust' ); ?></h2>
+		<ul>
+			<?php
+			foreach ( $wpau_stockticker::$exchanges as $symbol => $name ) {
+				printf(
+					'<li><strong>%1$s</strong> - %2$s</li>',
+					$symbol,
+					$name
+				);
+			}
+			?>
+		</ul>
 	</div><!-- .help_cell -->
 </div>
 <script type="text/javascript">

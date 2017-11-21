@@ -14,20 +14,16 @@ Easy add customizable moving or static ticker tapes with stock information for c
 
 A simple and easy configurable plugin that allows you to insert stock ticker with stock price information (data provided by AlphaVantage.co). Insertion is enabled by shortcode or multi instance widget.
 
-Stock Ticker is enhanced animated variation of [Stock Quote](https://wordpress.org/plugins/stock-quote/) plugin.
-
 = Features =
-* Configure default set of stock symbols that will be displayed in ticker
+* Set global set of symbols you'll use site-wide
+* Configure default set of stock symbols that will be displayed in ticker inserted by empty shortcode
 * Configure default presence of company as Company Name or as Stock Symbol
 * Configure colours for unchanged quote, negative and positive changes with colour picker
-* Disable scrolling ticker and make it static for individual ticker
-* Tooltip for ticker item display company name, exchange and last trade date/time
-* Define custom names for companies to be used instead symbols
-* Define custom elements in visible change value
-* Plugin uses native WordPress function to get and cache data from Google Finance for predefined duration of time
-* Ready to be translated to non-english languages
+* Disable scrolling ticker and make it static
+* Define custom names for companies to be used instead of the symbols
+* Define custom elements as a part of visible value
 
-Since version 0.1.5 you can set custom template for visible change value. Default format is `%company% %price% %change% %changep%`, and as a macro keywords you can use:
+Since version 0.1.5 you can set custom template for visible change value. Default format is `%company% %price% %change% %changep%`. As a macro keywords you can use:
 
 * `%exch_symbol%` - Symbol with exchange, like *NASDAQ:AAPL*
 * `%symbol%` - Company symbol, like *AAPL*
@@ -36,12 +32,10 @@ Since version 0.1.5 you can set custom template for visible change value. Defaul
 * `%change%` - Change value, like *-5.53*
 * `%changep%` - Change percentage, like *-4.23%*
 
-For feature requests or help [send feedback](http://urosevic.net/wordpress/plugins/stock-ticker/ "Official plugin page") or use support forum on WordPress.
+For feature requests or help [send feedback](https://urosevic.net/wordpress/plugins/stock-ticker/ "Official plugin page") or use support forum on WordPress.
 
 = Shortcode =
-Use simple shortcode `[stock_ticker]` without any parameter in post or page, to display ticker with default (global) settings.
-
-You can tune single shortcode with parameters:
+Use simple shortcode `[stock_ticker]` without any parameter in post or page, to display ticker with default settings. You can tweak single shortcode with parameters:
 
 * `symbols` - string with single or comma separated array of stock symbols
 * `show` - string that define how will company be represent on ticker; can be `name` for Company Name, or `symbol` for Stock Symbol
@@ -52,14 +46,44 @@ You can tune single shortcode with parameters:
 * `speed` - (integer) tune speed of StockTicker block rendered by shortcode
 * `class` - customize block look and feel set custom CSS class (optional)
 
-= Example =
+= Examples =
 
 * Scrolling ticker
-`[stock_ticker symbols="BABA,^DJI,EURGBP=X,LON:FFX" show="symbol"]`
+`[stock_ticker symbols="BABA,.DJI,EURGBP=X,LON:FFX" show="symbol"]`
 * Static unordered list
-`[stock_ticker symbols="BABA,^DJI,EURGBP=X,LON:FFX" show="symbol" static="1"]`
+`[stock_ticker symbols="BABA,.DJI,EURGBP=X,LON:FFX" show="symbol" static="1"]`
 * Scrolling ticker w/o linked quotes
-`[stock_ticker symbols="BABA,^DJI,EURGBP=X,LON:FFX" show="symbol" nolink="1"]`
+`[stock_ticker symbols="BABA,.DJI,EURGBP=X,LON:FFX" show="symbol" nolink="1"]`
+
+= Supported Stock Exchange Markets =
+
+Alpha Vantage provide stock data for following stock exchange markets:
+
+* **ASX** - Australian Securities Exchange
+* **BOM** - Bombay Stock Exchange
+* **BIT** - Borsa Italiana Milan Stock Exchange
+* **TSE** - Canadian/Toronto Securities Exchange
+* **FRA** - Deutsche Boerse Frankfurt Stock Exchange
+* **ETR** - Deutsche Boerse Frankfurt Stock Exchange
+* **AMS** - Euronext Amsterdam
+* **EBR** - Euronext Brussels
+* **ELI** - Euronext Lisbon
+* **EPA** - Euronext Paris
+* **LON** - London Stock Exchange
+* **MCX** - Moscow Exchange
+* **NASDAQ** - NASDAQ Exchange
+* **CPH** - NASDAQ OMX Copenhagen
+* **HEL** - NASDAQ OMX Helsinki
+* **ICE** - NASDAQ OMX Iceland
+* **STO** - NASDAQ OMX Stockholm
+* **NSE** - National Stock Exchange of India
+* **NYSE** - New York Stock Exchange
+* **SGX** - Singapore Exchange
+* **SHA** - Shanghai Stock Exchange
+* **SHE** - Shenzhen Stock Exchange
+* **TPE** - Taiwan Stock Exchange
+* **TYO** - Tokyo Stock Exchange
+
 
 == Installation ==
 
@@ -70,14 +94,14 @@ Easy install Stock Ticker as any other ordinary WordPress plugin
 1. Install and activate `Stock Ticker`
 1. Configure default plugin options and insert shortcode `[stock_ticker]` to page or post, or `Stock Ticker` Widget to preferred Widget Area
 
-= To install ALPHA version of plugin =
+= To install ALPHA version of the plugin =
 
 1. Download package from https://github.com/urosevic/stock-ticker/tree/alphavantage
 1. Extract ZIP archive to your local computer and rename directory from `stock-ticker-alphavantage` to `stock-ticker`
 1. Upload directory `stock-ticker` from your local computer to your WordPress website to `wp-content/plugins/`
 1. Login to WordPress Dashboard and go to `Plugins` -> `Installed Plugins` page
 1. Click `Activate` link for Stock Ticker plugin.
-1. Get a free API Key from [AlphaVantage.io](https://www.alphavantage.co/support/#api-key)
+1. Get a free API Key from [AlphaVantage.co](https://www.alphavantage.co/support/#api-key)
 1. In WordPress Dashboard go to `Settings` -> `Stock Ticker`
 1. Enter in field `AlphaVantage.co API Key` Alpha Vantage API Key you got in previous step (check [this screenshot](https://goo.gl/3PKxLM))
 1. In field `All Stock Symbols` enter all stock symbols you’ll use on website, separated by comma. This field is used to fetch stock data from AlphaVantage.co API by AJAX in background. Because AV have only API to get data for single symbol, that can take a while to get. Please note, for default symbols we still have field in Default Settings section of plugin.
@@ -94,12 +118,12 @@ Easy install Stock Ticker as any other ordinary WordPress plugin
 
 = How to know which stock symbols to use? =
 
-Visit [Google Finance](https://www.google.com/finance) and look for preferred symbols that you need/wish to display on your site.
-For start you can try with AAPL,MSFT,IBM,CSCO,GOOG,YHOO,AMZN (Apple Inc; Microsoft Corporation; International Business Machines Corporation; Cisco Systems, Inc.; Google Inc; Yahoo! Inc; Amazon.com, Inc.)
+You can use standard symbols from supported stock exchanges.
+To start with you can try with AAPL,MSFT,IBM,CSCO,GOOG,YHOO,AMZN (Apple Inc; Microsoft Corporation; International Business Machines Corporation; Cisco Systems, Inc.; Google Inc; Yahoo! Inc; Amazon.com, Inc.)
 
-= How to get Dow Jones Industrial Average? =
+= How to get Dow Jones Industrial Average or other Indexes? =
 
-Since version 1.4.0 we use Google Finance, which support ^DJI exchange. To get quote for this exchange, simply add symbol `.DJI` or `^DJI`.
+Since version 3.0.0 we use Alpha Vantage, which support Indexes. To get quote for index, simply add symbol as `.DJI` (or `^DJI` if you prefer).
 
 = How to get currency exchange rate? =
 
@@ -107,7 +131,7 @@ Use Currency symbols like `EURGBP=X` to get rate of `1 Euro` = `? British Pounds
 
 = How to get Crude Oil, Gold and other commodities? =
 
-Unfortunately, Google Finance does not provide data for commodities (metals, energies, grains, meats, softs). That is why Stock Ticker can't provide quotes for them.
+Unfortunately, Alpha Vantage does not provide data for commodities (metals, energies, grains, meats, softs). That is why Stock Ticker can't provide quotes for them.
 
 = How to get descriptive title for currency exchange rates? =
 
@@ -115,14 +139,9 @@ Add to `Custom Names` legend currency exchange symbol w/o `=X` part, like:
 
 `EURGBP;Euro (€) ⇨ British Pound Sterling (£)`
 
-= How to get sotck quotes from XZY Stock Exchange? =
-
-First check does [Google Finance](https://www.google.com/finance) provides quotes from stock exchange you referring to. If it's supported, then look to next question to learn how to get stocks from there.
-If Google Finance does not support your stock exchange, we are sorry but we can't help you at the moment.
-
 = How to get proper stock price from proper stock exchange? =
 
-Enter symbol in format `EXCHANGE:SYMBOL` like `LON:FFX`
+Enter symbol in format `EXCHANGE:SYMBOL` like `LON:FFX` for FairFX Group PLC from London Stock Exchange market.
 
 = How to add Stock Ticker to header theme file? =
 
@@ -130,17 +149,9 @@ Add this to your template file (you also can add custom parameters for shortcode
 
 `<?php echo do_shortcode('[stock_ticker]'); ?>`
 
-= Stock Ticker does not work with ION .com Insider plugin =
-
-Trend Analysis WordPress Plugin ION.com Insider mess with content and change shortcode parameters before WordPress process shortcodes.
-
-To avoid this, use Stock Ticker 0.1.4.6 or newer, and use in shortcodes single instead double quotes for parameters. Example:
-
-`[stock_ticker symbols='BABA,^DJI,EURGBP=X,LON:FFX']`
-
 = How to customize quote output? =
 
-On Settings page for plugin you can set custom Value template. You can use macro keywords `%exch_symbol%`, `%symbol%`, `%company%`, `%price%`, `%change%` and `%changep%` mixed with HTML tags `<span>`, `<em>` and/or `<strong>`.
+On Settings page for plugin you can set custom Value template. You can use macro keywords `%exch_symbol%`, `%symbol%`, `%company%`, `%price%`, `%volume%`, `%change%` and `%changep%` mixed with HTML tags `<span>`, `<em>` and/or `<strong>`.
 
 Default template is `%company% %price% %change% %changep%` but you can format it like:
 
@@ -148,7 +159,7 @@ Default template is `%company% %price% %change% %changep%` but you can format it
 
 = I set to show `%company%` but symbol is displayed instead =
 
-Please note that Google Finance does not provide company name in retrieved feeds. You'll need to set company name in *Custom Names* field on plugin settings page.
+Please note that Alpha Vantage does not provide company name in retrieved feeds. You'll need to set company name in *Custom Names* field on plugin settings page.
 
 = How to resolve error `Unfortunately, we could not get stock quotes this time`? =
 
@@ -160,44 +171,19 @@ If you still experiencing issue, please contact us through [support forum](https
 
 == Disclaimer ==
 
-Data for Stock Ticker has provided by Google Finance and per their disclaimer, it can only be used at a noncommercial level. Please also note that Google has stated Finance API as deprecated and has no exact shutdown date.
+All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displayed for informational and educational purposes only and should not be considered as investment advise.
 
-[Google Finance Disclaimer](https://www.google.com/intl/en-US/googlefinance/disclaimer/#disclaimers)
-
-Data is provided by financial exchanges and may be delayed as specified
-by financial exchanges or our data providers. Google does not verify any
-data and disclaims any obligation to do so.
-
-Google, its data or content providers, the financial exchanges and
-each of their affiliates and business partners (A) expressly disclaim
-the accuracy, adequacy, or completeness of any data and (B) shall not be
-liable for any errors, omissions or other defects in, delays or
-interruptions in such data, or for any actions taken in reliance thereon.
-Neither Google nor any of our information providers will be liable for
-any damages relating to your use of the information provided herein.
-As used here, “business partners” does not refer to an agency, partnership,
-or joint venture relationship between Google and any such parties.
-
-You agree not to copy, modify, reformat, download, store, reproduce,
-reprocess, transmit or redistribute any data or information found herein
-or use any such data or information in a commercial enterprise without
-obtaining prior written consent. All data and information is provided “as is”
-for personal informational purposes only, and is not intended for trading
-purposes or advice. Please consult your broker or financial representative
-to verify pricing before executing any trade.
-
-Either Google or its third party data or content providers have exclusive
-proprietary rights in the data and information provided.
-
-Please find all listed exchanges and indices covered by Google along with
-their respective time delays from the table on the left.
-
-Advertisements presented on Google Finance are solely the responsibility
-of the party from whom the ad originates. Neither Google nor any of its
-data licensors endorses or is responsible for the content of any advertisement
-or any goods or services offered therein.
+Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.
 
 == Changelog ==
+
+= 0.2.99-alpha9 (20171121) =
+* Fix: Update script
+* Fix: recognize zero Volume and use it from previous day
+* Fix: Domain name for AV website
+* Update: Disclaimer
+* Clean: Remove not needed and commented out code
+* Add: Plugin log file
 
 = 0.2.99-alpha8 (20171120) =
 * Revert: bring back cache timeout so we can have dellay between finished fetching and next round start
