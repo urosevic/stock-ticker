@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
 Tested up to: 4.9.1
-Stable tag: 0.2.3
+Stable tag: 3.0.0
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -84,7 +84,6 @@ Alpha Vantage provide stock data for following stock exchange markets:
 * **TPE** - Taiwan Stock Exchange
 * **TYO** - Tokyo Stock Exchange
 
-
 == Installation ==
 
 Easy install Stock Ticker as any other ordinary WordPress plugin
@@ -92,7 +91,12 @@ Easy install Stock Ticker as any other ordinary WordPress plugin
 1. Go to `Plugins` -> `Add New`
 1. Search for `Stock Ticker` plugin
 1. Install and activate `Stock Ticker`
-1. Configure default plugin options and insert shortcode `[stock_ticker]` to page or post, or `Stock Ticker` Widget to preferred Widget Area
+1. Get a free API Key from [AlphaVantage.co](https://www.alphavantage.co/support/#api-key)
+1. In WordPress Dashboard go to `Settings` -> `Stock Ticker`
+1. Enter in field `AlphaVantage.co API Key` Alpha Vantage API Key you got in previous step (check [this screenshot](https://goo.gl/3PKxLM))
+1. In field `All Stock Symbols` enter all stock symbols you’ll use on website, separated by comma. This field is used to fetch stock data from AlphaVantage.co API by AJAX in background. Because AV have only API to get data for single symbol, that can take a while to get. Please note, for default symbols we still have field in Default Settings section of plugin.
+1. Enable `Auto Refresh` option because on first load if we do not have data downloaded from AlphaVantage.co they will be loaded through AJAX after a while.
+1. Insert shortcode `[stock_ticker]` to page or post, or `Stock Ticker` Widget to preferred Widget Area.
 
 = To install ALPHA version of the plugin =
 
@@ -176,7 +180,10 @@ All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displa
 Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.
 
 == Changelog ==
-= 0.2.99-alpha11 (20161203) =
+= 3.0.0 (20171203) =
+* Release working version of plugin
+
+= 0.2.99-alpha11 (20171203) =
 * Change: Add to plugin table ID as primary key column
 * Change: Switch back to TIME_SERIES_DAILY because INTRADAY fail with currencies
 * Fix: Plugin version in updater script
