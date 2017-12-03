@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 0.2.99-alpha8
+Version: 0.2.99-alpha9
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -834,9 +834,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 
 			// Define AplhaVantage API URL
-			$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $defaults['avapikey'] . '&symbol=';
+			$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=5min&apikey=' . $defaults['avapikey'] . '&symbol=';
 			$feed_url .= $symbol;
-
+self::log( $feed_url );
 			$wparg = array(
 				'timeout' => intval( $defaults['timeout'] ),
 			);
@@ -866,11 +866,47 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					// Get basics
 					// $ticker_symbol      = $response_arr['Meta Data']['2. Symbol']; // We don't use this at the moment, but requested symbol
 					$last_trade_refresh = $response_arr['Meta Data']['3. Last Refreshed'];
-					$last_trade_tz      = $response_arr['Meta Data']['5. Time Zone'];
+					$last_trade_tz      = $response_arr['Meta Data']['6. Time Zone']; // TIME_SERIES_INTRADAY
 
 					// Get prices
 					$i = 0;
-					foreach ( $response_arr['Time Series (Daily)'] as $key => $val ) {
+
+					$last_trade = array();
+					$last_trade_date = '';
+					$prev_trade = array();
+					$prev_trade_date = '';
+					foreach ( $response_arr['Time Series (5min)'] as $datetime => $val ) { // TIME_SERIES_INTRADAY
+						// If we don't have last trade already set, do it now
+						if ( empty( $last_trade ) ) {
+							$last_trade = $val;
+							$last_trade_datetime = $datetime;
+							$last_trade_date = date( 'Y-m-d', strtotime( $last_trade_datetime ) );
+						} else if ( empty( $prev_trade ) ) {
+							// Get previous trade day
+							$prev_trade_date = date( 'Y-m-d', strtotime( $datetime ) );
+							// If this date differ from last, consider as previous day
+							if ( $prev_trade_date != $last_trade_date ) {
+								$prev_trade = $val;
+								$prev_trade_datetime = $datetime;
+							}
+						}
+					}
+
+					$last_open   = $last_trade['1. open'];
+					$last_high   = $last_trade['2. high'];
+					$last_low    = $last_trade['3. low'];
+					$last_close  = $last_trade['4. close'];
+					$last_volume = (int) $last_trade['5. volume'];
+
+					$prev_open   = $prev_trade['1. open'];
+					$prev_high   = $prev_trade['2. high'];
+					$prev_low    = $prev_trade['3. low'];
+					$prev_close  = $prev_trade['4. close'];
+					$prev_volume = (int) $prev_trade['5. volume'];
+
+					/*
+					foreach ( $response_arr['Time Series (Daily)'] as $key => $val ) { // TIME_SERIES_DAILY
+					// foreach ( $response_arr['Time Series (5min)'] as $key => $val ) { // TIME_SERIES_INTRADAY
 						switch ( $i ) {
 							case 0:
 								$last_trade_date = $key;
@@ -949,6 +985,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 							}
 						}
 					}
+					/**/
 
 					// The difference between 2017-09-01's close price and 2017-08-31's close price gives you the "Change" value.
 					$change = $last_close - $prev_close;
