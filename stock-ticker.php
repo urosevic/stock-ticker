@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 0.2.99-alpha9
+Version: 0.2.99-alpha10
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -49,8 +49,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	 */
 	class Wpau_Stock_Ticker {
 
-		const DB_VER = 3;
-		const VER = '0.2.99-alpha9';
+		const DB_VER = 4;
+		const VER = '0.2.99-alpha11';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -347,10 +347,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Delete control options to force re-fetching from first symbol
 		 */
 		public static function restart_av_fetching() {
-			update_option( 'stockticker_av_latest', '' );
+			update_option( 'stockticker_av_last', '' );
 			$expired_timestamp = time() - ( 10 * YEAR_IN_SECONDS );
-			update_option( 'stockticker_av_latest_timestamp', $expired_timestamp );
+			update_option( 'stockticker_av_last_timestamp', $expired_timestamp );
 			update_option( 'stockticker_av_progress', false );
+			self::log( 'Stock Ticker: data fetching from first symbol has been restarted' );
 		} // END public static function restart_av_fetching() {
 
 		function ajax_stockticker_load() {
@@ -722,7 +723,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$symbol_to_fetch = $symbols_arr[ $current_symbol_index ];
 
 			// Get last fetched symbol
-			$last_fetched = get_option( 'stockticker_av_last' );
+			$last_fetched = strtoupper( get_option( 'stockticker_av_last' ) );
 
 			// Find which symbol we should fetch
 			if ( ! empty( $last_fetched ) ) {
@@ -732,7 +733,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				if ( count( $symbols_arr ) <= $current_symbol_index ) {
 					$current_symbol_index = 0;
 				}
-				$symbol_to_fetch = $symbols_arr[ $current_symbol_index ];
+				$symbol_to_fetch = strtoupper( $symbols_arr[ $current_symbol_index ] );
 			}
 
 			// If no symbol to fetch, exit
@@ -773,40 +774,95 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// With success stock data in array, save data to database
 			global $wpdb;
-			$ret = $wpdb->replace(
-				$wpdb->prefix . 'stock_ticker_data',
-				array(
-					'symbol'         => $stock_data['t'],
-					'raw'            => $stock_data['raw'],
-					'last_refreshed' => $stock_data['lt'],
-					'tz'             => $stock_data['ltz'],
-					'last_open'      => $stock_data['o'],
-					'last_high'      => $stock_data['h'],
-					'last_low'       => $stock_data['low'],
-					'last_close'     => $stock_data['l'],
-					'last_volume'    => $stock_data['v'],
-					'change'         => $stock_data['c'],
-					'changep'        => $stock_data['cp'],
-					'range'          => $stock_data['r'],
-				),
-				array(
-					'%s', // symbol
-					'%s', // raw
-					'%s', // last_refreshed
-					'%s', // tz
-					'%f', // last_open
-					'%f', // last_high
-					'%f', // last_low
-					'%f', // last_close
-					'%d', // last_volume
-					'%f', // last_change
-					'%f', // last_changep
-					'%s', // range
-				)
-			);
+			// Define plugin table name
+			$table_name = $wpdb->prefix . 'stock_ticker_data';
+			// Check does symbol already exists in DB (to update or to insert new one)
+			// I'm not using here $wpdb->replace() as I wish to avoid reinserting row to table which change primary key (delete row, insert new row)
+			$symbol_exists = $wpdb->get_var( "SELECT symbol FROM $table_name WHERE symbol='$symbol_to_fetch'" );
+			if ( ! empty( $symbol_exists ) ) {
+				// UPDATE
+				$ret = $wpdb->update(
+					// table
+					$table_name,
+					// data
+					array(
+						'symbol'         => $stock_data['t'],
+						'raw'            => $stock_data['raw'],
+						'last_refreshed' => $stock_data['lt'],
+						'tz'             => $stock_data['ltz'],
+						'last_open'      => $stock_data['o'],
+						'last_high'      => $stock_data['h'],
+						'last_low'       => $stock_data['low'],
+						'last_close'     => $stock_data['l'],
+						'last_volume'    => $stock_data['v'],
+						'change'         => $stock_data['c'],
+						'changep'        => $stock_data['cp'],
+						'range'          => $stock_data['r'],
+					),
+					// WHERE
+					array(
+						'symbol' => $stock_data['t'],
+					),
+					// format
+					array(
+						'%s', // symbol
+						'%s', // raw
+						'%s', // last_refreshed
+						'%s', // tz
+						'%f', // last_open
+						'%f', // last_high
+						'%f', // last_low
+						'%f', // last_close
+						'%d', // last_volume
+						'%f', // last_change
+						'%f', // last_changep
+						'%s', // range
+					),
+					// WHERE format
+					array(
+						'%s',
+					)
+				);
+			} else {
+				// INSERT
+				$ret = $wpdb->insert(
+					// table
+					$table_name,
+					// data
+					array(
+						'symbol'         => $stock_data['t'],
+						'raw'            => $stock_data['raw'],
+						'last_refreshed' => $stock_data['lt'],
+						'tz'             => $stock_data['ltz'],
+						'last_open'      => $stock_data['o'],
+						'last_high'      => $stock_data['h'],
+						'last_low'       => $stock_data['low'],
+						'last_close'     => $stock_data['l'],
+						'last_volume'    => $stock_data['v'],
+						'change'         => $stock_data['c'],
+						'changep'        => $stock_data['cp'],
+						'range'          => $stock_data['r'],
+					),
+					// format
+					array(
+						'%s', // symbol
+						'%s', // raw
+						'%s', // last_refreshed
+						'%s', // tz
+						'%f', // last_open
+						'%f', // last_high
+						'%f', // last_low
+						'%f', // last_close
+						'%d', // last_volume
+						'%f', // last_change
+						'%f', // last_changep
+						'%s', // range
+					)
+				);
+			}
 
 			// Is successfully updated data in DB?
-			if ( (int) $ret > 0 ) {
+			if ( false !== $ret ) {
 				self::log( "Stock data for {$symbol_to_fetch} has been updated in database." );
 				// After success update in database, set last fetched symbol
 				update_option( 'stockticker_av_last', $symbol_to_fetch );
@@ -1034,7 +1090,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			update_option( 'stockticker_av_progress', false );
 			return;
 		}
-		private function log( $str ) {
+		public static function log( $str ) {
 			$log_file = trailingslashit( WP_CONTENT_DIR ) . 'stockticker.log';
 			$date = date( 'c' );
 			error_log( "{$date}: {$str}\n", 3, $log_file );
