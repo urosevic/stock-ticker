@@ -834,9 +834,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 
 			// Define AplhaVantage API URL
-			$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=5min&apikey=' . $defaults['avapikey'] . '&symbol=';
+			// $feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=5min&apikey=' . $defaults['avapikey'] . '&symbol=';
+			$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $defaults['avapikey'] . '&symbol=';
 			$feed_url .= $symbol;
-self::log( $feed_url );
+
 			$wparg = array(
 				'timeout' => intval( $defaults['timeout'] ),
 			);
@@ -866,11 +867,12 @@ self::log( $feed_url );
 					// Get basics
 					// $ticker_symbol      = $response_arr['Meta Data']['2. Symbol']; // We don't use this at the moment, but requested symbol
 					$last_trade_refresh = $response_arr['Meta Data']['3. Last Refreshed'];
-					$last_trade_tz      = $response_arr['Meta Data']['6. Time Zone']; // TIME_SERIES_INTRADAY
+					$last_trade_tz      = $response_arr['Meta Data']['5. Time Zone']; // TIME_SERIES_DAILY
+					// $last_trade_tz      = $response_arr['Meta Data']['6. Time Zone']; // TIME_SERIES_INTRADAY
 
 					// Get prices
 					$i = 0;
-
+					/*
 					$last_trade = array();
 					$last_trade_date = '';
 					$prev_trade = array();
@@ -903,8 +905,9 @@ self::log( $feed_url );
 					$prev_low    = $prev_trade['3. low'];
 					$prev_close  = $prev_trade['4. close'];
 					$prev_volume = (int) $prev_trade['5. volume'];
+					*/
 
-					/*
+					/**/
 					foreach ( $response_arr['Time Series (Daily)'] as $key => $val ) { // TIME_SERIES_DAILY
 					// foreach ( $response_arr['Time Series (5min)'] as $key => $val ) { // TIME_SERIES_INTRADAY
 						switch ( $i ) {
