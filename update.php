@@ -38,7 +38,7 @@ function au_stockticker_update() {
 	}
 
 	// Update plugin version number
-	update_option( 'stockticker_version', $target_db_ver );
+	update_option( 'stockticker_version', Wpau_Stock_Ticker::VER );
 
 } // END function au_stockticker_update()
 
@@ -131,4 +131,18 @@ function au_stockticker_update_routine_3() {
 	// Delete all transients as we don't use them anymore since 0.2.99alpha7
 	global $wpdb;
 	$ret = $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '%\_transient\_stockticker\_av\_%' OR option_name LIKE '%\_transient\_timeout\_stockticker\_av\_%'" );
+
 } // END function au_stockticker_update_routine_3()
+
+function au_stockticker_update_routine_4() {
+	// Add id as a primary column for 0.2.99alpha10
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'stock_ticker_data';
+
+	// Because WordPress dbDelta missing features as noted in ticket https://core.trac.wordpress.org/ticket/40357
+	// We must to run direct primary key switch
+	$wpdb->query("ALTER TABLE $table_name DROP PRIMARY KEY");
+	$wpdb->query("ALTER TABLE $table_name ADD id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST");
+
+} // END function au_stockticker_update_routine_4()
