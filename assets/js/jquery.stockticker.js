@@ -22,7 +22,6 @@ var stocktickers_load = function() {
 				},
 				success: function(response) {
 					if ( response.status == 'success' ) {
-						console.log(response);
 						stockticker_loaded = true;
 						obj.html(response.message);
 						if ( ! obj.data('stockticker_static') ) {
