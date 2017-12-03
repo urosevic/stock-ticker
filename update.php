@@ -145,4 +145,7 @@ function au_stockticker_update_routine_4() {
 	$wpdb->query("ALTER TABLE $table_name DROP PRIMARY KEY");
 	$wpdb->query("ALTER TABLE $table_name ADD id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST");
 
+	// Delete unused keys
+	delete_option( 'stockticker_av_latest' );
+	delete_option( 'stockticker_av_latest_timestamp' );
 } // END function au_stockticker_update_routine_4()

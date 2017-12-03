@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 0.2.99-alpha10
+Version: 0.2.99-alpha11
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
