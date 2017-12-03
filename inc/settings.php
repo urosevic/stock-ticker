@@ -272,7 +272,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				array(
 					'field'       => $this->option_name . '[speed]',
 					'description' => __( 'Define speed of ticker scrolling in pixels per second (default is 50)', 'wpaust' ),
-					'class'       => 'num',
+					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['speed'] ) ? $this->defaults['speed'] : 50,
 					'min'         => 10,
 					'max'         => 200,
@@ -328,7 +328,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				array(
 					'field'       => $this->option_name . '[cache_timeout]',
 					'description' => __( 'Define timeout before next round of fetching symbol data start, in seconds', 'wpaust' ),
-					'class'       => 'num',
+					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['cache_timeout'] ) ? $this->defaults['cache_timeout'] : 180,
 					'min'         => 0,
 					'max'         => DAY_IN_SECONDS,
@@ -345,7 +345,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				array(
 					'field'       => $this->option_name . '[timeout]',
 					'description' => __( 'Define timeout to fetch quote feed before give up and display error message, in seconds (default is 2)', 'wpaust' ),
-					'class'       => 'num',
+					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['timeout'] ) ? $this->defaults['timeout'] : 2,
 					'min'         => 1,
 					'max'         => 60,
@@ -394,7 +394,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				array(
 					'field'       => $this->option_name . '[refresh_timeout]',
 					'description' => __( 'Define auto refresh timeout, in seconds', 'wpaust' ),
-					'class'       => 'num',
+					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['refresh_timeout'] ) ? $this->defaults['refresh_timeout'] : 2,
 					'min'         => 0,
 					'max'         => HOUR_IN_SECONDS,
@@ -603,6 +603,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						break;
 					case 'symbols':
 					case 'all_symbols':
+						// Always uppercase
+						$value = strtoupper( strip_tags( stripslashes( $value ) ) );
+						break;
 					case 'legend':
 					case 'loading_message':
 					case 'error_message':
@@ -705,15 +708,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			if (
 				$previous_options['avapikey'] !== $sanitized['avapikey'] ||
 				$previous_options['all_symbols'] !== $sanitized['all_symbols'] ||
-				// $previous_options['cache_timeout'] !== $sanitized['cache_timeout'] ||
+				$previous_options['cache_timeout'] !== $sanitized['cache_timeout'] ||
 				$previous_options['timeout'] !== $sanitized['timeout']
 			) {
-				error_log( 'Stock Ticker: restarting data fetching from first symbol' );
-				// Wpau_Stock_Ticker::clean_transients();
-				// error_log( 'Stock Ticker: clean transients after settings have been updated' );
+				Wpau_Stock_Ticker::log( 'Stock Ticker: Restarting data fetching from first symbol' );
 				Wpau_Stock_Ticker::restart_av_fetching();
 			}
 
+			Wpau_Stock_Ticker::log( 'Stock Ticker: Settings have been updated' );
 			return $sanitized;
 		} // END public function sanitize_options($sanitized) {
 
