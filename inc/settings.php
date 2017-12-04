@@ -119,6 +119,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'value'       => $this->defaults['error_message'],
 				)
 			);
+			// Force fetch stock
+			add_settings_field(
+				$this->option_name . 'force_fetch',
+				__( 'Force data fetch', 'wpaust' ),
+				array( &$this, 'settings_js_forcedatafetch' ),
+				$wpau_stockticker->plugin_slug,
+				'wpaust_general'
+			);
 
 			// --- Register setting General so $_POST handling is done ---
 			register_setting(
@@ -424,8 +432,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				array( &$this, 'sanitize_options' )
 			);
 
-
 		} // END public static function register_settings()
+
+		public function settings_js_forcedatafetch() {
+			?>
+			<p class="description">After you update settings, you can force initial stock data fetching by click on button below. If you get too much minuses during fetch, try to increase Fetch Timeout option, save settings and fetch data again.</p>
+			<button name="st_force_data_fetch" class="button button-secondary">Fetch Stock Data Now!</button>
+			<pre class="st_force_data_fetch"></pre>
+			<?php
+		}
 
 		/**
 		 * Print description for General section

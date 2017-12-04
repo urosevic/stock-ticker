@@ -40,7 +40,7 @@ global $wpau_stockticker;
 				printf(
 				__( 'Since %1$s version %2$s source for all stock data used in plugin is provided by %3$s, displayed for informational and educational purposes only and should not be considered as investment advise. <br />Author of the plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.' ),
 				__( 'Stock Ticker', 'wpaust' ),
-				'0.3.0',
+				'3.0.0',
 				'<strong>Alpha Vantage</strong>'
 				);
 			?></p>

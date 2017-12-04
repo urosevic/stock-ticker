@@ -114,6 +114,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Register AJAX stock updater
 			add_action( 'wp_ajax_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
 			add_action( 'wp_ajax_nopriv_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
+			// Restart fetching loop by AJAX request
+			add_action( 'wp_ajax_stockticker_purge_cache', array( $this, 'ajax_restart_av_fetching' ) );
+			add_action( 'wp_ajax_nopriv_stockticker_purge_cache', array( $this, 'ajax_restart_av_fetching' ) );
 
 			if ( is_admin() ) {
 				// Initialize Plugin Settings Magic
@@ -135,7 +138,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Activate the plugin
 		 */
 		function activate() {
-			error_log(__FUNCTION__);
 			global $wpau_stockticker;
 			$wpau_stockticker->init_options();
 			$wpau_stockticker->maybe_update();
@@ -189,7 +191,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Check do we need to migrate options
 		 */
 		function maybe_update() {
-			error_log(__FUNCTION__);
 			// Bail if this plugin data doesn't need updating
 			if ( get_option( 'stockticker_db_ver', 0 ) >= self::DB_VER ) {
 				return;
@@ -272,6 +273,19 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					array(),
 					self::VER
 				);
+				wp_register_script(
+					'stock-ticker-admin',
+					$this->plugin_url . ( WP_DEBUG ? 'assets/js/jquery.admin.js' : 'assets/js/jquery.admin.min.js' ),
+					array( 'jquery' ),
+					self::VER,
+					true
+				);
+				wp_localize_script(
+					'stock-ticker-admin',
+					'stockTickerJs',
+					array( 'ajax_url' => admin_url( 'admin-ajax.php' ) )
+				);
+				wp_enqueue_script( 'stock-ticker-admin' );
 			}
 		} // END function admin_scripts()
 
@@ -356,6 +370,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			self::log( 'Stock Ticker: data fetching from first symbol has been restarted' );
 		} // END public static function restart_av_fetching() {
 
+		function ajax_restart_av_fetching() {
+			self::restart_av_fetching();
+			$result['status']  = 'success';
+			$result['message'] = 'OK';
+			$result = json_encode( $result );
+			echo $result;
+			wp_die();
+		} // END function ajax_restart_av_fetching() {
+
 		function ajax_stockticker_load() {
 			// @TODO Provide error message if any of params missing + add nonce check
 			if ( ! empty( $_POST['symbols'] ) ) {
@@ -395,7 +418,27 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 */
 		function ajax_stockticker_update_quotes() {
 			$response = $this->get_alphavantage_quotes();
-			echo $response;
+			$result['status']  = 'success';
+			$result['message'] = $response;
+
+			if ( strpos( $response, 'no need to fetch' ) !== false ) {
+				$result['done'] = true;
+				$result['message'] = 'DONE';
+			} else {
+				$result['done'] = false;
+				// If we have some plugin functionality fatal error
+				// (missing API key, no symbols, can't write to DB, etc)
+				// then throw error and signal stop fetching:
+				// * There is no defined All Stock Symbols
+				// * Failed to save stock data for {$symbol_to_fetch} to database!
+				// * AlphaVantage.co API key has not set
+				if ( strpos( $response, 'Stock Ticker Fatal Error:' ) !== false ) {
+					$result['done'] = true;
+				}
+			}
+			$result = json_encode( $result );
+
+			echo $result;
 			wp_die();
 		} // END function ajax_stockticker_update_quotes()
 
@@ -665,6 +708,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// glue together all the placeholders...
 			$format = implode( ',', $placeholders );
 			// put all in the query and prepare
+			/*
 			$stock_sql = $wpdb->prepare(
 				"
 				SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
@@ -676,6 +720,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// retrieve the results from database
 			$stock_data_a = $wpdb->get_results( $stock_sql, ARRAY_A );
+			/**/
+			$stock_data_a = $wpdb->get_results( $wpdb->prepare(
+				"
+				SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
+				FROM {$wpdb->prefix}stock_ticker_data
+				WHERE symbol IN ($format)
+				",
+				$symbols_arr
+			), ARRAY_A );
 
 			// If we don't have anything retrieved, just exit
 			if ( empty( $stock_data_a ) ) {
@@ -714,7 +767,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// If we don't have defined global symbols, exit
 			if ( empty( $symbols ) ) {
-				return 'We do not have any symbol to fetch data for.';
+				return 'Stock Ticker Fatal Error: There is no defined All Stock Symbols';
 			}
 
 			// Make array of global symbols
@@ -734,32 +787,37 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// If we have less than next symbol, then rewind to beginning
 				if ( count( $symbols_arr ) <= $current_symbol_index ) {
 					$current_symbol_index = 0;
+				} else {
+					$symbol_to_fetch = strtoupper( $symbols_arr[ $current_symbol_index ] );
 				}
-				$symbol_to_fetch = strtoupper( $symbols_arr[ $current_symbol_index ] );
 			}
-
+			/*
 			// If no symbol to fetch, exit
 			if ( empty( $symbol_to_fetch ) ) {
-				// After finished update, set last fetched symbol
-				update_option( 'stockticker_av_last', $symbol_to_fetch );
+				// Set last fetched symbol to none
+				update_option( 'stockticker_av_last', '' );
 				// and release processing for next run
 				self::unlock_fetch();
-				return 'No symbol to fetch!';
+				// then return message as a response
+				$msg = 'No symbols to fetch!';
+				return $msg;
 			}
+			*/
 
-			// If current_symbol_index is 0 and cache timeout not expired, do not attempt to fetch again
-			// but wait to timeout expire for next loop (UTC)
+			// If current_symbol_index is 0 and cache timeout has not expired,
+			// do not attempt to fetch again but wait to expire timeout for next loop (UTC)
 			if ( 0 == $current_symbol_index ) {
 				$current_timestamp = time();
 				$last_fetched_timestamp = get_option( 'stockticker_av_last_timestamp', $current_timestamp );
-				$target_timestamp = $current_timestamp - (int) $defaults['cache_timeout'];
-				if ( $last_fetched_timestamp > $target_timestamp ) {
+				$target_timestamp = $last_fetched_timestamp + (int) $defaults['cache_timeout'];
+				if ( $target_timestamp > $current_timestamp ) {
 					// If timestamp not expired, do not fetch but exit
 					self::unlock_fetch();
 					return 'Cache timeout has not expired, no need to fetch new loop at the moment.';
 				} else {
 					// If timestamp expired, set new value and proceed
 					update_option( 'stockticker_av_last_timestamp', $current_timestamp );
+					self::log( 'Set current timestamp when first symbol is fetched as a reference for next loop' );
 				}
 			}
 
@@ -768,9 +826,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// If we have not got array with stock data, exit w/o updating DB
 			if ( ! is_array( $stock_data ) ) {
-				self::log( "No proper data got from Alpha Vantage, but we got this: {$stock_data}" );
+				self::log( $stock_data );
+				// If we got some error for first symbol, revert last timestamp
+				if ( 0 == $current_symbol_index ) {
+					self::log( 'Failed fetching and crunching for first symbol, set back previous timestamp' );
+					update_option( 'stockticker_av_last_timestamp', $last_fetched_timestamp );
+				}
 				// Release processing for next run
 				self::unlock_fetch();
+				// Return response status
 				return $stock_data;
 			}
 
@@ -780,7 +844,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$table_name = $wpdb->prefix . 'stock_ticker_data';
 			// Check does symbol already exists in DB (to update or to insert new one)
 			// I'm not using here $wpdb->replace() as I wish to avoid reinserting row to table which change primary key (delete row, insert new row)
-			$symbol_exists = $wpdb->get_var( "SELECT symbol FROM $table_name WHERE symbol='$symbol_to_fetch'" );
+			$symbol_exists = $wpdb->get_var( $wpdb->prepare(
+				"
+					SELECT symbol 
+					FROM {$wpdb->prefix}stock_ticker_data
+					WHERE symbol = %s
+				",
+				$symbol_to_fetch
+			) );
 			if ( ! empty( $symbol_exists ) ) {
 				// UPDATE
 				$ret = $wpdb->update(
@@ -863,19 +934,26 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				);
 			}
 
-			// Is successfully updated data in DB?
-			if ( false !== $ret ) {
-				self::log( "Stock data for {$symbol_to_fetch} has been updated in database." );
-				// After success update in database, set last fetched symbol
-				update_option( 'stockticker_av_last', $symbol_to_fetch );
-			} else {
-				self::log( "Error: Failed to save stock data for {$symbol_to_fetch} to database!" );
+			// Is failed updated data in DB
+			if ( false === $ret ) {
+				$msg = "Stock Ticker Fatal Error: Failed to save stock data for {$symbol_to_fetch} to database!";
+				self::log( $msg );
+				// Release processing for next run
+				self::unlock_fetch();
+				// Return failed status
+				return $msg;
 			}
 
+			// After success update in database, report in log
+			$msg = "Stock data for symbol {$symbol_to_fetch} has been updated in database.";
+			self::log( $msg );
+			// Set last fetched symbol
+			update_option( 'stockticker_av_last', $symbol_to_fetch );
 			// Release processing for next run
 			self::unlock_fetch();
+			// Return succes status
+			return $msg;
 
-			return 'OK';
 		} // END function get_alphavantage_quotes( $symbols )
 
 		function fetch_alphavantage_feed( $symbol ) {
@@ -887,8 +965,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// Exit if we don't have API Key
 			if ( empty( $defaults['avapikey'] ) ) {
-				self::log( 'Stock Ticker can not fetch stock data from AlphaVantage.co because you don`t have set API Key!' );
-				return false;
+				return 'Stock Ticker Fatal Error: AlphaVantage.co API key has not set';
 			}
 
 			// Define AplhaVantage API URL
@@ -908,18 +985,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// If we have WP error log it and return none
 			if ( is_wp_error( $response ) ) {
-				$error_msg = 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message();
-				self::log( $error_msg );
-				return $error_msg;
+				return 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message();
 			} else {
 				// Get response from AV and parse it - look for error
 				$json = wp_remote_retrieve_body( $response );
 				$response_arr = json_decode( $json, true );
 				// If we got some error from AV, log to self::log and return none
 				if ( ! empty( $response_arr['Error Message'] ) ) {
-					$error_msg = 'Stock Ticker connected to AlphaVantage but got error: ' . $response_arr['Error Message'];
-					self::log( $error_msg );
-					return $error_msg;
+					return 'Stock Ticker connected to AlphaVantage.co but got error: ' . $response_arr['Error Message'];
 				} else {
 					// Crunch data from AlphaVantage for symbol and prepare compact array
 					self::log( "We got data from AlphaVantage for $symbol, so now let we crunch them and save to database..." );
@@ -933,8 +1006,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					// Get prices
 					$i = 0;
 
-					foreach ( $response_arr['Time Series (Daily)'] as $key => $val ) { // TIME_SERIES_DAILY
 					// foreach ( $response_arr['Time Series (5min)'] as $key => $val ) { // TIME_SERIES_INTRADAY
+					foreach ( $response_arr['Time Series (Daily)'] as $key => $val ) { // TIME_SERIES_DAILY
 						switch ( $i ) {
 							case 0:
 								$last_trade_date = $key;
@@ -1059,9 +1132,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			return;
 		}
 		public static function log( $str ) {
-			$log_file = trailingslashit( WP_CONTENT_DIR ) . 'stockticker.log';
-			$date = date( 'c' );
-			error_log( "{$date}: {$str}\n", 3, $log_file );
+			// Only if WP_DEBUG is enabled
+			if ( defined('WP_DEBUG') && true === WP_DEBUG) {
+				$log_file = trailingslashit( WP_CONTENT_DIR ) . 'stockticker.log';
+				$date = date( 'c' );
+				error_log( "{$date}: {$str}\n", 3, $log_file );
+			}
 		}
 	} // END class Wpau_Stock_Ticker
 

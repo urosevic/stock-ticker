@@ -45,7 +45,7 @@ function au_stockticker_update() {
 
 
 /**
- * Migrate pre-0.3.0 to 0.3.0 version
+ * Migrate pre-3.0.0 to 3.0.0 version
  */
 function au_stockticker_update_routine_1() {
 
@@ -79,7 +79,7 @@ function au_stockticker_update_routine_1() {
 		delete_option( 'st_quote_plus' );
 	}
 
-	// Add 0.3.0 options
+	// Add 3.0.0 options
 	if ( empty( $defaults['avapikey'] ) ) {
 		$defaults['avapikey'] = '';
 	}

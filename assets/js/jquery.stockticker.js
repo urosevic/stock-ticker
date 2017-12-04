@@ -48,13 +48,13 @@ jQuery(document).ready(function() {
 		jQuery.ajax({
 			type: 'post',
 			dataType: 'json',
+			async: true,
 			url: stockTickerJs.ajax_url,
 			data: {
 				'action': 'stockticker_update_quotes'
-			},
-			success: function(response) {
-				console.log( 'Stock Ticker update quotes response: ' + response );
 			}
+		}).done(function(response){
+			console.log( 'Stock Ticker update quotes response: ' + response.message );
 		});
 	}, 2000);
 

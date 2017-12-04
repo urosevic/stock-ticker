@@ -165,9 +165,13 @@ All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displa
 Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.
 
 == Changelog ==
+
 = 3.0.1 (20171204) =
 * Fix: Plugin table has not created for fresh installations
-
+* Fix: Stuck fetching data from AlphaVantage.co after first symbol fetch fail
+* Add: Force fetching data from settings page
+* Add: Fill stockticker.log only if WP_DEBUG is enabled
+* Change: Log and AJAX messages wording
 
 = 3.0.0 (20171203) =
 * Release working version of plugin
