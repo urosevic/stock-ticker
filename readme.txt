@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
 Tested up to: 4.9.1
-Stable tag: 3.0.0
+Stable tag: 3.0.1
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -39,8 +39,9 @@ Use simple shortcode `[stock_ticker]` without any parameter in post or page, to 
 
 * `symbols` - string with single or comma separated array of stock symbols
 * `show` - string that define how will company be represent on ticker; can be `name` for Company Name, or `symbol` for Stock Symbol
+* `number_format` - override default number format for values (default from this settings page used if no custom set by shortcode). Valid options are: `cd` for *0.000,00*; `dc` for *0,000.00*; `sd` for *0 000.00* and `sc` for *0 000,00*
+* `decimals` - override default number of decimal places for values (default from this settings page used if no custom set by shortcode). Valid values are: `1`, `2`, `3` and `4`
 * `static` - (boolean) to enable static unordered list instead scroling ticker set to `1` or `true`
-* `nolink` - (boolean) to disable links for single quotes set to `1` or `true`
 * `prefill` - (boolean) to start with pre-filled instead empty ticker set to `1` or `true`
 * `duplicate` - (boolean) if there is less items than visible on the ticker, set this to `1` or `true` to make it continuous
 * `speed` - (integer) tune speed of StockTicker block rendered by shortcode
@@ -52,8 +53,6 @@ Use simple shortcode `[stock_ticker]` without any parameter in post or page, to 
 `[stock_ticker symbols="BABA,.DJI,EURGBP=X,LON:FFX" show="symbol"]`
 * Static unordered list
 `[stock_ticker symbols="BABA,.DJI,EURGBP=X,LON:FFX" show="symbol" static="1"]`
-* Scrolling ticker w/o linked quotes
-`[stock_ticker symbols="BABA,.DJI,EURGBP=X,LON:FFX" show="symbol" nolink="1"]`
 
 = Supported Stock Exchange Markets =
 
@@ -98,25 +97,11 @@ Easy install Stock Ticker as any other ordinary WordPress plugin
 1. Enable `Auto Refresh` option because on first load if we do not have data downloaded from AlphaVantage.co they will be loaded through AJAX after a while.
 1. Insert shortcode `[stock_ticker]` to page or post, or `Stock Ticker` Widget to preferred Widget Area.
 
-= To install ALPHA version of the plugin =
-
-1. Download package from https://github.com/urosevic/stock-ticker/tree/alphavantage
-1. Extract ZIP archive to your local computer and rename directory from `stock-ticker-alphavantage` to `stock-ticker`
-1. Upload directory `stock-ticker` from your local computer to your WordPress website to `wp-content/plugins/`
-1. Login to WordPress Dashboard and go to `Plugins` -> `Installed Plugins` page
-1. Click `Activate` link for Stock Ticker plugin.
-1. Get a free API Key from [AlphaVantage.co](https://www.alphavantage.co/support/#api-key)
-1. In WordPress Dashboard go to `Settings` -> `Stock Ticker`
-1. Enter in field `AlphaVantage.co API Key` Alpha Vantage API Key you got in previous step (check [this screenshot](https://goo.gl/3PKxLM))
-1. In field `All Stock Symbols` enter all stock symbols you’ll use on website, separated by comma. This field is used to fetch stock data from AlphaVantage.co API by AJAX in background. Because AV have only API to get data for single symbol, that can take a while to get. Please note, for default symbols we still have field in Default Settings section of plugin.
-1. Enable `Auto Refresh` option because on first load if we do not have data downloaded from AV.co they will be loaded through AJAX after a while.
-
 == Screenshots ==
 
 1. Global plugin settings page
 2. Widget settings
 3. Stock ticker in action
-4. Live widget preview
 
 == Frequently Asked Questions ==
 
@@ -180,6 +165,10 @@ All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displa
 Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.
 
 == Changelog ==
+= 3.0.1 (20171204) =
+* Fix: Plugin table has not created for fresh installations
+
+
 = 3.0.0 (20171203) =
 * Release working version of plugin
 

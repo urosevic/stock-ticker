@@ -10,14 +10,15 @@
  */
 
 function au_stockticker_update() {
+	error_log(__FUNCTION__);
 	// no PHP timeout for running updates
 	set_time_limit( 0 );
 
 	// this is the current database schema version number
-	$current_db_ver = get_option( 'stockticker_db_ver', 0 );
+	$current_db_ver = (int) get_option( 'stockticker_db_ver', 0 );
 
 	// this is the target version that we need to reach
-	$target_db_ver = Wpau_Stock_Ticker::DB_VER;
+	$target_db_ver = (int) Wpau_Stock_Ticker::DB_VER;
 
 	// run update routines one by one until the current version number
 	// reaches the target version number
@@ -149,3 +150,12 @@ function au_stockticker_update_routine_4() {
 	delete_option( 'stockticker_av_latest' );
 	delete_option( 'stockticker_av_latest_timestamp' );
 } // END function au_stockticker_update_routine_4()
+
+function au_stockticker_update_routine_5() {
+	// If fetch timeout is shorted than 4 seconds, increase timeout to 4 seconds
+	$defaults = get_option( 'stockticker_defaults' );
+	if ( (int) $defaults['timeout'] < 4 ) {
+		$defaults['timeout'] = 4;
+		update_option( 'stockticker_defaults', $defaults );
+	}
+} // END function au_stockticker_update_routine_5()

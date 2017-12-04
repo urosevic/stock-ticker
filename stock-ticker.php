@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 3.0.0
+Version: 3.0.1
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -49,8 +49,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	 */
 	class Wpau_Stock_Ticker {
 
-		const DB_VER = 4;
-		const VER = '3.0.0';
+		const DB_VER = 5;
+		const VER = '3.0.1';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -135,6 +135,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Activate the plugin
 		 */
 		function activate() {
+			error_log(__FUNCTION__);
 			global $wpau_stockticker;
 			$wpau_stockticker->init_options();
 			$wpau_stockticker->maybe_update();
@@ -165,7 +166,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'error_message'   => 'Unfortunately, we could not get stock quotes this time.',
 				'legend'          => "AAPL;Apple Inc.\nFB;Facebook, Inc.\nCSCO;Cisco Systems, Inc.\nGOOG;Google Inc.\nINTC;Intel Corporation\nLNKD;LinkedIn Corporation\nMSFT;Microsoft Corporation\nTWTR;Twitter, Inc.\nBABA;Alibaba Group Holding Limited\nIBM;International Business Machines Corporationn\n.DJI;Dow Jones Industrial Average\nEURGBP;Euro (€) ⇨ British Pound Sterling (£)",
 				'style'           => 'font-family:"Open Sans",Helvetica,Arial,sans-serif;font-weight:normal;font-size:14px;',
-				'timeout'         => 2,
+				'timeout'         => 4,
 				'refresh'         => false,
 				'refresh_timeout' => 5 * MINUTE_IN_SECONDS,
 				'speed'           => 50,
@@ -176,8 +177,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'decimals'        => 2,
 			);
 
-			add_option( 'stockticker_version', self::VER, '', 'no' );
-			add_option( 'stockticker_db_ver', self::DB_VER, '', 'no' );
+			// add_option( 'stockticker_version', self::VER, '', 'no' );
+			// add_option( 'stockticker_db_ver', self::DB_VER, '', 'no' );
 			add_option( $this->plugin_option, $init, '', 'no' );
 
 			return $init;
@@ -188,8 +189,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Check do we need to migrate options
 		 */
 		function maybe_update() {
+			error_log(__FUNCTION__);
 			// Bail if this plugin data doesn't need updating
-			if ( get_option( 'stockticker_db_ver' ) >= self::DB_VER ) {
+			if ( get_option( 'stockticker_db_ver', 0 ) >= self::DB_VER ) {
 				return;
 			}
 			require_once( dirname( __FILE__ ) . '/update.php' );
@@ -906,16 +908,18 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// If we have WP error log it and return none
 			if ( is_wp_error( $response ) ) {
-				self::log( 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message() );
-				return 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message();
+				$error_msg = 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message();
+				self::log( $error_msg );
+				return $error_msg;
 			} else {
 				// Get response from AV and parse it - look for error
 				$json = wp_remote_retrieve_body( $response );
 				$response_arr = json_decode( $json, true );
 				// If we got some error from AV, log to self::log and return none
 				if ( ! empty( $response_arr['Error Message'] ) ) {
-					self::log( 'Stock Ticker connected to AlphaVantage but got error: ' . $response_arr['Error Message'] );
-					return 'Stock Ticker connected to AlphaVantage but got error: ' . $response_arr['Error Message'];
+					$error_msg = 'Stock Ticker connected to AlphaVantage but got error: ' . $response_arr['Error Message'];
+					self::log( $error_msg );
+					return $error_msg;
 				} else {
 					// Crunch data from AlphaVantage for symbol and prepare compact array
 					self::log( "We got data from AlphaVantage for $symbol, so now let we crunch them and save to database..." );
