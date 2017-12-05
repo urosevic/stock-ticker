@@ -10,7 +10,7 @@
  */
 
 function au_stockticker_update() {
-	error_log(__FUNCTION__);
+
 	// no PHP timeout for running updates
 	set_time_limit( 0 );
 
