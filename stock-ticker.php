@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 3.0.1
+Version: 3.0.2
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -50,7 +50,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 5;
-		const VER = '3.0.1';
+		const VER = '3.0.2';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -97,6 +97,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			register_activation_hook( __FILE__, array( $this, 'activate' ) );
 			register_deactivation_hook( __FILE__, array( $this, 'deactivate' ) );
 
+			// Throw message on multisite
+			if ( is_multisite() ) {
+				add_action( 'admin_notices', array( $this, 'multisite_notice' ) );
+				return;
+			}
+
 			// Maybe update trigger.
 			add_action( 'plugins_loaded', array( $this, 'maybe_update' ) );
 
@@ -135,9 +141,32 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		} // END public function __construct()
 
 		/**
+		 * Throw notice that plugin does not work on Multisite
+		 */
+		function multisite_notice() {
+			$class = 'notice notice-error';
+			$message = sprintf(
+				__( 'We are sorry, %1$s v%2$s does not support Multisite WordPress.', 'wpaust' ),
+				$this->plugin_name,
+				self::VER
+			);
+			printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) ); 
+		}
+
+		/**
 		 * Activate the plugin
 		 */
 		function activate() {
+			// Auto disable on WPMU
+			if ( is_multisite() ) {
+				deactivate_plugins( plugin_basename( __FILE__ ) );
+				wp_die( sprintf(
+					__( 'We are sorry, %1$s v%2$s does not support Multisite WordPress.', 'wpaust' ),
+					$this->plugin_name,
+					self::VER
+				) );
+			}
+			// Single WP activation process
 			global $wpau_stockticker;
 			$wpau_stockticker->init_options();
 			$wpau_stockticker->maybe_update();

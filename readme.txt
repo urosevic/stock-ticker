@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
 Tested up to: 4.9.1
-Stable tag: 3.0.1
+Stable tag: 3.0.2
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -13,6 +13,8 @@ Easy add customizable moving or static ticker tapes with stock information for c
 == Description ==
 
 A simple and easy configurable plugin that allows you to insert stock ticker with stock price information (data provided by AlphaVantage.co). Insertion is enabled by shortcode or multi instance widget.
+
+**Multisite WordPress is not supported jet**
 
 = Features =
 * Set global set of symbols you'll use site-wide
@@ -23,7 +25,7 @@ A simple and easy configurable plugin that allows you to insert stock ticker wit
 * Define custom names for companies to be used instead of the symbols
 * Define custom elements as a part of visible value
 
-Since version 0.1.5 you can set custom template for visible change value. Default format is `%company% %price% %change% %changep%`. As a macro keywords you can use:
+You can set custom template for visible change value. Default format is `%company% %price% %change% %changep%`. As a macro keywords you can use:
 
 * `%exch_symbol%` - Symbol with exchange, like *NASDAQ:AAPL*
 * `%symbol%` - Company symbol, like *AAPL*
@@ -85,16 +87,16 @@ Alpha Vantage provide stock data for following stock exchange markets:
 
 == Installation ==
 
-Easy install Stock Ticker as any other ordinary WordPress plugin
+To install Stock Ticker and make initial setting to work, please follow instructions below
 
 1. Go to `Plugins` -> `Add New`
 1. Search for `Stock Ticker` plugin
 1. Install and activate `Stock Ticker`
 1. Get a free API Key from [AlphaVantage.co](https://www.alphavantage.co/support/#api-key)
 1. In WordPress Dashboard go to `Settings` -> `Stock Ticker`
-1. Enter in field `AlphaVantage.co API Key` Alpha Vantage API Key you got in previous step (check [this screenshot](https://goo.gl/3PKxLM))
-1. In field `All Stock Symbols` enter all stock symbols you’ll use on website, separated by comma. This field is used to fetch stock data from AlphaVantage.co API by AJAX in background. Because AV have only API to get data for single symbol, that can take a while to get. Please note, for default symbols we still have field in Default Settings section of plugin.
-1. Enable `Auto Refresh` option because on first load if we do not have data downloaded from AlphaVantage.co they will be loaded through AJAX after a while.
+1. Enter to field `AlphaVantage.co API Key` Alpha Vantage API Key you received in previous step (check [this screenshot](https://goo.gl/3PKxLM))
+1. Enter to field `All Stock Symbols` all stock symbols you’ll use on whole website in various widgets and shortcodes, separated by comma. This field is used to fetch stock data from AlphaVantage.co API by AJAX in background. Because AV have only API to get data for single symbol, that can take a while to get. Please note, for default shortcode symbols there is still have field in Default Settings section of plugin.
+1. Save settings and click button `Fetch Stock Data Now!` to initially fetch stock data to database and wait for a while until we get all symbols from AlphaVantage.co for the very first time.
 1. Insert shortcode `[stock_ticker]` to page or post, or `Stock Ticker` Widget to preferred Widget Area.
 
 == Screenshots ==
@@ -102,6 +104,10 @@ Easy install Stock Ticker as any other ordinary WordPress plugin
 1. Global plugin settings page
 2. Widget settings
 3. Stock ticker in action
+
+== Hall of Fame ==
+
+A big **thank you** goes to @flexer, @khunmax, @k2_1971 and @vijaleshk who do tests with alpha versions of plugin until we finally released v3.0.0. And also important to mention @eigood who pointed me to AlphaVantage.co as a replacement for Google Finance.
 
 == Frequently Asked Questions ==
 
@@ -165,6 +171,10 @@ All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displa
 Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.
 
 == Changelog ==
+
+= 3.0.2 (20171205) =
+* Add: Notice about not supported multisite
+* Add: Activation routine to check and deactivate plugin on multisite as not supported at the moment
 
 = 3.0.1 (20171204) =
 * Fix: Plugin table has not created for fresh installations
@@ -412,6 +422,9 @@ Author of the **Stock Ticker** plugin does not accept liability or responsibilit
 * developed JavaScript code for parsing stock data
 
 == Upgrade Notice ==
+
+= 3.0.0 =
+Switch to AlphaVantage.co free API for stock data.
 
 = 0.1.2 =
 Because we changed default options to single wp_options entry, after upgrade old defaults should be transformed to single entry. You can set custom names on settings page.
