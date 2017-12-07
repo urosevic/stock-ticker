@@ -438,7 +438,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			?>
 			<p class="description">After you update settings, you can force initial stock data fetching by click on button below. If you get too much minuses during fetch, try to increase Fetch Timeout option, save settings and fetch data again.</p>
 			<button name="st_force_data_fetch" class="button button-secondary">Fetch Stock Data Now!</button>
-			<pre class="st_force_data_fetch"></pre>
+			<div class="st_force_data_fetch"></div>
 			<?php
 		}
 
@@ -493,7 +493,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		 */
 		public function settings_field_input_password( $args ) {
 			printf(
-				'<input type="text" name="%s" id="%s" value="%s" class="%s" /><p class="description">%s</p>',
+				'<input type="password" name="%s" id="%s" value="%s" class="%s" /><p class="description">%s</p>',
 				esc_attr( $args['field'] ),
 				esc_attr( $args['field'] ),
 				esc_attr( $args['value'] ),
@@ -617,9 +617,16 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						$value = preg_replace( '/[^0-9A-Z]+/', '', $value );
 						break;
 					case 'symbols':
+						// Always uppercase
+						$value = self::sanitize_symbols( $value );
+						$value = self::alpha_symbols( $value, 'symbols' );
+						break;
 					case 'all_symbols':
 						// Always uppercase
-						$value = strtoupper( strip_tags( stripslashes( $value ) ) );
+						$value = self::sanitize_symbols( $value );
+						$value = self::alpha_symbols( $value, 'all_symbols' );
+						// Add error if there is not supported exchanges
+						// add_settings_error( 'all_symbols', 'all_symbols', 'You have unsupported exchange markets in All Symbols. Please remove them!', 'error' );
 						break;
 					case 'legend':
 					case 'loading_message':
@@ -760,6 +767,63 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Render the settings template.
 			include( sprintf( '%s/../templates/settings.php', dirname( __FILE__ ) ) );
 		} // END public function plugin_settings_page()
+
+		/**
+		 * Allow only numbers, alphabet, comma, dot, semicolon, equal and carret
+		 * @param  string $symbols Unfiltered value of stock symbols
+		 * @return string          Sanitized value of stock symbols
+		 */
+		private function sanitize_symbols( $symbols ) {
+			$symbols = preg_replace( '/[^0-9A-Z\=\.\,\:\^]+/', '', strtoupper( $symbols ) );
+			return $symbols;
+		} // END private function sanitize_symbols( $symbols )
+
+		/**
+		 * Strip unsupported stock symbols and throw message with list of removed symbols
+		 * @param  string $symbols All stock symbols
+		 * @param  string $control Name of field where symbols goes
+		 * @return string          Only symbols supported by AlphaVantage.co
+		 */
+		private function alpha_symbols( $symbols, $control ) {
+			$symbols_supported = array();
+			$symbols_removed = array();
+			$symbols_arr = explode( ',', $symbols );
+			// Remove unsupported stock exchanges from global array to prevent API errors
+			foreach ( $symbols_arr as $symbol_pos => $symbol_to_check ) {
+				// If there is semicolon, it's symbol with exchange
+				if ( strpos( $symbol_to_check, ':' ) ) {
+					// Explode symbol so we can get exchange code
+					$symbol_exchange = explode( ':', $symbol_to_check );
+					// If exchange code is supported, add symbol to query array
+					if ( ! empty( Wpau_Stock_Ticker::$exchanges[ strtoupper( trim( $symbol_exchange[0] ) ) ] ) ) {
+						$symbols_supported[] = $symbol_to_check;
+					} else {
+						$symbols_removed[] = $symbol_to_check;
+					}
+				} else {
+					// Add symbol w/o exchange to query array
+					$symbols_supported[] = $symbol_to_check;
+				}
+			}
+			// Set back supported symbols
+			$symbols = join( ',', $symbols_supported );
+			// If we have removed symbols, add settings error message
+			if ( ! empty( $symbols_removed ) ) {
+				$symbols_removed_str = join( ', ', $symbols_removed );
+				$opt_name = 'all_symbols' == $control ? 'All Stock Symbols' : 'Stock Symbols';
+				add_settings_error(
+					$control,
+					$control,
+					sprintf(
+						'Field %1$s had symbols from unsupported exchange markets, so we removed them: %2$s',
+						$opt_name,
+						$symbols_removed_str
+					),
+					'updated'
+				);
+			}
+			return $symbols;
+		} // END private function alpha_symbols( $symbols, $control )
 
 	} // END class Wpau_Stock_Ticker_Settings
 } // END if(!class_exists( 'Wpau_Stock_Ticker_Settings' ))

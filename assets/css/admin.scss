@@ -4,7 +4,16 @@
 
         .content_cell {
             display: table-cell;
-
+            .st_force_data_fetch {
+                &:empty {
+                    display: none;
+                }
+                background: #23282d;
+                color: #ccc;
+                margin-top: 10px;
+                padding: 5px;
+                font-family: monospace;
+            }
         }
 
         .sidebar_container {
