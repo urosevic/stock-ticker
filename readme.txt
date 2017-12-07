@@ -5,6 +5,7 @@ Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, ba
 Requires at least: 4.0.0
 Tested up to: 4.9.1
 Stable tag: 3.0.2
+Requires PHP: 5.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -107,7 +108,7 @@ To install Stock Ticker and make initial setting to work, please follow instruct
 
 == Hall of Fame ==
 
-A big **thank you** goes to @flexer, @khunmax, @k2_1971 and @vijaleshk who do tests with alpha versions of plugin until we finally released v3.0.0. And also important to mention @eigood who pointed me to AlphaVantage.co as a replacement for Google Finance.
+A big **thank you** goes to [@flexer](https://wordpress.org/support/users/flexer/), [@khunmax](https://wordpress.org/support/users/khunmax/), [@k2_1971](https://wordpress.org/support/users/k2_1971/) and [@vijaleshk](https://wordpress.org/support/users/vijaleshk/) who do tests with alpha versions of plugin until we finally released v3.0.0. And also important to mention [@eigood](https://wordpress.org/support/users/eigood/) who pointed me to AlphaVantage.co as a replacement for Google Finance.
 
 == Frequently Asked Questions ==
 
@@ -173,6 +174,7 @@ Author of the **Stock Ticker** plugin does not accept liability or responsibilit
 == Changelog ==
 
 = 3.0.2 (20171205) =
+* Readme: add required PHP version and link profiles in Hall of Fame
 * Add: Notice about not supported multisite
 * Add: Activation routine to check and deactivate plugin on multisite as not supported at the moment
 
