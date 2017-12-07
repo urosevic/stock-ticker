@@ -807,14 +807,18 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			foreach ( $symbols_arr as $symbol_pos => $symbol_to_check ) {
 				// If there is semicolon, it's symbol with exchange
 				if ( strpos( $symbol_to_check, ':' ) ) {
+					// Explode symbol so we can get exchange code
 					$symbol_exchange = explode( ':', $symbol_to_check );
-					if ( in_array( strtoupper( trim( $symbol_exchange[0] ) ), $this->exchanges ) ) {
+					// If exchange code is supported, add symbol to query array
+					if ( ! empty( self::$exchanges[ strtoupper( trim( $symbol_exchange[0] ) ) ] ) ) {
 						$symbols_supported[] = $symbol_to_check;
 					}
 				} else {
+					// Add symbol w/o exchange to query array
 					$symbols_supported[] = $symbol_to_check;
 				}
 			}
+			// Set back query array to $symbols_arr
 			$symbols_arr = $symbols_supported;
 
 			// Default symbol to fetch first (first form array)
