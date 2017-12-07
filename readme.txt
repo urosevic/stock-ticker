@@ -172,6 +172,11 @@ All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displa
 Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.
 
 == Changelog ==
+= 3.0.3 (20171207) =
+* Add: Routine to stripe unsupported stock exchanges from all symbols when doing fetch from AlphaVantage.co to prevent API errors
+* Add: Routine to strip symbols from unsupported stock markets from `All Stock Symbols` and `Stock Symbols` and display message about removed symbols on settings update
+* Improve: sanitization for stock symbols on settings update
+* Change: API Key input type set to password
 
 = 3.0.2 (20171205) =
 * Readme: add required PHP version and link profiles in Hall of Fame
