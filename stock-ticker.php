@@ -156,12 +156,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$missing_option = array();
 
 			// If no AlphaVantage API Key, display admin notice
-			if ( ! empty( $this->defaults['avapikey'] ) ) {
+			if ( empty( $this->defaults['avapikey'] ) ) {
 				$missing_option[] = __( 'AlphaVantage.co API Key', 'wpaust' );
 			}
 
 			// If no all symbls, display admin notice
-			if ( ! empty( $this->defaults['all_symbols'] ) ) {
+			if ( empty( $this->defaults['all_symbols'] ) ) {
 				$missing_option[] = __( 'All Stock Symbols', 'wpaust' );
 			}
 
@@ -178,7 +178,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					$missing_options
 				);
 				printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), $message );
-				// printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 			}
 
 		} // END function admin_notice()
