@@ -159,3 +159,51 @@ function au_stockticker_update_routine_5() {
 		update_option( 'stockticker_defaults', $defaults );
 	}
 } // END function au_stockticker_update_routine_5()
+
+function au_stockticker_update_routine_6() {
+	// Fix issue with skipped upgrades for DB VER from 1 to 4
+
+	// remove legacy settings if they remain
+	if ( $old_option = get_option( 'stock_ticker_defaults' ) ) {
+		if ( false !== $old_option ) {
+			delete_option( 'stock_ticker_defaults' );
+		}
+	}
+
+	// create stockticker table if missing
+	global $wpdb;
+	$table_name = $table_name = $wpdb->prefix . 'stock_ticker_data';
+	if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) != $table_name ) {
+		//table not in database. Create new table
+		$charset_collate = $wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE $table_name (
+			`id` INT(10) NOT NULL AUTO_INCREMENT,
+			`symbol` varchar(20) NOT NULL,
+			`raw` text NOT NULL,
+			`last_refreshed` datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+			`tz` varchar(20) NOT NULL,
+			`last_open` decimal(13,4) NOT NULL,
+			`last_high` decimal(13,4) NOT NULL,
+			`last_low` decimal(13,4) NOT NULL,
+			`last_close` decimal(13,4) NOT NULL,
+			`last_volume` int NOT NULL,
+			`change` decimal(13,4) NOT NULL,
+			`changep` decimal(13,4) NOT NULL,
+			`range` varchar(60) DEFAULT '' NOT NULL,
+			PRIMARY KEY  (`id`),
+			UNIQUE `symbol` (`symbol`)
+		) $charset_collate;";
+
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		dbDelta( $sql );
+	}
+
+	// Remove legacy transients
+	au_stockticker_update_routine_3()
+
+	// Delete temporary options used in alpha's
+	delete_option( 'stockticker_av_latest' );
+	delete_option( 'stockticker_av_latest_timestamp' );
+
+} // END function au_stockticker_update_routine_6()
