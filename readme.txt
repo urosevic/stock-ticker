@@ -90,6 +90,8 @@ Alpha Vantage provide stock data for following stock exchange markets:
 
 To install Stock Ticker and make initial setting to work, please follow instructions below
 
+https://youtu.be/_tSQ5-ODVfs
+
 1. Go to `Plugins` -> `Add New`
 1. Search for `Stock Ticker` plugin
 1. Install and activate `Stock Ticker`
