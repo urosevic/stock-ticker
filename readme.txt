@@ -174,6 +174,7 @@ Author of the **Stock Ticker** plugin does not accept liability or responsibilit
 == Changelog ==
 = 3.0.3 (20171211) =
 * Fix: Users of 0.2.99-alpha could have uncreated stock ticker table in database because of broken upgrade script in alpha versions
+* Add: Admin notification for AlphaVantage.co API Key and All Stock Symbols
 * (20171207) Add: Routine to stripe unsupported stock exchanges from all symbols when doing fetch from AlphaVantage.co to prevent API errors
 * Add: Routine to strip symbols from unsupported stock markets from `All Stock Symbols` and `Stock Symbols` and display message about removed symbols on settings update
 * Improve: sanitization for stock symbols on settings update

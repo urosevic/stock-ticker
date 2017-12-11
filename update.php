@@ -200,7 +200,7 @@ function au_stockticker_update_routine_6() {
 	}
 
 	// Remove legacy transients
-	au_stockticker_update_routine_3()
+	au_stockticker_update_routine_3();
 
 	// Delete temporary options used in alpha's
 	delete_option( 'stockticker_av_latest' );

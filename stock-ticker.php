@@ -26,10 +26,6 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/*
- * @TODO:
- * * add admin notification for AlphaVantage.co API Key and default symbols
- */
 
 // Exit if accessed directly
 if ( ! defined( 'ABSPATH' ) ) {
@@ -127,6 +123,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			if ( is_admin() ) {
 				// Initialize Plugin Settings Magic
 				add_action( 'init', array( $this, 'admin_init' ) );
+				// Maybe display admin notices?
+				add_action( 'admin_notices', array( $this, 'admin_notice' ) );
 			} else {
 				// Enqueue frontend scripts.
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -150,8 +148,40 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$this->plugin_name,
 				self::VER
 			);
-			printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) ); 
+			printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 		}
+
+		function admin_notice() {
+
+			$missing_option = array();
+
+			// If no AlphaVantage API Key, display admin notice
+			if ( ! empty( $this->defaults['avapikey'] ) ) {
+				$missing_option[] = __( 'AlphaVantage.co API Key', 'wpaust' );
+			}
+
+			// If no all symbls, display admin notice
+			if ( ! empty( $this->defaults['all_symbols'] ) ) {
+				$missing_option[] = __( 'All Stock Symbols', 'wpaust' );
+			}
+
+			if ( ! empty( $missing_option ) ) {
+				$class = 'notice notice-error';
+				$missing_options = '<ul><li>' . join( '</li><li>', $missing_option ) . '</li></ul>';
+				$settings_title = __( 'Settings' );
+				$settings_link = "<a href=\"options-general.php?page={$this->plugin_slug}\">{$settings_title}</a>";
+				$message = sprintf(
+					__( 'Plugin %1$s v%2$s require that you have defined options listed below to work properly. Please visit plugin %3$s page and read description for those options. %4$s', 'wpaust' ),
+					"<strong>{$this->plugin_name}</strong>",
+					self::VER,
+					$settings_link,
+					$missing_options
+				);
+				printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), $message );
+				// printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
+			}
+
+		} // END function admin_notice()
 
 		/**
 		 * Activate the plugin
@@ -1181,7 +1211,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		}
 		public static function log( $str ) {
 			// Only if WP_DEBUG is enabled
-			if ( defined('WP_DEBUG') && true === WP_DEBUG) {
+			if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG ) {
 				$log_file = trailingslashit( WP_CONTENT_DIR ) . 'stockticker.log';
 				$date = date( 'c' );
 				error_log( "{$date}: {$str}\n", 3, $log_file );
