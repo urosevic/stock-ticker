@@ -4,6 +4,13 @@
 
         .content_cell {
             display: table-cell;
+
+            button[name="st_force_data_fetch_stop"] {
+                display: none;
+                &.enabled {
+                    display: initial;
+                }
+            }
             .st_force_data_fetch {
                 &:empty {
                     display: none;

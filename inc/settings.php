@@ -436,8 +436,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 
 		public function settings_js_forcedatafetch() {
 			?>
-			<p class="description">After you update settings, you can force initial stock data fetching by click on button below. If you get too much minuses during fetch, try to increase Fetch Timeout option, save settings and fetch data again.</p>
-			<button name="st_force_data_fetch" class="button button-secondary">Fetch Stock Data Now!</button>
+			<p class="description">After you update settings, you can force initial stock data fetching by click on button below.<br />
+			If you get too much <code>[Timeout]</code> statuses during fetch, try to increase Fetch Timeout option, save settings and fetch data again.<br />
+			If you get any <code>[Invalid API call]</code> for same symbol multiple times, then AlphaVantage.co does not have that symbol in TIME_SERIES_DAILY (you should remove faulty symbol from <strong>All Stock Symbols</strong>).</p>
+			<button name="st_force_data_fetch" class="button button-primary">Fetch Stock Data Now!</button> <button name="st_force_data_fetch_stop" class="button button-secondary">Stop Fetch</button>
 			<div class="st_force_data_fetch"></div>
 			<?php
 		}

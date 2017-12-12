@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
 Tested up to: 4.9.1
-Stable tag: 3.0.3
+Stable tag: 3.0.4
 Requires PHP: 5.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -174,6 +174,11 @@ All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displa
 Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.
 
 == Changelog ==
+= 3.0.4 (20171212) =
+* Add: Button to `Stop Fetch` of forced fetching stock data on settings page
+* Improve: Description for `Fetch Stock Data` on settings page
+* Improve: Response info for `Fetch Stock Data` on settings page with link to test symbol in case of error message `Invalid API call`
+
 = 3.0.3 (20171211) =
 * Fix: Users of 0.2.99-alpha could have uncreated stock ticker table in database because of broken upgrade script in alpha versions
 * Add: Admin notification for AlphaVantage.co API Key and All Stock Symbols

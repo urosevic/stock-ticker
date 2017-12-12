@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 3.0.3
+Version: 3.0.4
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -46,7 +46,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 6;
-		const VER = '3.0.3';
+		const VER = '3.0.4';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -341,7 +341,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				wp_localize_script(
 					'stock-ticker-admin',
 					'stockTickerJs',
-					array( 'ajax_url' => admin_url( 'admin-ajax.php' ) )
+					array(
+						'ajax_url' => admin_url( 'admin-ajax.php' ),
+						'avurl'    => 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $this->defaults['avapikey'] . '&symbol='
+					)
 				);
 				wp_enqueue_script( 'stock-ticker-admin' );
 			}
@@ -477,9 +480,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		function ajax_stockticker_update_quotes() {
 			$response = $this->get_alphavantage_quotes();
 			$result['status']  = 'success';
-			$result['message'] = $response;
+			$result['message'] = $response['message'];
+			$result['symbol']  = $response['symbol'];
 
-			if ( strpos( $response, 'no need to fetch' ) !== false ) {
+			if ( strpos( $response['message'], 'no need to fetch' ) !== false ) {
 				$result['done'] = true;
 				$result['message'] = 'DONE';
 			} else {
@@ -490,7 +494,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// * There is no defined All Stock Symbols
 				// * Failed to save stock data for {$symbol_to_fetch} to database!
 				// * AlphaVantage.co API key has not set
-				if ( strpos( $response, 'Stock Ticker Fatal Error:' ) !== false ) {
+				if ( strpos( $response['message'], 'Stock Ticker Fatal Error:' ) !== false ) {
 					$result['done'] = true;
 				}
 			}
@@ -825,7 +829,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// If we don't have defined global symbols, exit
 			if ( empty( $symbols ) ) {
-				return 'Stock Ticker Fatal Error: There is no defined All Stock Symbols';
+				return array(
+					'message' => 'Stock Ticker Fatal Error: There is no defined All Stock Symbols',
+					'symbol'  => '',
+				);
 			}
 
 			// Make array of global symbols
@@ -890,7 +897,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				if ( $target_timestamp > $current_timestamp ) {
 					// If timestamp not expired, do not fetch but exit
 					self::unlock_fetch();
-					return 'Cache timeout has not expired, no need to fetch new loop at the moment.';
+					return array( 
+						'message' => 'Cache timeout has not expired, no need to fetch new loop at the moment.',
+						'symbol'  => $symbol_to_fetch,
+					);
 				} else {
 					// If timestamp expired, set new value and proceed
 					update_option( 'stockticker_av_last_timestamp', $current_timestamp );
@@ -904,15 +914,25 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// If we have not got array with stock data, exit w/o updating DB
 			if ( ! is_array( $stock_data ) ) {
 				self::log( $stock_data );
-				// If we got some error for first symbol, revert last timestamp
-				if ( 0 == $current_symbol_index ) {
+
+				// If it's Invalid API call, report and skip it
+				if ( strpos( $stock_data, 'Invalid API call' ) >= 0 ) {
+					self::log( "Damn, we got Invalid API call for symbol " . $symbol_to_fetch );
+					update_option( 'stockticker_av_last', $symbol_to_fetch );
+				}
+
+				// If we got some error for first symbol, (and resnponse has not invalid API) revert last timestamp
+				if ( 0 == $current_symbol_index && false === strpos( $stock_data, 'Invalid API call' ) ) {
 					self::log( 'Failed fetching and crunching for first symbol, set back previous timestamp' );
 					update_option( 'stockticker_av_last_timestamp', $last_fetched_timestamp );
 				}
 				// Release processing for next run
 				self::unlock_fetch();
 				// Return response status
-				return $stock_data;
+				return array(
+					'message' => $stock_data,
+					'symbol'  => $symbol_to_fetch,
+				);
 			}
 
 			// With success stock data in array, save data to database
@@ -1018,7 +1038,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// Release processing for next run
 				self::unlock_fetch();
 				// Return failed status
-				return $msg;
+				return array(
+					'message' => $msg,
+					'symbol'  => $symbol_to_fetch,
+				);
 			}
 
 			// After success update in database, report in log
@@ -1029,7 +1052,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Release processing for next run
 			self::unlock_fetch();
 			// Return succes status
-			return $msg;
+			return array(
+				'message' => $msg,
+				'symbol'  => $symbol_to_fetch,
+			);
 
 		} // END function get_alphavantage_quotes( $symbols )
 
