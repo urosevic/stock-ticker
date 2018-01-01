@@ -13,11 +13,22 @@ Easy add customizable moving or static ticker tapes with stock information for c
 
 == Description ==
 
-A simple and easy configurable plugin that allows you to insert stock ticker with stock price information (data provided by AlphaVantage.co). Insertion is enabled by shortcode or multi instance widget.
+A simple and easy configurable plugin for WordPress that allows you to insert stock ticker with stock price information to posts, pages, widgets or even to template files. Insertion is enabled by shortcode or multi instance widget.
+
+Please note, stock data has been provided by [Alpha Vantage](https://www.alphavantage.co/)
+
+Stock Ticker is advanced variation of [Stock Quote](https://wordpress.org/plugins/stock-quote/) plugin.
 
 **Multisite WordPress is not supported jet**
 
-= Features =
+== Disclaimer ==
+
+All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displayed for informational and educational purposes only and should not be considered as investment advise.
+
+Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results. Along to that, author of **Stock Ticker** plugin can not guarantee that stock prices are always accurate as they are provided by 3rd party service for free.
+
+== Features ==
+
 * Set global set of symbols you'll use site-wide
 * Configure default set of stock symbols that will be displayed in ticker inserted by empty shortcode
 * Configure default presence of company as Company Name or as Stock Symbol
@@ -36,6 +47,10 @@ You can set custom template for visible change value. Default format is `%compan
 * `%changep%` - Change percentage, like *-4.23%*
 
 For feature requests or help [send feedback](https://urosevic.net/wordpress/plugins/stock-ticker/ "Official plugin page") or use support forum on WordPress.
+
+== How To Use ==
+
+You can add Stock Ticker to posts, pages or widgets by shortcode or widget (**Appearance** -> **Widgets**).
 
 = Shortcode =
 Use simple shortcode `[stock_ticker]` without any parameter in post or page, to display ticker with default settings. You can tweak single shortcode with parameters:
@@ -57,7 +72,7 @@ Use simple shortcode `[stock_ticker]` without any parameter in post or page, to 
 * Static unordered list
 `[stock_ticker symbols="BABA,.DJI,EURGBP=X,LON:FFX" show="symbol" static="1"]`
 
-= Supported Stock Exchange Markets =
+== Supported Stock Exchange Markets ==
 
 Alpha Vantage provide stock data for following stock exchange markets:
 
@@ -166,12 +181,6 @@ This can be temporary problem. First try to access front-end page with appended 
 If that does not help, next try to increase *Fetch Timeout* option on general plugin settings and then visit frontend page with appended address parameter `?stockticker_purge_cache=1`.
 
 If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker) and don't forget to provide URL to your website where you have inserted Stock Ticker.
-
-== Disclaimer ==
-
-All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displayed for informational and educational purposes only and should not be considered as investment advise.
-
-Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.
 
 == Changelog ==
 = 3.0.4 (20171212) =
