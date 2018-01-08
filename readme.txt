@@ -152,9 +152,9 @@ Enter symbol in format `EXCHANGE:SYMBOL` like `LON:FFX` for FairFX Group PLC fro
 
 = Stock Exchange or Symbol I need does not work! =
 
-If Stock Exchange or symbol you need does not work (like `BVMF:BVMF3`), first look for your symbol on (Yahoo Finance)[https://finance.yahoo.com] and try to use symbol Yahoo put in parenthesys (like `BVMF3.SA` for our example, or `^BSESN` for index of Bombay Stock Exchange of India).
+If Stock Exchange or symbol you need does not work (like `BVMF:BVMF3`), first look for your symbol on [Yahoo! Finance](https://finance.yahoo.com) and try to use symbol Yahoo put in parenthesys (like `BVMF3.SA` for our example, or `^BSESN` for index of Bombay Stock Exchange of India).
 
-If you already set proper symbol but no data got fetched from AlphaVantage, please verify that Alpha Vantage have data for your symbol. If they don't support symbol you need, feel free to ask AlphaVantage support to include it to their data set by community forum https://www.alpha-vantage.community/
+If you already set proper symbol but no data got fetched from AlphaVantage, please verify that Alpha Vantage have data for your symbol. If they don't support symbol you need, feel free to ask AlphaVantage support to include it to their data set by community forum [www.alpha-vantage.community](https://www.alpha-vantage.community/)
 
 = How to get descriptive title for currency exchange rates? =
 
