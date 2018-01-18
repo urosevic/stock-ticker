@@ -38,7 +38,11 @@ jQuery(document).ready(function($) {
 							if ( response.message.indexOf('Operation timed out') >= 0 ) {
 								$('.st_force_data_fetch').append( '[Timeout] ' + response.symbol + '<br />');
 							} else if ( response.message.indexOf('Invalid API call') >= 0 ) {
-								$('.st_force_data_fetch').append( '[Invalid API call] ' + response.symbol + ' (<a href="' + stockTickerJs.avurl + response.symbol + '" target="_blank">test</a>)<br />');
+								var fetch_url = stockTickerJs.avurl;
+								if ( 'intraday' == response.method ) {
+									fetch_url = stockTickerJs.avurli;
+								}
+								$('.st_force_data_fetch').append( '[Invalid API call] ' + response.symbol + ' (<a href="' + fetch_url + response.symbol + '" target="_blank">test</a>)<br />');
 							} else {
 								$('.st_force_data_fetch').append( '[OK] ' + response.symbol + '<br />');
 							}

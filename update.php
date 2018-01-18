@@ -207,3 +207,12 @@ function au_stockticker_update_routine_6() {
 	delete_option( 'stockticker_av_latest_timestamp' );
 
 } // END function au_stockticker_update_routine_6()
+
+// INtraday setting since 3.0.5
+function au_stockticker_update_routine_7() {
+	$defaults = get_option( 'stockticker_defaults' );
+	if ( ! isset( $defaults['intraday'] ) ) {
+		$defaults['intraday'] = false;
+		update_option( 'stockticker_defaults', $defaults );
+	}
+} // END function au_stockticker_update_routine_7()
