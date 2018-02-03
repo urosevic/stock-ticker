@@ -1,4 +1,19 @@
 jQuery(document).ready(function($) {
+	var cache_timeout_advisor = function() {
+		// Cache Timeout advisor
+		var symbols_arr = $('input[name="stockticker_defaults[all_symbols]"]').val().toString().split(',');
+		var min_cache_timeout = ( symbols_arr.length * $('input[name="stockticker_defaults[timeout]"]').val() ) * 1.50;
+		$('#fetch_timeout_advisor .min').html( Math.ceil( min_cache_timeout ) );
+	};
+	// Append advisor placeholder
+	$('input[name="stockticker_defaults[cache_timeout]"]').after('&nbsp;<span id="fetch_timeout_advisor">at least <span class="min"></span></span>');
+	// Update advisor on load
+	cache_timeout_advisor();
+	// Update advisor on change
+	$('input[name="stockticker_defaults[timeout]"], input[name="stockticker_defaults[all_symbols]"]').on('change click keydown', function(ev){
+		cache_timeout_advisor();
+	});
+	// Fetch Magic
 	$('button[name="st_force_data_fetch_stop"]').on('click', function(e){
 		e.preventDefault();
 		$(this).data('stop','true');

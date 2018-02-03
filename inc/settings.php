@@ -326,6 +326,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					),
 				)
 			);
+
 			// Caching timeout field.
 			add_settings_field(
 				$this->option_name . 'cache_timeout',
@@ -335,7 +336,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				'wpaust_advanced',
 				array(
 					'field'       => $this->option_name . '[cache_timeout]',
-					'description' => __( 'Define timeout before next round of fetching symbol data start, in seconds', 'wpaust' ),
+					'description' => __( 'Define timeout before next round of fetching symbols data start, in seconds. Make sure to set this value to (at least) number of **All Stock Symbols** × **Fetch Timeout** + **50%** (if you have 10 symbols and 10 second fetch timeout, set to at least 150 seconds). Please note, Alpha Vantage update quotes on 15 minutes!', 'wpaust' ),
 					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['cache_timeout'] ) ? $this->defaults['cache_timeout'] : 180,
 					'min'         => 0,
@@ -395,13 +396,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Refresh timeout field.
 			add_settings_field(
 				$this->option_name . 'refresh_timeout',
-				__( 'Refresh Timeout', 'wpaust' ),
+				__( 'Auto Refresh Timeout', 'wpaust' ),
 				array( &$this, 'settings_field_input_number' ),
 				$wpau_stockticker->plugin_slug,
 				'wpaust_advanced',
 				array(
 					'field'       => $this->option_name . '[refresh_timeout]',
-					'description' => __( 'Define auto refresh timeout, in seconds', 'wpaust' ),
+					'description' => __( 'Define auto refresh timeout, in seconds. This value is for reloading ticker on webpage without refrehsing page, and does not affect how ofter plugin refresh data from AlphaVantage API!', 'wpaust' ),
 					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['refresh_timeout'] ) ? $this->defaults['refresh_timeout'] : 2,
 					'min'         => 0,
@@ -510,6 +511,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		 * @param  array $args Array of field arguments.
 		 */
 		public function settings_field_input_number( $args ) {
+			$args['description'] = self::format_description( esc_html( $args['description'] ) );
 			printf(
 				'<input type="number" name="%1$s" id="%2$s" value="%3$s" min="%4$s" max="%5$s" step="%6$s" class="%7$s" /><p class="description">%8$s</p>',
 				esc_attr( $args['field'] ),            // 1
@@ -519,7 +521,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				(int) $args['max'],                    // 5
 				(int) $args['step'],                   // 6
 				sanitize_html_class( $args['class'] ), // 7
-				esc_html( $args['description'] )       // 8
+				$args['description']                   // 8
 			);
 		} // END public function settings_field_input_number($args)
 
@@ -596,6 +598,17 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				esc_html( $args['description'] )
 			);
 		} // END public function settings_field_colour_picker($args)
+
+		/**
+		 * Basic markdown formatter for descriptions
+		 * @param  string $text Raw ASCII text
+		 * @return string       HTML formatted text
+		 */
+		function format_description( $text ) {
+			$pattern = '/(\*\*)([^\*]+)(\*\*)/';
+			$replacement = '<strong>${2}</strong>';
+			return preg_replace( $pattern, $replacement, $text );
+		} // END function format_description( $text )
 
 		/**
 		 * Sanitize settings options
