@@ -194,6 +194,7 @@ If you still experiencing issue, please contact us through [support forum](https
 * Improve: description for `Refresh Timeout` option and rename to `Auto Refresh Timeout`
 * Improve: description for `Cache Timeout` option
 * Improve: add advised minimal cache timeout value, based on number of symbols in `All Stock Symbols` and `Fetch Timeout` value.
+* (20180118) Add: support for TIME_SERIES_INTRADAY as optional method for refular symbols (excluding currencies and indexes)
 
 = 3.0.4 (20171212) =
 * Add: Button to `Stop Fetch` of forced fetching stock data on settings page

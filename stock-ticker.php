@@ -45,7 +45,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	 */
 	class Wpau_Stock_Ticker {
 
-		const DB_VER = 6;
+		const DB_VER = 7;
 		const VER = '3.0.5';
 
 		public $plugin_name   = 'Stock Ticker';
@@ -235,6 +235,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'loading_message' => 'Loading stock data...',
 				'number_format'   => 'dc',
 				'decimals'        => 2,
+				'intraday'        => false,
 			);
 
 			add_option( $this->plugin_option, $init, '', 'no' );
@@ -341,7 +342,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					'stockTickerJs',
 					array(
 						'ajax_url' => admin_url( 'admin-ajax.php' ),
-						'avurl'    => 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $this->defaults['avapikey'] . '&symbol='
+						'avurl'    => 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $this->defaults['avapikey'] . '&symbol=',
+						'avurli'   => 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=30min&apikey=' . $this->defaults['avapikey'] . '&symbol=',
 					)
 				);
 				wp_enqueue_script( 'stock-ticker-admin' );
@@ -480,6 +482,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$result['status']  = 'success';
 			$result['message'] = $response['message'];
 			$result['symbol']  = $response['symbol'];
+			$result['method']  = $response['method'];
 
 			if ( strpos( $response['message'], 'no need to fetch' ) !== false ) {
 				$result['done'] = true;
@@ -830,6 +833,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				return array(
 					'message' => 'Stock Ticker Fatal Error: There is no defined All Stock Symbols',
 					'symbol'  => '',
+					'method'  => '',
 				);
 			}
 
@@ -886,6 +890,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 			*/
 
+			// Define method for symbol
+			if ( ! empty( $defaults['intraday'] ) && false === strpos( $symbol, '=X' ) && false === strpos( $symbol, '^' ) ) {
+				$method = 'intraday';
+			} else {
+				$method = 'daily';
+			}
+
 			// If current_symbol_index is 0 and cache timeout has not expired,
 			// do not attempt to fetch again but wait to expire timeout for next loop (UTC)
 			if ( 0 == $current_symbol_index ) {
@@ -898,6 +909,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					return array( 
 						'message' => 'Cache timeout has not expired, no need to fetch new loop at the moment.',
 						'symbol'  => $symbol_to_fetch,
+						'symbol'  => $method,
 					);
 				} else {
 					// If timestamp expired, set new value and proceed
@@ -930,6 +942,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				return array(
 					'message' => $stock_data,
 					'symbol'  => $symbol_to_fetch,
+					'method'  => $method,
 				);
 			}
 
@@ -1039,6 +1052,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				return array(
 					'message' => $msg,
 					'symbol'  => $symbol_to_fetch,
+					'method'  => $method,
 				);
 			}
 
@@ -1053,6 +1067,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			return array(
 				'message' => $msg,
 				'symbol'  => $symbol_to_fetch,
+				'method'  => $method,
 			);
 
 		} // END function get_alphavantage_quotes( $symbols )
@@ -1070,15 +1085,21 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 
 			// Define AplhaVantage API URL
-			// $feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&interval=5min&apikey=' . $defaults['avapikey'] . '&symbol=';
-			$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $defaults['avapikey'] . '&symbol=';
+			// TIME_SERIES_INTRADAY for regular stocks (not for indexes and currencies)
+			if ( ! empty( $defaults['intraday'] ) && false === strpos( $symbol, '=X' ) && false === strpos( $symbol, '^' ) ) {
+				self::log( "Using TIME_SERIES_INTRADAY for {$symbol}..." );
+				$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=30min&apikey=' . $defaults['avapikey'] . '&symbol=';
+			} else {
+				self::log( "Using TIME_SERIES_DAILY for {$symbol}..." );
+				$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $defaults['avapikey'] . '&symbol=';
+			}
 			$feed_url .= $symbol;
 
 			$wparg = array(
 				'timeout' => intval( $defaults['timeout'] ),
 			);
 
-			// self::log( 'Fetching data from AV: ' . $feed_url );
+			self::log( 'Fetching data from AV: ' . $feed_url );
 			$response = wp_remote_get( $feed_url, $wparg );
 
 			// Initialize empty $json variable
@@ -1098,39 +1119,65 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					// Crunch data from AlphaVantage for symbol and prepare compact array
 					self::log( "We got data from AlphaVantage for $symbol, so now let we crunch them and save to database..." );
 
-					// Get basics
-					// $ticker_symbol      = $response_arr['Meta Data']['2. Symbol']; // We don't use this at the moment, but requested symbol
-					$last_trade_refresh = $response_arr['Meta Data']['3. Last Refreshed'];
-					$last_trade_tz      = $response_arr['Meta Data']['5. Time Zone']; // TIME_SERIES_DAILY
-					// $last_trade_tz      = $response_arr['Meta Data']['6. Time Zone']; // TIME_SERIES_INTRADAY
+					// Is INTRADAY or DAILY?
+					if ( 'Intraday (30min) prices and volumes' == $response_arr['Meta Data']['1. Information'] ) {
+						// INTRADAY: Get basics
+						// $ticker_symbol      = $response_arr['Meta Data']['2. Symbol']; // We don't use this at the moment, but requested symbol
+						$last_trade_refresh = $response_arr['Meta Data']['3. Last Refreshed'];
+						$last_trade_tz      = $response_arr['Meta Data']['6. Time Zone']; // TIME_SERIES_INTRADAY
 
-					// Get prices
-					$i = 0;
-
-					// foreach ( $response_arr['Time Series (5min)'] as $key => $val ) { // TIME_SERIES_INTRADAY
-					foreach ( $response_arr['Time Series (Daily)'] as $key => $val ) { // TIME_SERIES_DAILY
-						switch ( $i ) {
-							case 0:
-								$last_trade_date = $key;
+						// Get prices
+						$last_trade = $prev_trade = array();
+						$last_trade_date = $prev_trade_date = '';
+						foreach ( $response_arr['Time Series (30min)'] as $datetime => $val ) { // TIME_SERIES_INTRADAY
+							// If we don't have last trade already set, do it now
+							if ( empty( $last_trade ) ) {
 								$last_trade = $val;
-								break;
-							case 1:
-								$prev_trade_date = $key;
-								$prev_trade = $val;
-								break;
-							case 2: // Workaround for inconsistent data
-								$prev_trade_2_date = $key;
-								$prev_trade_2 = $val;
-								break;
-							case 3: // Workaround for weekend data (currencies)
-								$prev_trade_3_date = $key;
-								$prev_trade_3 = $val;
-								break;
-							default:
-								continue;
+								$last_trade_datetime = $datetime;
+								$last_trade_date = date( 'Y-m-d', strtotime( $last_trade_datetime ) );
+							} else if ( empty( $prev_trade ) ) {
+								// Get previous trade day
+								$prev_trade_date = date( 'Y-m-d', strtotime( $datetime ) );
+								// If this date differ from last, consider as previous day
+								if ( $prev_trade_date != $last_trade_date ) {
+									$prev_trade = $val;
+									$prev_trade_datetime = $datetime;
+								}
+							}
 						}
-						++$i;
-					}
+					} else {
+						// DAILY: Get basics
+						// $ticker_symbol      = $response_arr['Meta Data']['2. Symbol']; // We don't use this at the moment, but requested symbol
+						$last_trade_refresh = $response_arr['Meta Data']['3. Last Refreshed'];
+						$last_trade_tz      = $response_arr['Meta Data']['5. Time Zone']; // TIME_SERIES_DAILY
+
+						// Get prices
+						$i = 0;
+						foreach ( $response_arr['Time Series (Daily)'] as $key => $val ) { // TIME_SERIES_DAILY
+							switch ( $i ) {
+								case 0:
+									$last_trade_date = $key;
+									$last_trade = $val;
+									break;
+								case 1:
+									$prev_trade_date = $key;
+									$prev_trade = $val;
+									break;
+								case 2: // Workaround for inconsistent data
+									$prev_trade_2_date = $key;
+									$prev_trade_2 = $val;
+									break;
+								case 3: // Workaround for weekend data (currencies)
+									$prev_trade_3_date = $key;
+									$prev_trade_3 = $val;
+									break;
+								default:
+									continue;
+							}
+							++$i;
+						}
+
+					} // END INTRADAY || DAILY
 
 					$last_open   = $last_trade['1. open'];
 					$last_high   = $last_trade['2. high'];
@@ -1186,7 +1233,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 								$last_volume = (int) $prev_trade_3['5. volume'];
 							}
 						}
-					}
+					} // END last_volume
 
 					// The difference between 2017-09-01's close price and 2017-08-31's close price gives you the "Change" value.
 					$change = $last_close - $prev_close;
@@ -1214,8 +1261,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 						'low' => $last_low,
 						'v'   => $last_volume,
 					);
+					// self::log( 'data_arr w/o raw JSON: ' . print_r( $data_arr, 1 ) );
 					$data_arr['raw'] = $json;
-
 				}
 				unset( $response_arr );
 			}
