@@ -36,6 +36,7 @@ Author of the **Stock Ticker** plugin does not accept liability or responsibilit
 * Disable scrolling ticker and make it static
 * Define custom names for companies to be used instead of the symbols
 * Define custom elements as a part of visible value
+* Optional (BETA) Intraday time series for equity. Known issues because of 15min timeframe: RANGE and VOLUME are wrong. Because indexes does not have VOLUME, so for indexes and currencies TIME_SERIES_DAILY will be used
 
 You can set custom template for visible change value. Default format is `%company% %price% %change% %changep%`. As a macro keywords you can use:
 
@@ -191,6 +192,9 @@ If you still experiencing issue, please contact us through [support forum](https
 == Changelog ==
 = 3.0.5 (20180204) =
 * Fix: stock price was by mistake taken from last_open instead of last_close, reported by @cartmen123
+* Fix: INTRADAY option set as `BETA`
+* Fix: undefined variable $symbol and $method
+* Improve: description for `Intraday`
 * Improve: description for `Refresh Timeout` option and rename to `Auto Refresh Timeout`
 * Improve: description for `Cache Timeout` option
 * Improve: add advised minimal cache timeout value, based on number of symbols in `All Stock Symbols` and `Fetch Timeout` value.

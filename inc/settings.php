@@ -91,13 +91,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			);
 			add_settings_field(
 				$this->option_name . 'intraday',
-				__( 'TIme Series Intraday', 'wpaust' ),
+				__( 'Time Series Intraday', 'wpaust' ),
 				array( &$this, 'settings_field_checkbox' ),
 				$wpau_stockticker->plugin_slug,
 				'wpaust_general',
 				array(
 					'field'       => $this->option_name . '[intraday]',
-					'description' => __( 'Use TIME_SERIES_INTRADAY for equity (indexes does not have VOLUME, for currencies TIME_SERIES_DAILY will be used)', 'wpaust' ),
+					'description' => __( '**[BETA]** Use TIME_SERIES_INTRADAY for equity. Known issues because of 15min timeframe: RANGE and VOLUME are wrong; for indexes and currencies TIME_SERIES_DAILY will be used.', 'wpaust' ),
 					'class'       => 'checkbox',
 					'value'       => isset( $this->defaults['intraday'] ) ? $this->defaults['intraday'] : false,
 				) // args
@@ -593,7 +593,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				esc_attr( $args['field'] ),
 				$args['class'],
 				$checked,
-				$args['description']
+				self::format_description( $args['description'] )
 			);
 
 		} // END public function settings_field_checkbox($args) {

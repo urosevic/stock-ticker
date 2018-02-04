@@ -343,7 +343,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					array(
 						'ajax_url' => admin_url( 'admin-ajax.php' ),
 						'avurl'    => 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $this->defaults['avapikey'] . '&symbol=',
-						'avurli'   => 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=30min&apikey=' . $this->defaults['avapikey'] . '&symbol=',
+						'avurli'   => 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=15min&apikey=' . $this->defaults['avapikey'] . '&symbol=',
 					)
 				);
 				wp_enqueue_script( 'stock-ticker-admin' );
@@ -817,7 +817,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$progress = get_option( 'stockticker_av_progress', false );
 
 			if ( false != $progress ) {
-				return;
+				return array( 'method' => 'skip' );
 			}
 
 			// Set fetch progress as active
@@ -891,7 +891,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			*/
 
 			// Define method for symbol
-			if ( ! empty( $defaults['intraday'] ) && false === strpos( $symbol, '=X' ) && false === strpos( $symbol, '^' ) ) {
+			if ( ! empty( $defaults['intraday'] ) && false === strpos( $symbol_to_fetch, '=X' ) && false === strpos( $symbol_to_fetch, '^' ) ) {
 				$method = 'intraday';
 			} else {
 				$method = 'daily';
@@ -909,7 +909,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					return array( 
 						'message' => 'Cache timeout has not expired, no need to fetch new loop at the moment.',
 						'symbol'  => $symbol_to_fetch,
-						'symbol'  => $method,
+						'method'  => $method,
 					);
 				} else {
 					// If timestamp expired, set new value and proceed
@@ -1088,7 +1088,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// TIME_SERIES_INTRADAY for regular stocks (not for indexes and currencies)
 			if ( ! empty( $defaults['intraday'] ) && false === strpos( $symbol, '=X' ) && false === strpos( $symbol, '^' ) ) {
 				self::log( "Using TIME_SERIES_INTRADAY for {$symbol}..." );
-				$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=30min&apikey=' . $defaults['avapikey'] . '&symbol=';
+				$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=15min&apikey=' . $defaults['avapikey'] . '&symbol=';
 			} else {
 				self::log( "Using TIME_SERIES_DAILY for {$symbol}..." );
 				$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $defaults['avapikey'] . '&symbol=';
@@ -1120,7 +1120,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					self::log( "We got data from AlphaVantage for $symbol, so now let we crunch them and save to database..." );
 
 					// Is INTRADAY or DAILY?
-					if ( 'Intraday (30min) prices and volumes' == $response_arr['Meta Data']['1. Information'] ) {
+					if ( 'Intraday (15min) prices and volumes' == $response_arr['Meta Data']['1. Information'] ) {
 						// INTRADAY: Get basics
 						// $ticker_symbol      = $response_arr['Meta Data']['2. Symbol']; // We don't use this at the moment, but requested symbol
 						$last_trade_refresh = $response_arr['Meta Data']['3. Last Refreshed'];
@@ -1129,7 +1129,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 						// Get prices
 						$last_trade = $prev_trade = array();
 						$last_trade_date = $prev_trade_date = '';
-						foreach ( $response_arr['Time Series (30min)'] as $datetime => $val ) { // TIME_SERIES_INTRADAY
+						foreach ( $response_arr['Time Series (15min)'] as $datetime => $val ) { // TIME_SERIES_INTRADAY
 							// If we don't have last trade already set, do it now
 							if ( empty( $last_trade ) ) {
 								$last_trade = $val;

@@ -208,7 +208,7 @@ function au_stockticker_update_routine_6() {
 
 } // END function au_stockticker_update_routine_6()
 
-// INtraday setting since 3.0.5
+// Intraday setting since 3.0.5
 function au_stockticker_update_routine_7() {
 	$defaults = get_option( 'stockticker_defaults' );
 	if ( ! isset( $defaults['intraday'] ) ) {
