@@ -216,3 +216,15 @@ function au_stockticker_update_routine_7() {
 		update_option( 'stockticker_defaults', $defaults );
 	}
 } // END function au_stockticker_update_routine_7()
+
+// Fix for Uncaught ReferenceError: stock_tickers_load is not defined
+function au_stockticker_update_routine_8() {
+	$defaults = get_option( 'stockticker_defaults' );
+	if ( ! empty( $defaults['refresh'] ) ) {
+		try {
+			$upload_dir = wp_upload_dir();
+			$js = sprintf( 'var stockTickers = setInterval(function(){ stocktickers_load() }, %s);', intval( $defaults['refresh_timeout'] ) * 1000 );
+			file_put_contents( $upload_dir['basedir'] . '/stock-ticker-refresh.js', $js, LOCK_EX );
+		} catch (Exception $w) {}
+	}
+} // END function au_stockticker_update_routine_8()

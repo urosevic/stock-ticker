@@ -736,7 +736,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 
 			// Generate static refresh JS
 			if ( ! empty( $sanitized['refresh'] ) ) {
-				$js = sprintf( 'var stockTickers = setInterval(function(){ stock_tickers_load() }, %s);', $sanitized['refresh_timeout'] * 1000 );
+				$js = sprintf( 'var stockTickers = setInterval(function(){ stocktickers_load() }, %s);', $sanitized['refresh_timeout'] * 1000 );
 				if ( ! file_put_contents( $upload_dir['basedir'] . '/stock-ticker-refresh.js', $js, LOCK_EX ) ) {
 					$error = error_get_last();
 					add_settings_error(
