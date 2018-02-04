@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
 Tested up to: 4.9.2
-Stable tag: 3.0.4
+Stable tag: 3.0.5
 Requires PHP: 5.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -189,7 +189,8 @@ If that does not help, next try to increase *Fetch Timeout* option on general pl
 If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker) and don't forget to provide URL to your website where you have inserted Stock Ticker.
 
 == Changelog ==
-= 3.0.4.1 (20180203) =
+= 3.0.5 (20180204) =
+* Fix: stock price was by mistake taken from last_open instead of last_close, reported by @cartmen123
 * Improve: description for `Refresh Timeout` option and rename to `Auto Refresh Timeout`
 * Improve: description for `Cache Timeout` option
 * Improve: add advised minimal cache timeout value, based on number of symbols in `All Stock Symbols` and `Fetch Timeout` value.

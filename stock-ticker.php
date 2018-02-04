@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 3.0.4
+Version: 3.0.5
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -11,7 +11,7 @@ License: GNU GPL3
  */
 
 /**
-Copyright 2014-2017 Aleksandar Urosevic (urke.kg@gmail.com)
+Copyright 2014-2018 Aleksandar Urosevic (urke.kg@gmail.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 6;
-		const VER = '3.0.4';
+		const VER = '3.0.5';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -237,8 +237,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'decimals'        => 2,
 			);
 
-			// add_option( 'stockticker_version', self::VER, '', 'no' );
-			// add_option( 'stockticker_db_ver', self::DB_VER, '', 'no' );
 			add_option( $this->plugin_option, $init, '', 'no' );
 
 			return $init;
@@ -601,7 +599,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$q_symbol  = $symbol;
 				$q_name    = $stock_data[ $symbol ]['symbol']; // ['t']; // No nicename on AlphaVantage.co so use ticker instead.
 				$q_change  = $stock_data[ $symbol ]['change']; // ['c'];
-				$q_price   = $stock_data[ $symbol ]['last_open']; // ['l'];
+				$q_price   = $stock_data[ $symbol ]['last_close']; // ['l']; // last_close not last_open
 				$q_changep = $stock_data[ $symbol ]['changep']; // ['cp'];
 				$q_volume  = $stock_data[ $symbol ]['last_volume'];
 				$q_tz      = $stock_data[ $symbol ]['tz'];
