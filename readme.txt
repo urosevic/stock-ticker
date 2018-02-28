@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
 Tested up to: 4.9.4
-Stable tag: 3.0.5.2
+Stable tag: 3.0.5.3
 Requires PHP: 5.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -190,6 +190,9 @@ If that does not help, next try to increase *Fetch Timeout* option on general pl
 If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker) and don't forget to provide URL to your website where you have inserted Stock Ticker.
 
 == Changelog ==
+= 3.0.5.3 (20180228) =
+* Fix: Safer fix for Checkbox options
+
 = 3.0.5.2 (20180228) =
 * Fix: Checkbox options can not be disabled (`Intraday, `Auto Refresh`, `Load assets on all pages`). Thanks to @cmyee for reporting bug.
 * Fix: `Cache Timeout` can not be saved and always reset to zero on settings update.

@@ -703,8 +703,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 							$value = 'dc';
 						}
 						break;
-					default:
-						$value = false;
+					// Checkboxes
+					case 'refresh':
+					case 'intraday':
+					case 'globalassets':
+						$value = true;
+						break;
 				}
 				$sanitized[ $key ] = $value;
 			}
@@ -714,8 +718,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			foreach ( $checkboxes as $checkbox_name ) {
 				if ( empty( $options[ $checkbox_name ] ) ) {
 					$sanitized[ $checkbox_name ] = false;
-				} else {
-					$sanitized[ $checkbox_name ] = true;
 				}
 			}
 
