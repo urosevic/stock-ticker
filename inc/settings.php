@@ -676,10 +676,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					case 'template':
 						$value = strip_tags( $value, '<span><em><strong>' );
 						break;
-					// case 'cache_timeout':
-					// 	$value = (int) $value;
-					// 	$value = ! empty( $value ) ? $value : 180;
-					// 	break;
+					case 'cache_timeout':
+						$value = (int) $value;
+						$value = ! empty( $value ) ? $value : 180;
+						break;
 					case 'fetch_timeout':
 					case 'timeout':
 						$value = (int) $value;
@@ -693,10 +693,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						$value = (int) $value;
 						$value = ! empty( $value ) ? $value : 50;
 						break;
-					case 'refresh':
-					case 'intraday':
-						$value = ! empty( $value ) ? true : false;
-						break;
 					case 'decimals':
 						$value = (int) $value;
 						$value = ! empty( $value ) ? $value : 2;
@@ -707,8 +703,20 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 							$value = 'dc';
 						}
 						break;
+					default:
+						$value = false;
 				}
 				$sanitized[ $key ] = $value;
+			}
+
+			// Sanitize checkboxes
+			$checkboxes = array( 'refresh', 'intraday', 'globalassets' );
+			foreach ( $checkboxes as $checkbox_name ) {
+				if ( empty( $options[ $checkbox_name ] ) ) {
+					$sanitized[ $checkbox_name ] = false;
+				} else {
+					$sanitized[ $checkbox_name ] = true;
+				}
 			}
 
 			// Generate static CSS
