@@ -906,7 +906,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				if ( $target_timestamp > $current_timestamp ) {
 					// If timestamp not expired, do not fetch but exit
 					self::unlock_fetch();
-					return array( 
+					return array(
 						'message' => 'Cache timeout has not expired, no need to fetch new loop at the moment.',
 						'symbol'  => $symbol_to_fetch,
 						'method'  => $method,
@@ -954,7 +954,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// I'm not using here $wpdb->replace() as I wish to avoid reinserting row to table which change primary key (delete row, insert new row)
 			$symbol_exists = $wpdb->get_var( $wpdb->prepare(
 				"
-					SELECT symbol 
+					SELECT symbol
 					FROM {$wpdb->prefix}stock_ticker_data
 					WHERE symbol = %s
 				",
@@ -1179,6 +1179,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 					} // END INTRADAY || DAILY
 
+					// Fallback for indices like ^DWCWAT
+					// If there is no prev_trade, fallback to last_trade values
+					if ( empty( $prev_trade ) ) {
+						$prev_trade = $prev_trade_2 = $prev_trade_3 = $last_trade;
+					}
+
+					// Calculate diffs
 					$last_open   = $last_trade['1. open'];
 					$last_high   = $last_trade['2. high'];
 					$last_low    = $last_trade['3. low'];
