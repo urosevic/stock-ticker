@@ -484,7 +484,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$result['symbol']  = $response['symbol'];
 			$result['method']  = $response['method'];
 
-			if ( strpos( $response['message'], 'no need to fetch' ) !== false ) {
+			if ( strpos( $result['message'], 'no need to fetch' ) !== false ) {
 				$result['done'] = true;
 				$result['message'] = 'DONE';
 			} else {
@@ -495,7 +495,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// * There is no defined All Stock Symbols
 				// * Failed to save stock data for {$symbol_to_fetch} to database!
 				// * AlphaVantage.co API key has not set
-				if ( strpos( $response['message'], 'Stock Ticker Fatal Error:' ) !== false ) {
+				if ( strpos( $result['message'], 'Stock Ticker Fatal Error:' ) !== false ) {
 					$result['done'] = true;
 				}
 			}
@@ -817,7 +817,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$progress = get_option( 'stockticker_av_progress', false );
 
 			if ( false != $progress ) {
-				return array( 'method' => 'skip' );
+				return array(
+					'message' => 'Stock Ticker already fetching data. Skip.',
+					'symbol'  => '',
+					'method'  => 'skip',
+				);
 			}
 
 			// Set fetch progress as active

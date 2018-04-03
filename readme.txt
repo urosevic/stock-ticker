@@ -190,8 +190,9 @@ If that does not help, next try to increase *Fetch Timeout* option on general pl
 If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker) and don't forget to provide URL to your website where you have inserted Stock Ticker.
 
 == Changelog ==
-= 3.0.5.4 (20180321) =
-* Fix: Division by zero in stock-ticker\stock-ticker.php on line 1259 for not fully supported indices like `^DJBWR`
+= 3.0.5.4 (20180403) =
+* Fix: Undefined index: message in wp-content/plugins/stock-ticker/stock-ticker.php on line 483
+* (20180321) Fix: Division by zero in stock-ticker\stock-ticker.php on line 1259 for not fully supported indices like `^DJBWR`
 
 = 3.0.5.3 (20180228) =
 * Fix: Safer fix for Checkbox options
