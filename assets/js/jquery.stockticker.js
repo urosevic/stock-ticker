@@ -43,20 +43,22 @@ jQuery(document).ready(function() {
 			stocktickers_load();
 		}
 	}, 5000);
-	// Update AlphaVantage quotes
-	setTimeout(function() {
-		jQuery.ajax({
-			type: 'post',
-			dataType: 'json',
-			async: true,
-			url: stockTickerJs.ajax_url,
-			data: {
-				'action': 'stockticker_update_quotes'
-			}
-		}).done(function(response){
-			console.log( 'Stock Ticker update quotes response: ' + response.message );
-		});
-	}, 2000);
+	// Update AlphaVantage quotes (if not enabled onDemand)
+	if ( ! stockTickerJs.onDemand ) {
+		setTimeout(function() {
+			jQuery.ajax({
+				type: 'post',
+				dataType: 'json',
+				async: true,
+				url: stockTickerJs.ajax_url,
+				data: {
+					'action': 'stockticker_update_quotes'
+				}
+			}).done(function(response){
+				console.log( 'Stock Ticker update quotes response: ' + response.message );
+			});
+		}, 2000);
+	}
 
 	// Short-circuit selective refresh events if not in customizer preview or pre-4.5.
 	if ( 'undefined' === typeof wp || ! wp.customize || ! wp.customize.selectiveRefresh ) {

@@ -375,6 +375,24 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				)
 			);
 
+			// Fetch on Demand checkbox.
+			add_settings_field(
+				$this->option_name . 'fetch_on_demand',
+				__( 'Fetch on Demand', 'wpaust' ),
+				array( &$this, 'settings_field_checkbox' ),
+				$wpau_stockticker->plugin_slug,
+				'wpaust_advanced',
+				array(
+					'field'       => $this->option_name . '[fetch_on_demand]',
+					'description' => sprintf(
+						__( 'Enable this option to disable fetching quotes from AlphaVantage on each page load by AJAX. Make sure to configure server CRON to load %s on each minute', 'wpaust' ),
+						plugins_url( '/stock-ticker/fetch-on-demand.php?fetch=1' )
+					),
+					'class'       => 'checkbox',
+					'value'       => isset( $this->defaults['fetch_on_demand'] ) ? $this->defaults['fetch_on_demand'] : false,
+				) // args
+			);
+
 			// Default styling.
 			add_settings_field(
 				$this->option_name . 'style',
@@ -391,31 +409,31 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				)
 			);
 
-			// Refresh checkbox.
+			// Reload checkbox.
 			add_settings_field(
 				$this->option_name . 'refresh',
-				__( 'Auto Refresh', 'wpaust' ),
+				__( 'Auto Reload', 'wpaust' ),
 				array( &$this, 'settings_field_checkbox' ),
 				$wpau_stockticker->plugin_slug,
 				'wpaust_advanced',
 				array(
 					'field'       => $this->option_name . '[refresh]',
-					'description' => __( 'Enable this option to auto refresh all stock tickers on page w/o requirement to reload page manually.', 'wpaust' ),
+					'description' => __( 'Enable this option to auto reload all stock tickers on page w/o requirement to reload page manually.', 'wpaust' ),
 					'class'       => 'checkbox',
 					'value'       => isset( $this->defaults['refresh'] ) ? $this->defaults['refresh'] : false,
 				) // args
 			);
 
-			// Refresh timeout field.
+			// Reload timeout field.
 			add_settings_field(
 				$this->option_name . 'refresh_timeout',
-				__( 'Auto Refresh Timeout', 'wpaust' ),
+				__( 'Auto Reload Timeout', 'wpaust' ),
 				array( &$this, 'settings_field_input_number' ),
 				$wpau_stockticker->plugin_slug,
 				'wpaust_advanced',
 				array(
 					'field'       => $this->option_name . '[refresh_timeout]',
-					'description' => __( 'Define auto refresh timeout, in seconds. This value is for reloading ticker on webpage without refrehsing page, and does not affect how ofter plugin refresh data from AlphaVantage API!', 'wpaust' ),
+					'description' => __( 'Define auto reload timeout, in seconds. This value is for reloading ticker on webpage without refrehsing page, and does not affect how ofter plugin refresh data from AlphaVantage API!', 'wpaust' ),
 					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['refresh_timeout'] ) ? $this->defaults['refresh_timeout'] : 2,
 					'min'         => 0,
@@ -699,7 +717,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						break;
 					case 'number_format':
 						$value = strip_tags( stripslashes( $value ) );
-						if ( ! in_array( $value, array( 'dc','sd','sc','cd' ) ) ) {
+						if ( ! in_array( $value, array( 'dc', 'sd', 'sc', 'cd' ) ) ) {
 							$value = 'dc';
 						}
 						break;
@@ -707,6 +725,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					case 'refresh':
 					case 'intraday':
 					case 'globalassets':
+					case 'fetch_on_demand':
 						$value = true;
 						break;
 				}
@@ -714,7 +733,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			}
 
 			// Sanitize checkboxes
-			$checkboxes = array( 'refresh', 'intraday', 'globalassets' );
+			$checkboxes = array( 'refresh', 'intraday', 'globalassets', 'fetch_on_demand' );
 			foreach ( $checkboxes as $checkbox_name ) {
 				if ( empty( $options[ $checkbox_name ] ) ) {
 					$sanitized[ $checkbox_name ] = false;

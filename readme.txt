@@ -37,6 +37,7 @@ Author of the **Stock Ticker** plugin does not accept liability or responsibilit
 * Define custom names for companies to be used instead of the symbols
 * Define custom elements as a part of visible value
 * Optional (BETA) Intraday time series for equity. Known issues because of 15min timeframe: RANGE and VOLUME are wrong. Because indexes does not have VOLUME, so for indexes and currencies TIME_SERIES_DAILY will be used
+* Update quotes on demand by server cron (in case of low or huge traffic website)
 
 You can set custom template for visible change value. Default format is `%company% %price% %change% %changep%`. As a macro keywords you can use:
 
@@ -48,6 +49,16 @@ You can set custom template for visible change value. Default format is `%compan
 * `%changep%` - Change percentage, like *-4.23%*
 
 For feature requests or help [send feedback](https://urosevic.net/wordpress/plugins/stock-ticker/ "Official plugin page") or use support forum on WordPress.
+
+== How to Configure WP Cron for low traffic websites==
+
+If your website have low traffic, you should configure server cron to invoke WP Cron.
+
+In the file `wp-config.php` add the following code (that will disable internal WordPress cron job):
+`define('DISABLE_WP_CRON', true);`
+
+Add a cron job (`crontab -e` on unix/linux) to manually run WordPress cron job every minute:
+`1 * * * * wget -q -O - https://yourwebsite.com/wp-cron.php?doing_wp_cron`
 
 == How To Use ==
 
@@ -117,6 +128,10 @@ https://youtu.be/_tSQ5-ODVfs
 1. Enter to field `All Stock Symbols` all stock symbols you’ll use on whole website in various widgets and shortcodes, separated by comma. This field is used to fetch stock data from AlphaVantage.co API by AJAX in background. Because AV have only API to get data for single symbol, that can take a while to get. Please note, for default shortcode symbols there is still have field in Default Settings section of plugin.
 1. Save settings and click button `Fetch Stock Data Now!` to initially fetch stock data to database and wait for a while until we get all symbols from AlphaVantage.co for the very first time.
 1. Insert shortcode `[stock_ticker]` to page or post, or `Stock Ticker` Widget to preferred Widget Area.
+
+If you have low traffic or huge number of visits to website, we recommend to you activate Fetch on Demand mode:
+1. From plugin settings enable option `Fetch on Demand`
+1. Add to server cron job on each minute to load script `YOUR_WORDPRESS_WEBSITE_URL/wp-content/plugins/stock-ticker/fetch-on-demand.php?fetch=1`
 
 == Screenshots ==
 
@@ -190,6 +205,10 @@ If that does not help, next try to increase *Fetch Timeout* option on general pl
 If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker) and don't forget to provide URL to your website where you have inserted Stock Ticker.
 
 == Changelog ==
+= 3.0.6 (20180509) =
+* Add: option to fetch quotes on demand (server cron) and not by AJAX on page load
+* Add: trigger for fetch quotes on demand
+
 = 3.0.5.4 (20180403) =
 * Fix: Undefined index: message in wp-content/plugins/stock-ticker/stock-ticker.php on line 483
 * (20180321) Fix: Division by zero in stock-ticker\stock-ticker.php on line 1259 for not fully supported indices like `^DJBWR`

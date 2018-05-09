@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 3.0.5.3
+Version: 3.0.6
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -45,8 +45,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	 */
 	class Wpau_Stock_Ticker {
 
-		const DB_VER = 8;
-		const VER = '3.0.5.3';
+		const DB_VER = 9;
+		const VER = '3.0.6';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -106,6 +106,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			if ( ! empty( $_GET['stockticker_purge_cache'] ) ) {
 				self::restart_av_fetching();
 			}
+			if ( ! empty( $_GET['stockticker_unlock_fetch'] ) ) {
+				self::unlock_fetch();
+			}
 
 			// Initialize default settings
 			$this->defaults = self::defaults();
@@ -113,12 +116,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Register AJAX ticker loader
 			add_action( 'wp_ajax_stockticker_load', array( $this, 'ajax_stockticker_load' ) );
 			add_action( 'wp_ajax_nopriv_stockticker_load', array( $this, 'ajax_stockticker_load' ) );
-			// Register AJAX stock updater
-			add_action( 'wp_ajax_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
-			add_action( 'wp_ajax_nopriv_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
 			// Restart fetching loop by AJAX request
 			add_action( 'wp_ajax_stockticker_purge_cache', array( $this, 'ajax_restart_av_fetching' ) );
 			add_action( 'wp_ajax_nopriv_stockticker_purge_cache', array( $this, 'ajax_restart_av_fetching' ) );
+			// Register AJAX stock updater
+			add_action( 'wp_ajax_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
+			add_action( 'wp_ajax_nopriv_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
 
 			if ( is_admin() ) {
 				// Initialize Plugin Settings Magic
@@ -236,6 +239,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'number_format'   => 'dc',
 				'decimals'        => 2,
 				'intraday'        => false,
+				'fetch_on_demand' => false,
 			);
 
 			add_option( $this->plugin_option, $init, '', 'no' );
@@ -344,6 +348,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 						'ajax_url' => admin_url( 'admin-ajax.php' ),
 						'avurl'    => 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $this->defaults['avapikey'] . '&symbol=',
 						'avurli'   => 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=15min&apikey=' . $this->defaults['avapikey'] . '&symbol=',
+						'onDemand' => false,
 					)
 				);
 				wp_enqueue_script( 'stock-ticker-admin' );
@@ -387,7 +392,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			wp_localize_script(
 				'stock-ticker',
 				'stockTickerJs',
-				array( 'ajax_url' => admin_url( 'admin-ajax.php' ) )
+				array(
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'onDemand' => ! empty( $defaults['fetch_on_demand'] ) ? true : false,
+				)
 			);
 			// Enqueue script parser
 			if ( isset( $defaults['globalassets'] ) ) {
@@ -574,7 +582,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			unset( $m, $msize, $matrix, $line );
 
 			// Prepare ticker.
-			if ( ! empty( $static ) && 1 == $static ) { $class .= ' static'; }
+			if ( ! empty( $static ) && 1 == $static ) {
+				$class .= ' static';
+			}
 
 			// Prepare out vars
 			$out_start = sprintf( '<ul class="stock_ticker %s">', $class );
@@ -771,19 +781,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// glue together all the placeholders...
 			$format = implode( ',', $placeholders );
 			// put all in the query and prepare
-			/*
-			$stock_sql = $wpdb->prepare(
-				"
-				SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
-				FROM {$wpdb->prefix}stock_ticker_data
-				WHERE symbol IN ($format)
-				",
-				$symbols_arr
-			);
-
-			// retrieve the results from database
-			$stock_data_a = $wpdb->get_results( $stock_sql, ARRAY_A );
-			/**/
 			$stock_data_a = $wpdb->get_results( $wpdb->prepare(
 				"
 				SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
@@ -816,11 +813,20 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Check is currently fetch in progress
 			$progress = get_option( 'stockticker_av_progress', false );
 
-			if ( false != $progress ) {
+			// Workaround for stuck fetching
+			$defaults = $this->defaults;
+			$current_timestamp = time();
+			$last_fetched_timestamp = get_option( 'stockticker_av_last_timestamp', $current_timestamp );
+			$skip_target_timestamp = $last_fetched_timestamp + (int) $defaults['cache_timeout'] + ( 2 * (int) $defaults['timeout'] );
+			$delta_timestamp = $current_timestamp - $skip_target_timestamp;
+			// $skip_delta_timestamp = $current_timestamp - $last_fetched_timestamp;
+			// if ( false != $progress ) {
+			// if ( false != $progress && $skip_delta_timestamp < 19500 ) {
+			if ( false != $progress && $delta_timestamp < 1000 ) {
 				return array(
+					'method'  => 'skip',
 					'message' => 'Stock Ticker already fetching data. Skip.',
 					'symbol'  => '',
-					'method'  => 'skip',
 				);
 			}
 
@@ -931,7 +937,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 				// If it's Invalid API call, report and skip it
 				if ( strpos( $stock_data, 'Invalid API call' ) >= 0 ) {
-					self::log( "Damn, we got Invalid API call for symbol " . $symbol_to_fetch );
+					self::log( 'Damn, we got Invalid API call for symbol ' . $symbol_to_fetch );
 					update_option( 'stockticker_av_last', $symbol_to_fetch );
 				}
 
@@ -958,7 +964,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// I'm not using here $wpdb->replace() as I wish to avoid reinserting row to table which change primary key (delete row, insert new row)
 			$symbol_exists = $wpdb->get_var( $wpdb->prepare(
 				"
-					SELECT symbol
+					SELECT symbol 
 					FROM {$wpdb->prefix}stock_ticker_data
 					WHERE symbol = %s
 				",
@@ -1131,8 +1137,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 						$last_trade_tz      = $response_arr['Meta Data']['6. Time Zone']; // TIME_SERIES_INTRADAY
 
 						// Get prices
-						$last_trade = $prev_trade = array();
-						$last_trade_date = $prev_trade_date = '';
+						$last_trade = array();
+						$prev_trade = array();
+						$last_trade_date = '';
+						$prev_trade_date = '';
 						foreach ( $response_arr['Time Series (15min)'] as $datetime => $val ) { // TIME_SERIES_INTRADAY
 							// If we don't have last trade already set, do it now
 							if ( empty( $last_trade ) ) {
@@ -1162,6 +1170,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 								case 0:
 									$last_trade_date = $key;
 									$last_trade = $val;
+
 									break;
 								case 1:
 									$prev_trade_date = $key;
@@ -1180,7 +1189,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 							}
 							++$i;
 						}
-
 					} // END INTRADAY || DAILY
 
 					// Fallback for indices like ^DWCWAT
@@ -1290,12 +1298,26 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			update_option( 'stockticker_av_progress', false );
 			return;
 		}
+		/**
+		 * Determine visitor's IP address
+		 * @return string Visitor public IP address
+		 */
+		public static function get_visitor_ip() {
+			if ( ! empty( $_SERVER['HTTP_CLIENT_IP'] ) ) {
+				return $_SERVER['HTTP_CLIENT_IP'];
+			} elseif ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
+				return $_SERVER['HTTP_X_FORWARDED_FOR'];
+			} else {
+				return $_SERVER['REMOTE_ADDR'];
+			}
+		}
 		public static function log( $str ) {
 			// Only if WP_DEBUG is enabled
 			if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG ) {
 				$log_file = trailingslashit( WP_CONTENT_DIR ) . 'stockticker.log';
 				$date = date( 'c' );
-				error_log( "{$date}: {$str}\n", 3, $log_file );
+				$ip = self::get_visitor_ip();
+				error_log( "{$date}: [{$ip}] {$str}\n", 3, $log_file );
 			}
 		}
 	} // END class Wpau_Stock_Ticker

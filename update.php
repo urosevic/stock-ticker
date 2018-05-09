@@ -228,3 +228,12 @@ function au_stockticker_update_routine_8() {
 		} catch (Exception $w) {}
 	}
 } // END function au_stockticker_update_routine_8()
+
+// Add new option for fetch on demand
+function au_stockticker_update_routine_9() {
+	$defaults = get_option( 'stockticker_defaults' );
+	if ( ! isset( $defaults['fetch_on_demand'] ) ) {
+		$defaults['fetch_on_demand'] = false;
+		update_option( 'stockticker_defaults', $defaults );
+	}
+} // END function au_stockticker_update_routine_9()
