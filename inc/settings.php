@@ -829,6 +829,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			$symbols_arr = explode( ',', $symbols );
 			// Remove unsupported stock exchanges from global array to prevent API errors
 			foreach ( $symbols_arr as $symbol_pos => $symbol_to_check ) {
+				$symbol_to_check = trim( $symbol_to_check );
 				// If there is semicolon, it's symbol with exchange
 				if ( strpos( $symbol_to_check, ':' ) ) {
 					// Explode symbol so we can get exchange code
@@ -839,7 +840,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					} else {
 						$symbols_removed[] = $symbol_to_check;
 					}
-				} else {
+				} else if ( ! empty( $symbol_to_check ) ) {
 					// Add symbol w/o exchange to query array
 					$symbols_supported[] = $symbol_to_check;
 				}

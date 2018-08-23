@@ -3,8 +3,8 @@ Contributors: urkekg
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
-Tested up to: 4.9.4
-Stable tag: 3.0.5.3
+Tested up to: 4.9.8
+Stable tag: 3.0.5.4
 Requires PHP: 5.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -190,8 +190,9 @@ If that does not help, next try to increase *Fetch Timeout* option on general pl
 If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker) and don't forget to provide URL to your website where you have inserted Stock Ticker.
 
 == Changelog ==
-= 3.0.5.4 (20180403) =
-* Fix: Undefined index: message in wp-content/plugins/stock-ticker/stock-ticker.php on line 483
+= 3.0.5.4 (20180823) =
+* Fix: Better sanitization for AllSymbols
+* (20180403) Fix: Undefined index: message in wp-content/plugins/stock-ticker/stock-ticker.php on line 483
 * (20180321) Fix: Division by zero in stock-ticker\stock-ticker.php on line 1259 for not fully supported indices like `^DJBWR`
 
 = 3.0.5.3 (20180228) =
