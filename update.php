@@ -228,3 +228,15 @@ function au_stockticker_update_routine_8() {
 		} catch (Exception $w) {}
 	}
 } // END function au_stockticker_update_routine_8()
+
+// Remove Intraday setting
+function au_stockticker_update_routine_9() {
+	$defaults = get_option( 'stockticker_defaults' );
+	if ( isset( $defaults['intraday'] ) ) {
+		try {
+			unset( $defaults['intraday'] );
+			error_log(print_r($defaults,1));
+			update_option( 'stockticker_defaults', $defaults );
+		} catch (Exception $w) {}
+	}
+} // END function au_stockticker_update_routine_9()

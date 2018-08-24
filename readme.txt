@@ -190,6 +190,9 @@ If that does not help, next try to increase *Fetch Timeout* option on general pl
 If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker) and don't forget to provide URL to your website where you have inserted Stock Ticker.
 
 == Changelog ==
+= 3.1 (20180824) =
+* Remove Intraday option from settings
+
 = 3.0.5.4 (20180823) =
 * Fix: Better sanitization for AllSymbols
 * (20180403) Fix: Undefined index: message in wp-content/plugins/stock-ticker/stock-ticker.php on line 483

@@ -90,19 +90,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				)
 			);
 			add_settings_field(
-				$this->option_name . 'intraday',
-				__( 'Time Series Intraday', 'wpaust' ),
-				array( &$this, 'settings_field_checkbox' ),
-				$wpau_stockticker->plugin_slug,
-				'wpaust_general',
-				array(
-					'field'       => $this->option_name . '[intraday]',
-					'description' => __( '**[BETA]** Use TIME_SERIES_INTRADAY for equity. Known issues because of 15min timeframe: RANGE and VOLUME are wrong; for indexes and currencies TIME_SERIES_DAILY will be used.', 'wpaust' ),
-					'class'       => 'checkbox',
-					'value'       => isset( $this->defaults['intraday'] ) ? $this->defaults['intraday'] : false,
-				) // args
-			);
-			add_settings_field(
 				$this->option_name . 'loading_message',
 				__( 'Loading Message', 'wpaust' ),
 				array( &$this, 'settings_field_input_text' ),
@@ -705,7 +692,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						break;
 					// Checkboxes
 					case 'refresh':
-					case 'intraday':
 					case 'globalassets':
 						$value = true;
 						break;
@@ -714,7 +700,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			}
 
 			// Sanitize checkboxes
-			$checkboxes = array( 'refresh', 'intraday', 'globalassets' );
+			$checkboxes = array( 'refresh', 'globalassets' );
 			foreach ( $checkboxes as $checkbox_name ) {
 				if ( empty( $options[ $checkbox_name ] ) ) {
 					$sanitized[ $checkbox_name ] = false;
