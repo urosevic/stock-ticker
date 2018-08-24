@@ -1119,6 +1119,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// If we got some error from AV, log to self::log and return none
 				if ( ! empty( $response_arr['Error Message'] ) ) {
 					return 'Stock Ticker connected to AlphaVantage.co but got error: ' . $response_arr['Error Message'];
+				} else if ( ! empty( $response_arr['Information'] ) ) {
+					return 'Stock Ticker connected to AlphaVantage.co and got response: ' . $response_arr['Information'];
 				} else {
 					// Crunch data from AlphaVantage for symbol and prepare compact array
 					self::log( "We got data from AlphaVantage for $symbol, so now let we crunch them and save to database..." );
