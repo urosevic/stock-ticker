@@ -235,6 +235,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'loading_message' => 'Loading stock data...',
 				'number_format'   => 'dc',
 				'decimals'        => 2,
+				'av_api_tier'     => 5, // 5 = free
 			);
 
 			add_option( $this->plugin_option, $init, '', 'no' );

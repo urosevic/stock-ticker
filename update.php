@@ -235,7 +235,7 @@ function au_stockticker_update_routine_9() {
 	if ( isset( $defaults['intraday'] ) ) {
 		try {
 			unset( $defaults['intraday'] );
-			error_log(print_r($defaults,1));
+			$defaults['av_api_tier'] = 'free';
 			update_option( 'stockticker_defaults', $defaults );
 		} catch (Exception $w) {}
 	}

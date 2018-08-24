@@ -76,6 +76,42 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'value'       => $this->defaults['avapikey'],
 				)
 			);
+
+			add_settings_field(
+				$this->option_name . 'av_api_tier',
+				__( 'AlphaVantage.co API Key Tier', 'wpaust' ),
+				array( &$this, 'settings_field_select' ),
+				$wpau_stockticker->plugin_slug,
+				'wpaust_general',
+				array(
+					'field'       => $this->option_name . '[av_api_tier]',
+					'description' => sprintf(
+						wp_kses(
+							__( 'Which Alpha Vantage API Key membership do you have (<a href="%1$s" target="_blank">%2$s</a> or <a href="%3$s" target="_blank">%4$s</a>)?', 'wpaust' ),
+							array(
+								'a' => array(
+									'href'   => array(),
+									'target' => array( '_blank' ),
+								),
+							)
+						),
+						esc_url( 'https://www.alphavantage.co/support/#api-key' ),
+						__( 'Free', 'wpaust' ),
+						esc_url( 'https://www.alphavantage.co/premium/' ),
+						__( 'Premium', 'wpaust' )
+					),
+					'items'       => array(
+						'5'   => __( 'Free (5 requests/min)', 'wpaust' ),
+						'15'  => __( 'Premium (15 requests/min)', 'wpaust' ),
+						'60'  => __( 'Premium (60 requests/min)', 'wpaust' ),
+						'120' => __( 'Premium (120 requests/min)', 'wpaust' ),
+						'360' => __( 'Premium (360 requests/min)', 'wpaust' ),
+						'600' => __( 'Premium (600 requests/min)', 'wpaust' ),
+					),
+					'value' => $this->defaults['av_api_tier'],
+				)
+			);
+
 			add_settings_field(
 				$this->option_name . 'all_symbols',
 				__( 'All Stock Symbols', 'wpaust' ),
@@ -567,7 +603,22 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					sanitize_text_field( $val ) // 3
 				);
 			}
-			printf( '</select><p class="description">%s</p>', esc_html( $args['description'] ) );
+			printf(
+				'</select><p class="description">%s</p>',
+				wp_kses(
+					$args['description'],
+					array(
+						'a' => array(
+							'href'   => array(),
+							'target' => array( '_blank' ),
+						),
+						'strong',
+						'em',
+						'pre',
+						'code',
+					)
+				)
+			);
 		} // END public function settings_field_select($args)
 
 		/**
@@ -632,6 +683,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						// Allow only numbers (0-9) and English uppercase letters (A-Z)
 						$value = preg_replace( '/[^0-9A-Z]+/', '', $value );
 						break;
+					case 'av_api_tier':
+						if ( ! in_array( $value, array( 5, 15, 60, 120, 360, 600 ) ) ) {
+							$value = 5;
+						}
+						break;
 					case 'symbols':
 						// Always uppercase
 						$value = self::sanitize_symbols( $value );
@@ -687,7 +743,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						break;
 					case 'number_format':
 						$value = strip_tags( stripslashes( $value ) );
-						if ( ! in_array( $value, array( 'dc','sd','sc','cd' ) ) ) {
+						if ( ! in_array( $value, array( 'dc', 'sd', 'sc', 'cd' ) ) ) {
 							$value = 'dc';
 						}
 						break;
