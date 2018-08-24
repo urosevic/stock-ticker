@@ -235,7 +235,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'loading_message' => 'Loading stock data...',
 				'number_format'   => 'dc',
 				'decimals'        => 2,
-				'intraday'        => false,
 			);
 
 			add_option( $this->plugin_option, $init, '', 'no' );
@@ -895,11 +894,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			*/
 
 			// Define method for symbol
-			if ( ! empty( $defaults['intraday'] ) && false === strpos( $symbol_to_fetch, '=X' ) && false === strpos( $symbol_to_fetch, '^' ) ) {
-				$method = 'intraday';
-			} else {
-				$method = 'daily';
-			}
+			$method = 'global_quote';
 
 			// If current_symbol_index is 0 and cache timeout has not expired,
 			// do not attempt to fetch again but wait to expire timeout for next loop (UTC)
@@ -1089,15 +1084,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 
 			// Define AplhaVantage API URL
-			// TIME_SERIES_INTRADAY for regular stocks (not for indexes and currencies)
-			if ( ! empty( $defaults['intraday'] ) && false === strpos( $symbol, '=X' ) && false === strpos( $symbol, '^' ) ) {
-				self::log( "Using TIME_SERIES_INTRADAY for {$symbol}..." );
-				$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=15min&apikey=' . $defaults['avapikey'] . '&symbol=';
-			} else {
-				self::log( "Using TIME_SERIES_DAILY for {$symbol}..." );
-				$feed_url = 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $defaults['avapikey'] . '&symbol=';
-			}
-			$feed_url .= $symbol;
+			self::log( "Using GLOBAL_QUOTE for {$symbol}..." );
+			$feed_url = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=' . $defaults['avapikey'] . '&datatype=json&symbol=' . $symbol;
 
 			$wparg = array(
 				'timeout' => intval( $defaults['timeout'] ),
@@ -1125,156 +1113,26 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					// Crunch data from AlphaVantage for symbol and prepare compact array
 					self::log( "We got data from AlphaVantage for $symbol, so now let we crunch them and save to database..." );
 
-					// Is INTRADAY or DAILY?
-					if ( 'Intraday (15min) prices and volumes' == $response_arr['Meta Data']['1. Information'] ) {
-						// INTRADAY: Get basics
-						// $ticker_symbol      = $response_arr['Meta Data']['2. Symbol']; // We don't use this at the moment, but requested symbol
-						$last_trade_refresh = $response_arr['Meta Data']['3. Last Refreshed'];
-						$last_trade_tz      = $response_arr['Meta Data']['6. Time Zone']; // TIME_SERIES_INTRADAY
-
-						// Get prices
-						$last_trade = $prev_trade = array();
-						$last_trade_date = $prev_trade_date = '';
-						foreach ( $response_arr['Time Series (15min)'] as $datetime => $val ) { // TIME_SERIES_INTRADAY
-							// If we don't have last trade already set, do it now
-							if ( empty( $last_trade ) ) {
-								$last_trade = $val;
-								$last_trade_datetime = $datetime;
-								$last_trade_date = date( 'Y-m-d', strtotime( $last_trade_datetime ) );
-							} else if ( empty( $prev_trade ) ) {
-								// Get previous trade day
-								$prev_trade_date = date( 'Y-m-d', strtotime( $datetime ) );
-								// If this date differ from last, consider as previous day
-								if ( $prev_trade_date != $last_trade_date ) {
-									$prev_trade = $val;
-									$prev_trade_datetime = $datetime;
-								}
-							}
-						}
-					} else {
-						// DAILY: Get basics
-						// $ticker_symbol      = $response_arr['Meta Data']['2. Symbol']; // We don't use this at the moment, but requested symbol
-						$last_trade_refresh = $response_arr['Meta Data']['3. Last Refreshed'];
-						$last_trade_tz      = $response_arr['Meta Data']['5. Time Zone']; // TIME_SERIES_DAILY
-
-						// Get prices
-						$i = 0;
-						foreach ( $response_arr['Time Series (Daily)'] as $key => $val ) { // TIME_SERIES_DAILY
-							switch ( $i ) {
-								case 0:
-									$last_trade_date = $key;
-									$last_trade = $val;
-									break;
-								case 1:
-									$prev_trade_date = $key;
-									$prev_trade = $val;
-									break;
-								case 2: // Workaround for inconsistent data
-									$prev_trade_2_date = $key;
-									$prev_trade_2 = $val;
-									break;
-								case 3: // Workaround for weekend data (currencies)
-									$prev_trade_3_date = $key;
-									$prev_trade_3 = $val;
-									break;
-								default:
-									continue;
-							}
-							++$i;
-						}
-
-					} // END INTRADAY || DAILY
-
-					// Fallback for indices like ^DWCWAT
-					// If there is no prev_trade, fallback to last_trade values
-					if ( empty( $prev_trade ) ) {
-						$prev_trade = $prev_trade_2 = $prev_trade_3 = $last_trade;
+					// GLOBAL_QUOTE
+					if ( isset( $response_arr['Global Quote'] ) ) {
+						$quote = $response_arr['Global Quote'];
+						$data_arr = array(
+							't'   => $symbol,
+							'pc'  => $quote['08. previous close'],
+							'c'   => $quote['09. change'],
+							'cp'  => str_replace( '%', '', $quote['10. change percent'] ),
+							'l'   => $quote['05. price'], // $last_close,
+							'lt'  => $quote['07. latest trading day'], // $last_trade_refresh,
+							'ltz' => 'US/Eastern', // default US/Eastern
+							'r'   => "{$quote['04. low']} - {$quote['03. high']}", // $range,
+							'o'   => $quote['02. open'], // $last_open,
+							'h'   => $quote['03. high'], // $last_high,
+							'low' => $quote['04. low'], // $last_low,
+							'v'   => $quote['06. volume'], // $last_volume,
+						);
 					}
 
-					// Calculate diffs
-					$last_open   = $last_trade['1. open'];
-					$last_high   = $last_trade['2. high'];
-					$last_low    = $last_trade['3. low'];
-					$last_close  = $last_trade['4. close'];
-					$last_volume = (int) $last_trade['5. volume'];
-
-					$prev_open   = $prev_trade['1. open'];
-					$prev_high   = $prev_trade['2. high'];
-					$prev_low    = $prev_trade['3. low'];
-					$prev_close  = $prev_trade['4. close'];
-					$prev_volume = (int) $prev_trade['5. volume'];
-
-					// Try fallback for previous data if AV return zero for second day
-					if ( '0.0000' == $prev_open ) {
-						$prev_open   = $prev_trade_2['1. open'];
-						// 3rd day (weekend)
-						if ( '0.0000' == $prev_open ) {
-							$prev_open   = $prev_trade_3['1. open'];
-						}
-					}
-					if ( '0.0000' == $prev_high ) {
-						$prev_high   = $prev_trade_2['2. high'];
-						// 3rd day (weekend)
-						if ( '0.0000' == $prev_high ) {
-							$prev_high   = $prev_trade_3['2. high'];
-						}
-					}
-					if ( '0.0000' == $prev_low ) {
-						$prev_low    = $prev_trade_2['3. low'];
-						// 3rd day (weekend)
-						if ( '0.0000' == $prev_low ) {
-							$prev_low    = $prev_trade_3['3. low'];
-						}
-					}
-					if ( '0.0000' == $prev_close ) {
-						$prev_close  = $prev_trade_2['4. close'];
-						// 3rd day (weekend)
-						if ( '0.0000' == $prev_close ) {
-							$prev_close  = $prev_trade_3['4. close'];
-						}
-					}
-
-					// Volume (1st day)
-					if ( 0 == $last_volume ) {
-						// 2nd day
-						$last_volume = (int) $prev_trade['5. volume'];
-						// 3rd day
-						if ( 0 == $last_volume ) {
-							$last_volume = (int) $prev_trade_2['5. volume'];
-							// 4th day
-							if ( 0 == $last_volume ) {
-								$last_volume = (int) $prev_trade_3['5. volume'];
-							}
-						}
-					} // END last_volume
-
-					// The difference between 2017-09-01's close price and 2017-08-31's close price gives you the "Change" value.
-					$change = $last_close - $prev_close;
-					// So the gain on Friday was 25.92 (5025.92 - 5000) or 0.52% (25.92/5000 x 100%). No mystery!
-					$change_p = ( $change / $prev_close ) * 100;
-					// if we got INF, fake changep to 0
-					if ( 'INF' == $change_p ) {
-						$change_p = 0;
-					}
-
-					// The high and low prices combined give you the "Range" information
-					$range = "$last_low - $last_high";
-
-					// unset( $json );
-					$data_arr = array(
-						't'   => $symbol, // $ticker_symbol,
-						'c'   => $change,
-						'cp'  => $change_p,
-						'l'   => $last_close,
-						'lt'  => $last_trade_refresh,
-						'ltz' => $last_trade_tz,
-						'r'   => $range,
-						'o'   => $last_open,
-						'h'   => $last_high,
-						'low' => $last_low,
-						'v'   => $last_volume,
-					);
-					// self::log( 'data_arr w/o raw JSON: ' . print_r( $data_arr, 1 ) );
+					self::log( 'data_arr w/o raw JSON: ' . print_r( $data_arr, 1 ) );
 					$data_arr['raw'] = $json;
 				}
 				unset( $response_arr );

@@ -61,7 +61,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'field'       => $this->option_name . '[avapikey]',
 					'description' => sprintf(
 						wp_kses(
-							__( 'To get stock data we use AlphaVantage.co API. If you do not have it already, <a href="%1$s" target="_blank">%2$s</a> and enter it here.', 'wpaust' ),
+							__( 'To get stock data we use AlphaVantage.co API. If you do not have it already, <a href="%1$s" target="_blank">%2$s</a> and enter it here. Please note, free API key is limited to 5 requests per minute.', 'wpaust' ),
 							array(
 								'a' => array(
 									'href' => array(),
@@ -72,7 +72,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						esc_url( 'https://www.alphavantage.co/support/#api-key' ),
 						__( 'Claim your free API Key', 'wpaust' )
 					),
-					'class'       => 'widefat',
+					'class'       => 'regular-text',
 					'value'       => $this->defaults['avapikey'],
 				)
 			);
@@ -438,8 +438,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		public function settings_js_forcedatafetch() {
 			?>
 			<p class="description">After you update settings, you can force initial stock data fetching by click on button below.<br />
-			If you get too much <code>[Timeout]</code> statuses during fetch, try to increase Fetch Timeout option, save settings and fetch data again.<br />
-			If you get any <code>[Invalid API call]</code> for same symbol multiple times, then AlphaVantage.co does not have that symbol in TIME_SERIES_DAILY or TIME_SERIES_INTRADAY (you should remove faulty symbol from <strong>All Stock Symbols</strong>).</p>
+			If you use free AlphaVantage.co API Key and you have more than 5 symbils in All Symbols field, only first 5 quotes will be fetched.<br />
+			If you have up to 5 symbols in All Symbols and you get too much <code>[Timeout]</code> statuses during fetch, try to increase Fetch Timeout option, save settings and fetch data again.<br />
+			If you get any <code>[Invalid API call]</code> for same symbol multiple times, then AlphaVantage.co does not have that symbol in GLOBAL_QUOTE (you should remove faulty symbol from <strong>All Stock Symbols</strong>).</p>
 			<button name="st_force_data_fetch" class="button button-primary">Fetch Stock Data Now!</button> <button name="st_force_data_fetch_stop" class="button button-secondary">Stop Fetch</button>
 			<div class="st_force_data_fetch"></div>
 			<?php
@@ -481,7 +482,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		 */
 		public function settings_field_input_text( $args ) {
 			printf(
-				'<input type="text" name="%s" id="%s" value="%s" class="%s" /><p class="description">%s</p>',
+				'<input type="text" name="%s" id="%s" value="%s" class="%s" data-lpignore="true" /><p class="description">%s</p>',
 				esc_attr( $args['field'] ),
 				esc_attr( $args['field'] ),
 				esc_attr( $args['value'] ),
@@ -496,7 +497,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		 */
 		public function settings_field_input_password( $args ) {
 			printf(
-				'<input type="password" name="%s" id="%s" value="%s" class="%s" /><p class="description">%s</p>',
+				'<input type="password" name="%s" id="%s" value="%s" class="%s" data-lpignore="true" /><p class="description">%s</p>',
 				esc_attr( $args['field'] ),
 				esc_attr( $args['field'] ),
 				esc_attr( $args['value'] ),

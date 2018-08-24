@@ -191,6 +191,7 @@ If you still experiencing issue, please contact us through [support forum](https
 
 == Changelog ==
 = 3.1 (20180824) =
+* Switch to GLOBAL_QUOTE API mode and eliminate requirement to calculate change amount from TIME_SERIES_DAILY and TIME_SERIES_INTRADAY
 * Remove Intraday option from settings
 
 = 3.0.5.4 (20180823) =
