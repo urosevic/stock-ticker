@@ -843,25 +843,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Make array of global symbols
 			$symbols_arr = explode( ',', $symbols );
 
-			// Remove unsupported stock exchanges from global array to prevent API errors
-			$symbols_supported = array();
-			foreach ( $symbols_arr as $symbol_pos => $symbol_to_check ) {
-				// If there is semicolon, it's symbol with exchange
-				if ( strpos( $symbol_to_check, ':' ) ) {
-					// Explode symbol so we can get exchange code
-					$symbol_exchange = explode( ':', $symbol_to_check );
-					// If exchange code is supported, add symbol to query array
-					if ( ! empty( self::$exchanges[ strtoupper( trim( $symbol_exchange[0] ) ) ] ) ) {
-						$symbols_supported[] = $symbol_to_check;
-					}
-				} else {
-					// Add symbol w/o exchange to query array
-					$symbols_supported[] = $symbol_to_check;
-				}
-			}
-			// Set back query array to $symbols_arr
-			$symbols_arr = $symbols_supported;
-
 			// Default symbol to fetch first (first form array)
 			$current_symbol_index = 0;
 			$symbol_to_fetch = $symbols_arr[ $current_symbol_index ];
@@ -880,18 +861,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					$symbol_to_fetch = strtoupper( $symbols_arr[ $current_symbol_index ] );
 				}
 			}
-			/*
-			// If no symbol to fetch, exit
-			if ( empty( $symbol_to_fetch ) ) {
-				// Set last fetched symbol to none
-				update_option( 'stockticker_av_last', '' );
-				// and release processing for next run
-				self::unlock_fetch();
-				// then return message as a response
-				$msg = 'No symbols to fetch!';
-				return $msg;
-			}
-			*/
 
 			// Define method for symbol
 			$method = 'global_quote';
