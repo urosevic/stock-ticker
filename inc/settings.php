@@ -891,6 +891,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					$symbols_supported[] = $symbol_to_check;
 				}
 			}
+			// Remove duplicate symbols
+			$symbols_supported = array_unique($symbols_supported);
 			// Set back supported symbols
 			$symbols = join( ',', $symbols_supported );
 			// If we have removed symbols, add settings error message
