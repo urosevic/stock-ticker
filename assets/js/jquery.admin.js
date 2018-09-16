@@ -22,6 +22,9 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 		var fetch_button = this;
 		var fetch_button_stop = $('button[name="st_force_data_fetch_stop"]');
+		var av_api_tier = $('select[name="stockticker_defaults[av_api_tier]"]').val();
+		var av_api_timeout = ( 60 / av_api_tier ) * 1000;
+
 		// disable button
 		$(fetch_button).prop('disabled',true);
 		$(fetch_button_stop).addClass('enabled');
@@ -36,7 +39,7 @@ jQuery(document).ready(function($) {
 			}
 		}).done( function(response) {
 				// Update log container
-				$('.st_force_data_fetch').html( 'Reset fetching loop and fetch data again. Please wait...<br /><br />' );
+				$('.st_force_data_fetch').html( 'Reset fetching loop and fetch data again. We`ll make pause ' + (av_api_timeout / 1000) + ' second(s) between each symbol fetch. Please wait...<br /><br />' );
 				function fetchNextSymbol() {
 					/* Then do AJAX request */
 					$.ajax({
@@ -63,7 +66,7 @@ jQuery(document).ready(function($) {
 							}
 							setTimeout(function() {
 								fetchNextSymbol();
-							}, 2000);
+							}, av_api_timeout);
 						} else {
 							if ( response.message != 'DONE' ) {
 								$('.st_force_data_fetch').append( '<br />[' + response.symbol + '] ' + response.message );
