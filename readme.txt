@@ -3,7 +3,7 @@ Contributors: urkekg
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
-Tested up to: 4.9.8
+Tested up to: 4.9.9
 Stable tag: 3.0.5.4
 Requires PHP: 5.5
 License: GPLv3 or later
@@ -189,9 +189,85 @@ If that does not help, next try to increase *Fetch Timeout* option on general pl
 
 If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker) and don't forget to provide URL to your website where you have inserted Stock Ticker.
 
+= Can I get stock data for my custom code? =
+
+Since version 3.1 of Stock Ticker you can get stock data in custom functions. Fore example:
+
+`
+<?php
+if ( class_exists( 'Wpau_Stock_Ticker' ) ) {
+	$stock_data = Wpau_Stock_Ticker::get_stock_from_db( 'AAPL,MSFT' );
+	var_dump( $stock_data );
+}
+?>
+`
+
+That will return associated array for requested symbols:
+`
+array(2) {
+  ["AAPL"]=>
+  array(11) {
+    ["symbol"]=>
+    string(4) "AAPL"
+    ["tz"]=>
+    string(10) "US/Eastern"
+    ["last_refreshed"]=>
+    string(19) "2018-09-14 00:00:00"
+    ["last_open"]=>
+    string(8) "225.7500"
+    ["last_high"]=>
+    string(8) "226.8400"
+    ["last_low"]=>
+    string(8) "222.5220"
+    ["last_close"]=>
+    string(8) "223.8400"
+    ["last_volume"]=>
+    string(8) "31999289"
+    ["change"]=>
+    string(7) "-2.5700"
+    ["changep"]=>
+    string(7) "-1.1351"
+    ["range"]=>
+    string(19) "222.5220 - 226.8400"
+  }
+  ["MSFT"]=>
+  array(11) {
+    ["symbol"]=>
+    string(4) "MSFT"
+    ["tz"]=>
+    string(10) "US/Eastern"
+    ["last_refreshed"]=>
+    string(19) "2018-09-14 00:00:00"
+    ["last_open"]=>
+    string(8) "113.3600"
+    ["last_high"]=>
+    string(8) "113.7300"
+    ["last_low"]=>
+    string(8) "112.4400"
+    ["last_close"]=>
+    string(8) "113.3700"
+    ["last_volume"]=>
+    string(8) "19122349"
+    ["change"]=>
+    string(6) "0.4600"
+    ["changep"]=>
+    string(6) "0.4074"
+    ["range"]=>
+    string(19) "112.4400 - 113.7300"
+  }
+}
+`
+
 == Changelog ==
-= 3.1 (20180824) =
-* Add Alpha Vantage Tier option for better fetch timeout control
+= 3.1 (20180916) =
+* Improve: Make Force Fetch to wait between each symbol fetch regarding to the API Tier
+* Improve: Remove duplicate symbols on settings update
+* Simplify: Merge 3 settings sections to single register_settings
+* Improve: Move routine to extract symbol to fetch to self method `get_symbol_to_fetch()`
+* Improve: Move stock data to DB to self method `data_to_db()`
+* Change: Make method `get_stock_from_db()` public so user can access Stock data in DB from custom functions
+* Change: Move method `sanitize_symbols()` to main class and make it public static so user can access it from custom functions
+* (20180824) Add Alpha Vantage Tier option for better fetch timeout control
 * Switch to GLOBAL_QUOTE API mode and eliminate requirement to calculate change amount from TIME_SERIES_DAILY and TIME_SERIES_INTRADAY
 * Remove Intraday option from settings
 
