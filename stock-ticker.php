@@ -762,7 +762,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * @param  string $symbols  Stock symbol to get data for (single or multiple symbols separate with comma)
 		 * @return array            Array of stock data for symbols
 		 */
-		public function get_stock_from_db( $symbols = '' ) {
+		public static function get_stock_from_db( $symbols = '' ) {
 			// If no symbols we have to fetch from DB, then exit
 			if ( empty( $symbols ) ) {
 				return;
