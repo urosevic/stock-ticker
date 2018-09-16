@@ -574,7 +574,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			unset( $m, $msize, $matrix, $line );
 
 			// Prepare ticker.
-			if ( ! empty( $static ) && 1 == $static ) { $class .= ' static'; }
+			if ( ! empty( $static ) && 1 == $static ) {
+				$class .= ' static';
+			}
 
 			// Prepare out vars
 			$out_start = sprintf( '<ul class="stock_ticker %s">', $class );
@@ -755,35 +757,32 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		} // END public function shortcode()
 
 		// Thanks to https://coderwall.com/p/zepnaw/sanitizing-queries-with-in-clauses-with-wpdb-on-wordpress
-		private function get_stock_from_db( $symbols = '' ) {
+		/**
+		 * Retrieve stock data for symbol from local database
+		 * @param  string $symbols  Stock symbol to get data for (single or multiple symbols separate with comma)
+		 * @return array            Array of stock data for symbols
+		 */
+		public function get_stock_from_db( $symbols = '' ) {
 			// If no symbols we have to fetch from DB, then exit
 			if ( empty( $symbols ) ) {
 				return;
 			}
 
-			global $wpdb;
+			// Sanitize symbols
+			$symbols = self::sanitize_symbols( $symbols );
 			// Explode symbols to array
 			$symbols_arr = explode( ',', $symbols );
 			// Count how many entries will we select?
 			$how_many = count( $symbols_arr );
-			// prepare the right amount of placeholders for each symbol
+			// Prepare the right amount of placeholders for each symbol
 			$placeholders = array_fill( 0, $how_many, '%s' );
-			// glue together all the placeholders...
+			// Glue together all the placeholders...
 			$format = implode( ',', $placeholders );
-			// put all in the query and prepare
-			/*
-			$stock_sql = $wpdb->prepare(
-				"
-				SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
-				FROM {$wpdb->prefix}stock_ticker_data
-				WHERE symbol IN ($format)
-				",
-				$symbols_arr
-			);
 
-			// retrieve the results from database
-			$stock_data_a = $wpdb->get_results( $stock_sql, ARRAY_A );
-			/**/
+			// From below we'll do magic within database
+			global $wpdb;
+
+			// put all in the query, prepare and get results
 			$stock_data_a = $wpdb->get_results( $wpdb->prepare(
 				"
 				SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
@@ -810,12 +809,30 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 		/**
 		 * Download stock quotes from AlphaVantage.co and store them all to single transient
+		 * @return array Array of symbol data fetch status with message, symbol and method
 		 */
-		function get_alphavantage_quotes() {
+		public function get_alphavantage_quotes() {
 
-			// Check is currently fetch in progress
+			// Get current timestamp (for reference)
+			$timestamp_now = time();
+
+			// Get API Tier and calculate timeout
+			$av_api_tier = ! empty( $this->defaults['av_api_tier'] ) ? $this->defaults['av_api_tier'] : 5;
+			$av_api_tier_timeout = 60 / $av_api_tier;
+
+			// Get API Tier end timestamp for previous fetch
+			$api_tier_end_timestamp = get_option( 'stockticker_av_tier_end_timestamp', $timestamp_now );
+			if ( $timestamp_now < $api_tier_end_timestamp ) {
+				self::log( 'API Tier timeout for previous symbol of ' . $av_api_tier_timeout . ' has not expired... waiting...' );
+				return array(
+					'message' => "API Tier timeout for previous symbol has not expired. Waiting {$av_api_tier_timeout} second(s) ...",
+					'symbol'  => '',
+					'method'  => 'wait',
+				);
+			}
+
+			// Check is fetch in progress (even with expired API Tier timeout)
 			$progress = get_option( 'stockticker_av_progress', false );
-
 			if ( false != $progress ) {
 				return array(
 					'message' => 'Stock Ticker already fetching data. Skip.',
@@ -824,27 +841,109 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				);
 			}
 
-			// Set fetch progress as active
-			self::lock_fetch();
+			// Get index and symbol to fetch
+			$to_fetch = self::get_symbol_to_fetch();
 
-			// Get defaults (for API key)
-			$defaults = $this->defaults;
-			// Get symbols we should to fetch from AlphaVantage
-			$symbols = $defaults['all_symbols'];
+			// Define method for symbol
+			$method = 'global_quote';
 
-			// If we don't have defined global symbols, exit
-			if ( empty( $symbols ) ) {
+			// If $to_fetch['index'] is 0 and cache timeout has not expired,
+			// do not attempt to fetch again but wait to expire timeout for next loop (UTC)
+			if ( 0 == $to_fetch['index'] ) {
+				$last_fetched_timestamp = get_option( 'stockticker_av_last_timestamp', $timestamp_now );
+				$target_timestamp = $last_fetched_timestamp + (int) $this->defaults['cache_timeout'];
+				if ( $target_timestamp > $timestamp_now ) {
+					// If timestamp not expired, do not fetch but exit
+					self::unlock_fetch();
+					return array(
+						'message' => 'Cache timeout has not expired, no need to start new fetch loop at the moment.',
+						'symbol'  => $to_fetch['symbol'],
+						'method'  => $method,
+					);
+				} else {
+					// If timestamp expired, set new value and proceed
+					update_option( 'stockticker_av_last_timestamp', $timestamp_now );
+					self::log( 'Set timestamp now when first symbol is fetched as a reference for next fetch loop' );
+				}
+			}
+
+			// Calculate API tier pause and save it to options and get data
+			$av_api_tier_end_timestamp = $timestamp_now + $av_api_tier_timeout;
+			update_option( 'stockticker_av_tier_end_timestamp', $av_api_tier_end_timestamp );
+
+			// Now call AlphaVantage fetcher for current symbol
+			$stock_data = $this->fetch_alphavantage_feed( $to_fetch['symbol'] );
+
+			// If we have not got array with stock data, exit w/o updating DB
+			if ( ! is_array( $stock_data ) ) {
+				self::log( $stock_data );
+
+				// If it's Invalid API call, report and skip it
+				if ( strpos( $stock_data, 'Invalid API call' ) >= 0 ) {
+					self::log( "Damn, we got Invalid API call for symbol {$to_fetch['symbol']}" );
+					update_option( 'stockticker_av_last', $to_fetch['symbol'] );
+				}
+
+				// If we got some error for first symbol, (and resnponse has not invalid API) revert last timestamp
+				if ( 0 == $to_fetch['index'] && false === strpos( $stock_data, 'Invalid API call' ) ) {
+					self::log( 'Failed fetching and crunching for first symbol, set back previous timestamp' );
+					update_option( 'stockticker_av_last_timestamp', $last_fetched_timestamp );
+				}
+				// Release processing for next run
+				self::unlock_fetch();
+				// Return response status
 				return array(
-					'message' => 'Stock Ticker Fatal Error: There is no defined All Stock Symbols',
-					'symbol'  => '',
-					'method'  => '',
+					'message' => $stock_data,
+					'symbol'  => $to_fetch['symbol'],
+					'method'  => $method,
 				);
 			}
+
+			// Now write object of stock data to DB
+			$ret = self::data_to_db( $to_fetch, $stock_data );
+
+			// Is failed updated data in DB
+			if ( false === $ret ) {
+				$msg = "Stock Ticker Fatal Error: Failed to save stock data for {$to_fetch['symbol']} to database!";
+				self::log( $msg );
+				// Release processing for next run
+				self::unlock_fetch();
+				// Return failed status
+				return array(
+					'message' => $msg,
+					'symbol'  => $to_fetch['symbol'],
+					'method'  => $method,
+				);
+			}
+
+			// After success update in database, report in log
+			$msg = "Stock data for symbol {$to_fetch['symbol']} has been updated in database.";
+			self::log( $msg );
+			// Set last fetched symbol
+			update_option( 'stockticker_av_last', $to_fetch['symbol'] );
+			// Release processing for next run
+			self::unlock_fetch();
+			// Return succes status
+			return array(
+				'message' => $msg,
+				'symbol'  => $to_fetch['symbol'],
+				'method'  => $method,
+			);
+		} // END function get_alphavantage_quotes()
+
+		/**
+		 * Define index (position) and symbol of one to fetch
+		 * @return array Arary with index of symbol and symbol to fetch
+		 */
+		public function get_symbol_to_fetch() {
+
+			// Get symbols we should to fetch from AlphaVantage
+			$symbols = $this->defaults['all_symbols'];
 
 			// Make array of global symbols
 			$symbols_arr = explode( ',', $symbols );
 
-			// Default symbol to fetch first (first form array)
+			// Default symbol to fetch first (first from array)
 			$current_symbol_index = 0;
 			$symbol_to_fetch = $symbols_arr[ $current_symbol_index ];
 
@@ -862,58 +961,21 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					$symbol_to_fetch = strtoupper( $symbols_arr[ $current_symbol_index ] );
 				}
 			}
+			// Return array
+			return array(
+				'index'  => $current_symbol_index,
+				'symbol' => $symbol_to_fetch,
+			);
 
-			// Define method for symbol
-			$method = 'global_quote';
+		} // END public function get_symbol_to_fetch()
 
-			// If current_symbol_index is 0 and cache timeout has not expired,
-			// do not attempt to fetch again but wait to expire timeout for next loop (UTC)
-			if ( 0 == $current_symbol_index ) {
-				$current_timestamp = time();
-				$last_fetched_timestamp = get_option( 'stockticker_av_last_timestamp', $current_timestamp );
-				$target_timestamp = $last_fetched_timestamp + (int) $defaults['cache_timeout'];
-				if ( $target_timestamp > $current_timestamp ) {
-					// If timestamp not expired, do not fetch but exit
-					self::unlock_fetch();
-					return array(
-						'message' => 'Cache timeout has not expired, no need to fetch new loop at the moment.',
-						'symbol'  => $symbol_to_fetch,
-						'method'  => $method,
-					);
-				} else {
-					// If timestamp expired, set new value and proceed
-					update_option( 'stockticker_av_last_timestamp', $current_timestamp );
-					self::log( 'Set current timestamp when first symbol is fetched as a reference for next loop' );
-				}
-			}
-
-			// Now call AlphaVantage fetcher for current symbol
-			$stock_data = $this->fetch_alphavantage_feed( $symbol_to_fetch );
-
-			// If we have not got array with stock data, exit w/o updating DB
-			if ( ! is_array( $stock_data ) ) {
-				self::log( $stock_data );
-
-				// If it's Invalid API call, report and skip it
-				if ( strpos( $stock_data, 'Invalid API call' ) >= 0 ) {
-					self::log( "Damn, we got Invalid API call for symbol " . $symbol_to_fetch );
-					update_option( 'stockticker_av_last', $symbol_to_fetch );
-				}
-
-				// If we got some error for first symbol, (and resnponse has not invalid API) revert last timestamp
-				if ( 0 == $current_symbol_index && false === strpos( $stock_data, 'Invalid API call' ) ) {
-					self::log( 'Failed fetching and crunching for first symbol, set back previous timestamp' );
-					update_option( 'stockticker_av_last_timestamp', $last_fetched_timestamp );
-				}
-				// Release processing for next run
-				self::unlock_fetch();
-				// Return response status
-				return array(
-					'message' => $stock_data,
-					'symbol'  => $symbol_to_fetch,
-					'method'  => $method,
-				);
-			}
+		/**
+		 * Save data retrieved from AV API to DB
+		 * @param  array $to_fetch    Array of index of symbol and symbol to fetch
+		 * @param  array $stock_data  Array of stock data
+		 * @return array              Result of MySQL query
+		 */
+		private function data_to_db( $to_fetch, $stock_data ) {
 
 			// With success stock data in array, save data to database
 			global $wpdb;
@@ -927,7 +989,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					FROM {$wpdb->prefix}stock_ticker_data
 					WHERE symbol = %s
 				",
-				$symbol_to_fetch
+				$to_fetch['symbol']
 			) );
 			if ( ! empty( $symbol_exists ) ) {
 				// UPDATE
@@ -1010,36 +1072,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					)
 				);
 			}
-
-			// Is failed updated data in DB
-			if ( false === $ret ) {
-				$msg = "Stock Ticker Fatal Error: Failed to save stock data for {$symbol_to_fetch} to database!";
-				self::log( $msg );
-				// Release processing for next run
-				self::unlock_fetch();
-				// Return failed status
-				return array(
-					'message' => $msg,
-					'symbol'  => $symbol_to_fetch,
-					'method'  => $method,
-				);
-			}
-
-			// After success update in database, report in log
-			$msg = "Stock data for symbol {$symbol_to_fetch} has been updated in database.";
-			self::log( $msg );
-			// Set last fetched symbol
-			update_option( 'stockticker_av_last', $symbol_to_fetch );
-			// Release processing for next run
-			self::unlock_fetch();
-			// Return succes status
-			return array(
-				'message' => $msg,
-				'symbol'  => $symbol_to_fetch,
-				'method'  => $method,
-			);
-
-		} // END function get_alphavantage_quotes( $symbols )
+			return $ret;
+		} // END private function data_to_db( $to_fetch, $stock_data )
 
 		function fetch_alphavantage_feed( $symbol ) {
 
@@ -1111,6 +1145,16 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			return $data_arr;
 
 		} // END function fetch_alphavantage_feed( $symbol )
+
+		/**
+		 * Allow only numbers, alphabet, comma, dot, semicolon, equal and carret
+		 * @param  string $symbols Unfiltered value of stock symbols
+		 * @return string          Sanitized value of stock symbols
+		 */
+		public static function sanitize_symbols( $symbols ) {
+			$symbols = preg_replace( '/[^0-9A-Z\=\.\,\:\^]+/', '', strtoupper( $symbols ) );
+			return $symbols;
+		} // END private function sanitize_symbols( $symbols )
 
 		private function lock_fetch() {
 			update_option( 'stockticker_av_progress', true );
