@@ -497,7 +497,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		public function settings_section_description() {
 			// Think of this as help text for the section.
 			esc_attr_e(
-				'Predefine general settings for Stock Ticker. Here you can set API key and symbols used on whole website (in all ticker).',
+				'',
 				'wpaust'
 			);
 		}
