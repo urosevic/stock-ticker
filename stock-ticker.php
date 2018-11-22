@@ -486,7 +486,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$result['symbol']  = $response['symbol'];
 			$result['method']  = $response['method'];
 
-			if ( strpos( $result['message'], 'no need to fetch' ) !== false ) {
+			if ( strpos( $result['message'], 'no need to start' ) !== false ) {
 				$result['done'] = true;
 				$result['message'] = 'DONE';
 			} else {

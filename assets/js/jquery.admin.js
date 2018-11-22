@@ -53,7 +53,9 @@ jQuery(document).ready(function($) {
 					}).done(function(response) {
 						if ( ! response.done && 'true' != $(fetch_button_stop).data('stop') ) {
 							// different progress character for timedout request
-							if ( response.message.indexOf('Operation timed out') >= 0 ) {
+							if ( 'wait' == response.method ) {
+								$('.st_force_data_fetch').append( '[WAIT] ' + response.message + '<br />');
+							} else if ( response.message.indexOf('Operation timed out') >= 0 ) {
 								$('.st_force_data_fetch').append( '[Timeout] ' + response.symbol + '<br />');
 							} else if ( response.message.indexOf('Invalid API call') >= 0 ) {
 								var fetch_url = stockTickerJs.avurl;

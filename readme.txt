@@ -260,6 +260,8 @@ array(2) {
 
 == Changelog ==
 = 3.1 (20181122) =
+* Fix: Infinite fetch loop
+* Improve: tier pause between symbol fetches
 * Improve: Allow dash in stock symbol
 * (20180916) Improve: Make Force Fetch to wait between each symbol fetch regarding to the API Tier
 * Improve: Remove duplicate symbols on settings update
