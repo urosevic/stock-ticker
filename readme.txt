@@ -259,8 +259,9 @@ array(2) {
 `
 
 == Changelog ==
-= 3.1 (20180916) =
-* Improve: Make Force Fetch to wait between each symbol fetch regarding to the API Tier
+= 3.1 (20181122) =
+* Improve: Allow dash in stock symbol
+* (20180916) Improve: Make Force Fetch to wait between each symbol fetch regarding to the API Tier
 * Improve: Remove duplicate symbols on settings update
 * Simplify: Merge 3 settings sections to single register_settings
 * Improve: Move routine to extract symbol to fetch to self method `get_symbol_to_fetch()`

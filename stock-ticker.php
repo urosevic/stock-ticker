@@ -31,6 +31,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+// require_once('class/class-stock-tools-settings.php');
 
 if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
@@ -342,6 +343,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					'stockTickerJs',
 					array(
 						'ajax_url' => admin_url( 'admin-ajax.php' ),
+						// FIX THIS with GLOBAL_QUOTE!!!
 						'avurl'    => 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $this->defaults['avapikey'] . '&symbol=',
 						'avurli'   => 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=15min&apikey=' . $this->defaults['avapikey'] . '&symbol=',
 					)
@@ -1152,7 +1154,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * @return string          Sanitized value of stock symbols
 		 */
 		public static function sanitize_symbols( $symbols ) {
-			$symbols = preg_replace( '/[^0-9A-Z\=\.\,\:\^]+/', '', strtoupper( $symbols ) );
+			$symbols = preg_replace( '/[^0-9A-Z\=\.\,\:\^\-]+/', '', strtoupper( $symbols ) );
 			return $symbols;
 		} // END private function sanitize_symbols( $symbols )
 
