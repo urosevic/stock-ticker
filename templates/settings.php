@@ -36,8 +36,8 @@ global $wpau_stockticker;
 			<h2><?php esc_attr_e( 'Disclaimer', 'wpaust' ); ?></h2>
 			<p class="description"><?php
 				printf(
-				__( 'Since %1$s version %2$s source for all stock data used in plugin is provided by %3$s, displayed for informational and educational purposes only and should not be considered as investment advise. <br />Author of the plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.' ),
-				__( 'Stock Ticker', 'wpaust' ),
+				__( 'All stock data for %1$s starting with version %2$s is provided by %3$s, displayed for informational and educational purposes only and should not be considered as investment advise. <br />Author of the %1$s plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results. Along to that, author of %1$s plugin can not guarantee that stock prices are always accurate as they are provided by 3rd party service for free.' ),
+				'<strong>' . __( 'Stock Ticker', 'wpaust' ) . '</strong>',
 				'3.0.0',
 				'<strong>Alpha Vantage</strong>'
 				);

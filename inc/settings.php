@@ -198,7 +198,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[symbols]',
-					'description' => __( 'Those simbols are used as default for shortcodes w/o provided symbols, but not for widgets as widget have own symbold setting. Enter stock symbols separated with comma.', 'wpaust' ),
+					'description' => __( 'Those simbols are used as default for shortcodes w/o provided symbols, but not for widgets as widget have own symbols setting. Enter stock symbols separated with comma.', 'wpaust' ),
 					'class'       => 'widefat',
 					'value'       => $this->defaults['symbols'],
 				)
@@ -483,9 +483,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		public function settings_js_forcedatafetch() {
 			?>
 			<p class="description">After you update settings, you can force initial stock data fetching by click on button below.<br />
-			If you use free AlphaVantage.co API Key and you have more than 5 symbils in All Symbols field, only first 5 quotes will be fetched.<br />
-			If you have up to 5 symbols in All Symbols and you get too much <code>[Timeout]</code> statuses during fetch, try to increase Fetch Timeout option, save settings and fetch data again.<br />
-			If you get any <code>[Invalid API call]</code> for same symbol multiple times, then AlphaVantage.co does not have that symbol in GLOBAL_QUOTE (you should remove faulty symbol from <strong>All Stock Symbols</strong>).</p>
+			If you get too much <code>[Timeout]</code> statuses during fetch, try to increase <strong>Fetch Timeout</strong> option, save settings and fetch data again.<br />
+			If you get any <code>[Invalid API call]</code> or <code>[Bad API response]</code> for same symbol multiple times, then AlphaVantage.co does not have that symbol for GLOBAL_QUOTE scope. In that case you should try to prepend stock exchange to symbol, or remove faulty symbol from <strong>All Stock Symbols</strong>.</p>
 			<button name="st_force_data_fetch" class="button button-primary">Fetch Stock Data Now!</button> <button name="st_force_data_fetch_stop" class="button button-secondary">Stop Fetch</button>
 			<div class="st_force_data_fetch"></div>
 			<?php

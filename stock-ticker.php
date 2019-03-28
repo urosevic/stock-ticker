@@ -11,7 +11,7 @@ License: GNU GPL3
  */
 
 /**
-Copyright 2014-2018 Aleksandar Urosevic (urke.kg@gmail.com)
+Copyright 2014-2019 Aleksandar Urosevic (urke.kg@gmail.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			'ELI'    => 'Euronext Lisbon',
 			'EPA'    => 'Euronext Paris',
 			'LON'    => 'London Stock Exchange',
-			'MCX'    => 'Moscow Exchange',
+			// 'MCX'    => 'Moscow Exchange',
 			'NASDAQ' => 'NASDAQ Exchange',
 			'CPH'    => 'NASDAQ OMX Copenhagen',
 			'HEL'    => 'NASDAQ OMX Helsinki',
@@ -343,9 +343,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					'stockTickerJs',
 					array(
 						'ajax_url' => admin_url( 'admin-ajax.php' ),
-						// FIX THIS with GLOBAL_QUOTE!!!
-						'avurl'    => 'https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=compact&apikey=' . $this->defaults['avapikey'] . '&symbol=',
-						'avurli'   => 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&outputsize=compact&interval=15min&apikey=' . $this->defaults['avapikey'] . '&symbol=',
+						'avurl'    => 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=' . $this->defaults['avapikey'] . '&datatype=json&symbol=',
 					)
 				);
 				wp_enqueue_script( 'stock-ticker-admin' );
@@ -885,9 +883,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					self::log( "Damn, we got Invalid API call for symbol {$to_fetch['symbol']}" );
 					update_option( 'stockticker_av_last', $to_fetch['symbol'] );
 				}
+				// Bad response
+				// Stock Ticker connected to AlphaVantage.co but received unusable response. Try to prefix symbol with stock exchange.
+				elseif ( strpos( $stock_data, 'Bad API response' ) >= 0 ) {
+					self::log( "Damn, we got Bad API response for symbol {$to_fetch['symbol']}" );
+					update_option( 'stockticker_av_last', $to_fetch['symbol'] );
+				}
 
 				// If we got some error for first symbol, (and resnponse has not invalid API) revert last timestamp
-				if ( 0 == $to_fetch['index'] && false === strpos( $stock_data, 'Invalid API call' ) ) {
+				if ( 0 == $to_fetch['index'] && false === strpos( $stock_data, 'Invalid API call' ) && false === strpos( $stock_data, 'Bad API response' ) ) {
 					self::log( 'Failed fetching and crunching for first symbol, set back previous timestamp' );
 					update_option( 'stockticker_av_last_timestamp', $last_fetched_timestamp );
 				}
@@ -1115,31 +1119,33 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					return 'Stock Ticker connected to AlphaVantage.co but got error: ' . $response_arr['Error Message'];
 				} else if ( ! empty( $response_arr['Information'] ) ) {
 					return 'Stock Ticker connected to AlphaVantage.co and got response: ' . $response_arr['Information'];
+				} else if ( ! isset( $response_arr['Global Quote'] ) ) {
+					return 'Bad API response: Stock Ticker connected to AlphaVantage.co and received response w/o Global Quote object!';
+				} else if ( empty( $quote['07. latest trading day'] ) ) {
+					return 'Bad API response: Stock Ticker connected to AlphaVantage.co and received empty Global Quote object.';
 				} else {
 					// Crunch data from AlphaVantage for symbol and prepare compact array
-					self::log( "We got data from AlphaVantage for $symbol, so now let we crunch them and save to database..." );
+					self::log( "We got some data from AlphaVantage for $symbol, so now let we crunch them and save to database if possible..." );
 
 					// GLOBAL_QUOTE
-					if ( isset( $response_arr['Global Quote'] ) ) {
-						$quote = $response_arr['Global Quote'];
-						$data_arr = array(
-							't'   => $symbol,
-							'pc'  => $quote['08. previous close'],
-							'c'   => $quote['09. change'],
-							'cp'  => str_replace( '%', '', $quote['10. change percent'] ),
-							'l'   => $quote['05. price'], // $last_close,
-							'lt'  => $quote['07. latest trading day'], // $last_trade_refresh,
-							'ltz' => 'US/Eastern', // default US/Eastern
-							'r'   => "{$quote['04. low']} - {$quote['03. high']}", // $range,
-							'o'   => $quote['02. open'], // $last_open,
-							'h'   => $quote['03. high'], // $last_high,
-							'low' => $quote['04. low'], // $last_low,
-							'v'   => $quote['06. volume'], // $last_volume,
-						);
-					}
-
+					$quote = $response_arr['Global Quote'];
+					$data_arr = array(
+						't'   => $symbol,
+						'pc'  => $quote['08. previous close'],
+						'c'   => $quote['09. change'],
+						'cp'  => str_replace( '%', '', $quote['10. change percent'] ),
+						'l'   => $quote['05. price'], // $last_close,
+						'lt'  => $quote['07. latest trading day'], // $last_trade_refresh,
+						'ltz' => 'US/Eastern', // default US/Eastern
+						'r'   => "{$quote['04. low']} - {$quote['03. high']}", // $range,
+						'o'   => $quote['02. open'], // $last_open,
+						'h'   => $quote['03. high'], // $last_high,
+						'low' => $quote['04. low'], // $last_low,
+						'v'   => $quote['06. volume'], // $last_volume,
+					);
 					self::log( 'data_arr w/o raw JSON: ' . print_r( $data_arr, 1 ) );
 					$data_arr['raw'] = $json;
+
 				}
 				unset( $response_arr );
 			}

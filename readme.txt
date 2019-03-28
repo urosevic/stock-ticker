@@ -3,8 +3,8 @@ Contributors: urkekg
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
-Tested up to: 4.9.9
-Stable tag: 3.0.5.4
+Tested up to: 5.1.1
+Stable tag: 3.1
 Requires PHP: 5.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -259,9 +259,13 @@ array(2) {
 `
 
 == Changelog ==
-= 3.1 (20181122) =
-* Fix: Infinite fetch loop
-* Improve: tier pause between symbol fetches
+
+= 3.1 (20190328) =
+* Bump supported WordPress version
+* Fix/Improve: Infinite loop for bad API responses
+* Improve: Update disclaimer and readme
+* (20181122) Fix: Infinite fetch loop
+* Improve: Tier pause between symbol fetches
 * Improve: Allow dash in stock symbol
 * (20180916) Improve: Make Force Fetch to wait between each symbol fetch regarding to the API Tier
 * Improve: Remove duplicate symbols on settings update

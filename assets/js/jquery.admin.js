@@ -53,16 +53,15 @@ jQuery(document).ready(function($) {
 					}).done(function(response) {
 						if ( ! response.done && 'true' != $(fetch_button_stop).data('stop') ) {
 							// different progress character for timedout request
+							var fetch_url = stockTickerJs.avurl;
 							if ( 'wait' == response.method ) {
 								$('.st_force_data_fetch').append( '[WAIT] ' + response.message + '<br />');
 							} else if ( response.message.indexOf('Operation timed out') >= 0 ) {
 								$('.st_force_data_fetch').append( '[Timeout] ' + response.symbol + '<br />');
 							} else if ( response.message.indexOf('Invalid API call') >= 0 ) {
-								var fetch_url = stockTickerJs.avurl;
-								if ( 'intraday' == response.method ) {
-									fetch_url = stockTickerJs.avurli;
-								}
-								$('.st_force_data_fetch').append( '[Invalid API call] ' + response.symbol + ' (<a href="' + fetch_url + response.symbol + '" target="_blank">test</a>)<br />');
+								$('.st_force_data_fetch').append( '[Invalid API call] ' + response.symbol + ' (<a href="' + stockTickerJs.avurl + response.symbol + '" target="_blank">test</a>)<br />');
+							} else if ( response.message.indexOf('Bad API response') >= 0 ) {
+								$('.st_force_data_fetch').append( '[Bad API response] ' + response.symbol + ' (<a href="' + stockTickerJs.avurl + response.symbol + '" target="_blank">test</a> OR try to prefix stock symbol with stock exchange)<br />');
 							} else {
 								$('.st_force_data_fetch').append( '[OK] ' + response.symbol + '<br />');
 							}
