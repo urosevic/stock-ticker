@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
 Requires at least: 4.0.0
 Tested up to: 5.1.1
-Stable tag: 3.1
+Stable tag: 3.1.0.1
 Requires PHP: 5.5
 License: GPLv3 or later
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -19,7 +19,7 @@ Please note, stock data has been provided by [Alpha Vantage](https://www.alphava
 
 Stock Ticker is advanced variation of [Stock Quote](https://wordpress.org/plugins/stock-quote/) plugin.
 
-**Multisite WordPress is not supported jet**
+**Multisite WordPress is not supported yet**
 
 == Disclaimer ==
 
@@ -88,7 +88,6 @@ Alpha Vantage provide stock data for following stock exchange markets:
 * **ELI** - Euronext Lisbon
 * **EPA** - Euronext Paris
 * **LON** - London Stock Exchange
-* **MCX** - Moscow Exchange
 * **NASDAQ** - NASDAQ Exchange
 * **CPH** - NASDAQ OMX Copenhagen
 * **HEL** - NASDAQ OMX Helsinki
@@ -101,6 +100,9 @@ Alpha Vantage provide stock data for following stock exchange markets:
 * **SHE** - Shenzhen Stock Exchange
 * **TPE** - Taiwan Stock Exchange
 * **TYO** - Tokyo Stock Exchange
+
+Not supported:
+* **MCX** - Moscow Exchange
 
 == Installation ==
 
@@ -260,8 +262,12 @@ array(2) {
 
 == Changelog ==
 
+= 3.1.0.1 (20190328) =
+* Fix: infinite Bad API response introduced in release 3.1
+
 = 3.1 (20190328) =
 * Bump supported WordPress version
+* Remove MCX from supported exchanges because AlphaVantage does not provide data for Moscow Stock Exchange
 * Fix/Improve: Infinite loop for bad API responses
 * Improve: Update disclaimer and readme
 * (20181122) Fix: Infinite fetch loop

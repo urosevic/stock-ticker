@@ -3,7 +3,7 @@
 Plugin Name: Stock Ticker
 Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
 Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 3.1
+Version: 3.1.0.1
 Author: Aleksandar Urosevic
 Author URI: https://urosevic.net
 License: GNU GPL3
@@ -31,7 +31,6 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
-// require_once('class/class-stock-tools-settings.php');
 
 if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
@@ -1121,14 +1120,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					return 'Stock Ticker connected to AlphaVantage.co and got response: ' . $response_arr['Information'];
 				} else if ( ! isset( $response_arr['Global Quote'] ) ) {
 					return 'Bad API response: Stock Ticker connected to AlphaVantage.co and received response w/o Global Quote object!';
-				} else if ( empty( $quote['07. latest trading day'] ) ) {
-					return 'Bad API response: Stock Ticker connected to AlphaVantage.co and received empty Global Quote object.';
 				} else {
 					// Crunch data from AlphaVantage for symbol and prepare compact array
 					self::log( "We got some data from AlphaVantage for $symbol, so now let we crunch them and save to database if possible..." );
 
 					// GLOBAL_QUOTE
 					$quote = $response_arr['Global Quote'];
+					if ( empty( $quote['07. latest trading day'] ) ) {
+						return 'Bad API response: Stock Ticker connected to AlphaVantage.co and received empty Global Quote object.';
+					}
 					$data_arr = array(
 						't'   => $symbol,
 						'pc'  => $quote['08. previous close'],
