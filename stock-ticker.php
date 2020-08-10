@@ -1,17 +1,20 @@
 <?php
 /**
-Plugin Name: Stock Ticker
-Plugin URI: https://urosevic.net/wordpress/plugins/stock-ticker/
-Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
-Version: 3.1.0.1
-Author: Aleksandar Urosevic
-Author URI: https://urosevic.net
-License: GNU GPL3
  * @package Stock Ticker
+ *
+ * Plugin Name: Stock Ticker
+ * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
+ * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
+ * Version:     3.1.0.1
+ * Author:      Aleksandar Urosevic
+ * Author URI:  https://urosevic.net
+ * License:     GNU GPLv3
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.txt
+ * Text Domain: stock-ticker
  */
 
 /**
-Copyright 2014-2019 Aleksandar Urosevic (urke.kg@gmail.com)
+Copyright 2014-2020 Aleksandar Urosevic (urke.kg@gmail.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -46,7 +49,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 9;
-		const VER = '3.1';
+		const VER = '3.1.0.1';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';

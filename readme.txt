@@ -1,12 +1,12 @@
 === Stock Ticker ===
 Contributors: urkekg
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
-Tags: widget, stock, ticker, securities, quote, financial, finance, exchange, bank, market, trading, investment, stock symbols, stock quotes, forex, nasdaq, nyse, wall street
-Requires at least: 4.0.0
-Tested up to: 5.1.1
+Tags: stock, sotck quote, ticker, trading, forex
+Requires at least: 4.9
+Tested up to: 5.5
 Stable tag: 3.1.0.1
-Requires PHP: 5.5
-License: GPLv3 or later
+Requires PHP: 5.6
+License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
 Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
@@ -20,6 +20,8 @@ Please note, stock data has been provided by [Alpha Vantage](https://www.alphava
 Stock Ticker is advanced variation of [Stock Quote](https://wordpress.org/plugins/stock-quote/) plugin.
 
 **Multisite WordPress is not supported yet**
+
+**IMPORTANT** Stock Ticker does not have own Gutenberg Block, so you can use Shortcode Block or Common Block to insert Stock Ticker within the post/page content.
 
 == Disclaimer ==
 
@@ -262,8 +264,9 @@ array(2) {
 
 == Changelog ==
 
-= 3.1.0.1 (20190328) =
-* Fix: infinite Bad API response introduced in release 3.1
+= 3.1.0.1 (20200810) =
+* Tested: WordPress 5.5-RC2-48768 and PHP 7.4.1
+* (20190328) Fix: infinite Bad API response introduced in release 3.1
 
 = 3.1 (20190328) =
 * Bump supported WordPress version
