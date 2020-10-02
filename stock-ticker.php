@@ -519,7 +519,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * @param  string   $number_format Which number format to use (dc, sc, cd, sd).
 		 * @return string          Composed HTML for block.
 		 */
-		public function stock_ticker( $symbols, $show, $number_format = null, $decimals = null, $static, $empty = true, $duplicate = false, $class = '' ) {
+		public function stock_ticker( $symbols, $show, $number_format = null, $decimals = null, $static = false, $empty = true, $duplicate = false, $class = '' ) {
 
 			if ( empty( $symbols ) ) {
 				return;
@@ -609,11 +609,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$q_price   = $stock_data[ $symbol ]['last_close']; // ['l']; // last_close not last_open
 				$q_changep = $stock_data[ $symbol ]['changep']; // ['cp'];
 				$q_volume  = $stock_data[ $symbol ]['last_volume'];
+				// Timezone.
 				$q_tz      = $stock_data[ $symbol ]['tz'];
-				$q_ltrade  = $stock_data[ $symbol ]['last_refreshed']; // ['lt'];
+				// Date.
+				$q_ltrade_raw = $stock_data[ $symbol ]['last_refreshed'];
+				// Make default plugin date format (for tooltip) w/o zero time.
+				$q_ltrade  = $q_ltrade_raw; // ['lt'];
 				$q_ltrade  = str_replace( ' 00:00:00', '', $q_ltrade ); // Strip zero time from last trade date string
 				$q_ltrade  = "{$q_ltrade} {$q_tz}";
-				// Extract Exchange from Symbol
+				// Extract Exchange from Symbol.
 				$q_exch = '';
 				if ( strpos( $symbol, ':' ) !== false ) {
 					list( $q_exch, $q_symbol ) = explode( ':', $symbol );
@@ -670,6 +674,47 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$template = str_replace( '%change%', $q_change, $template );
 				$template = str_replace( '%changep%', "{$q_changep}%", $template );
 				$template = str_replace( '%volume%', $q_volume, $template );
+
+				// Now simply replace not customized %ltrade% with default format.
+				$template = str_replace( '%ltrade%', $q_ltrade, $template );
+
+				// Check if template has custom date format for %ltrade%
+				// Usage: %ltrade% custom date format %ltrade|F j, Y%
+				if (strpos($template, '%ltrade|') !== false) {
+					// Match all %ltrade% occurances with custom date format
+					preg_match_all('/(\%ltrade\|[^%]+\%)+/', $template, $ltrade_formats);
+
+					// Just for testing...
+					$test = $ltrade_formats[0];
+
+					// If matches array exists, proceed with custom formatting
+					if (!empty($ltrade_formats[0])) {
+						// Convert date from quote to timestamp - use $q_ltrade and $q_tz for timezone conversion.
+						$ltrade_datetime = strtotime($q_ltrade_raw);
+						$ltrade_date = date_create_from_format('Y-m-d H:i:s', $q_ltrade_raw, new DateTimeZone($q_tz));
+						
+						// Now process each custom date format %ltrade% occurance.
+						foreach ( $ltrade_formats[0] as $ltrade_format ) {
+
+							// Extract custom date format.
+							$ltrade_date_format = str_replace('%ltrade|', '', $ltrade_format);
+							$ltrade_date_format = str_replace('%','', $ltrade_date_format);
+
+							// Format timestamp to custom date format.
+							$ltrade_date_formatted = date_format(
+								$ltrade_date,
+								$ltrade_date_format
+							);
+
+							// Now replace custom date format %ltrade% in $template with formatted date.
+							$template = str_replace(
+								$ltrade_format,
+								$ltrade_date_formatted,
+								$template
+							);
+						}
+					}
+				}
 
 				$q .= '<span class="sqitem" title="' . $quote_title . '">' . $template . '</span>';
 

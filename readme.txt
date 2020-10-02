@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: stock, sotck quote, ticker, trading, forex
 Requires at least: 4.9
 Tested up to: 5.5
-Stable tag: 3.1.0.1
+Stable tag: 3.2.0
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -79,7 +79,6 @@ Use simple shortcode `[stock_ticker]` without any parameter in post or page, to 
 
 Alpha Vantage provide stock data for following stock exchange markets:
 
-* **ASX** - Australian Securities Exchange
 * **BOM** - Bombay Stock Exchange
 * **BIT** - Borsa Italiana Milan Stock Exchange
 * **TSE** - Canadian/Toronto Securities Exchange
@@ -95,16 +94,17 @@ Alpha Vantage provide stock data for following stock exchange markets:
 * **HEL** - NASDAQ OMX Helsinki
 * **ICE** - NASDAQ OMX Iceland
 * **STO** - NASDAQ OMX Stockholm
-* **NSE** - National Stock Exchange of India
 * **NYSE** - New York Stock Exchange
-* **SGX** - Singapore Exchange
 * **SHA** - Shanghai Stock Exchange
 * **SHE** - Shenzhen Stock Exchange
 * **TPE** - Taiwan Stock Exchange
 * **TYO** - Tokyo Stock Exchange
 
 Not supported:
-* **MCX** - Moscow Exchange
+* **MCX** - Moscow Exchange (since December 2018) - eg. `MCX:GAZP`
+* **ASX** - Australian Securities Exchange ([since since May 2020](https://twitter.com/moinzaman/status/1262522914227712000)) - eg. `ASX:MSB`
+* **SGX** - Singapore Exchange ([since July 13th 2020](https://kpo-and-czm.blogspot.com/2017/11/bye-yahoo-finance-hi-alpha-vantage.html?showComment=1596075191464#c3946519402226422619)) - eg. `C29.SI`
+* **NSE** - National Stock Exchange of India ([since July 2020](https://twitter.com/sachinmankapure/status/1279794312210010114)) - eg. `NSE:VB`
 
 == Installation ==
 
@@ -263,6 +263,10 @@ array(2) {
 `
 
 == Changelog ==
+
+=3.2.0 (20200825) =
+* Add: new template keyword `%ltrade%` with customizable date format like `%ltrade|l, jS \of F Y%`
+* Improve: translatable strings and update Text Domain to from `wpaust` to `stock-ticker`
 
 = 3.1.0.1 (20200810) =
 * Tested: WordPress 5.5-RC2-48768 and PHP 7.4.1

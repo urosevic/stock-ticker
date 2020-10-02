@@ -45,7 +45,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Add settings section.
 			add_settings_section(
 				'wpau_stock_ticker',
-				__( 'Settings', 'wpaust' ),
+				__( 'Settings', 'stock-ticker' ),
 				array( &$this, 'settings_section_description' ),
 				$wpau_stockticker->plugin_slug
 			);
@@ -54,18 +54,18 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Add separator for General section
 			add_settings_field(
 				$this->option_name . 'general_section',
-				__( 'General', 'wpaust' ),
+				__( 'General', 'stock-ticker' ),
 				array( &$this, 'settings_field_section_divider' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
-					'description' => __( 'Predefine general settings for Stock Ticker. Here you can set API key and symbols used on whole website (in all ticker).', 'wpaust' ),
+					'description' => __( 'Predefine general settings for Stock Ticker. Here you can set API key and symbols used on whole website (in all ticker).', 'stock-ticker' ),
 				)
 			);
 
 			add_settings_field(
 				$this->option_name . 'avapikey',
-				__( 'AlphaVantage.co API Key', 'wpaust' ),
+				__( 'AlphaVantage.co API Key', 'stock-ticker' ),
 				array( &$this, 'settings_field_input_password' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
@@ -73,7 +73,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'field'       => $this->option_name . '[avapikey]',
 					'description' => sprintf(
 						wp_kses(
-							__( 'To get stock data we use AlphaVantage.co API. If you do not have it already, <a href="%1$s" target="_blank">%2$s</a> and enter it here. Please note, free API key is limited to 5 requests per minute.', 'wpaust' ),
+							__( 'To get stock data we use AlphaVantage.co API. If you do not have it already, <a href="%1$s" target="_blank">%2$s</a> and enter it here. Please note, free API key is limited to 5 requests per minute.', 'stock-ticker' ),
 							array(
 								'a' => array(
 									'href' => array(),
@@ -82,7 +82,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 							)
 						),
 						esc_url( 'https://www.alphavantage.co/support/#api-key' ),
-						__( 'Claim your free API Key', 'wpaust' )
+						__( 'Claim your free API Key', 'stock-ticker' )
 					),
 					'class'       => 'regular-text',
 					'value'       => $this->defaults['avapikey'],
@@ -91,7 +91,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 
 			add_settings_field(
 				$this->option_name . 'av_api_tier',
-				__( 'AlphaVantage.co API Key Tier', 'wpaust' ),
+				__( 'AlphaVantage.co API Key Tier', 'stock-ticker' ),
 				array( &$this, 'settings_field_select' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
@@ -99,7 +99,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'field'       => $this->option_name . '[av_api_tier]',
 					'description' => sprintf(
 						wp_kses(
-							__( 'Which Alpha Vantage API Key membership do you have (<a href="%1$s" target="_blank">%2$s</a> or <a href="%3$s" target="_blank">%4$s</a>)?', 'wpaust' ),
+							__( 'Which Alpha Vantage API Key membership do you have (<a href="%1$s" target="_blank">%2$s</a> or <a href="%3$s" target="_blank">%4$s</a>)?', 'stock-ticker' ),
 							array(
 								'a' => array(
 									'href'   => array(),
@@ -108,17 +108,17 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 							)
 						),
 						esc_url( 'https://www.alphavantage.co/support/#api-key' ),
-						__( 'Free', 'wpaust' ),
+						__( 'Free', 'stock-ticker' ),
 						esc_url( 'https://www.alphavantage.co/premium/' ),
-						__( 'Premium', 'wpaust' )
+						__( 'Premium', 'stock-ticker' )
 					),
 					'items'       => array(
-						'5'   => __( 'Free (5 requests/min)', 'wpaust' ),
-						'15'  => __( 'Premium (15 requests/min)', 'wpaust' ),
-						'60'  => __( 'Premium (60 requests/min)', 'wpaust' ),
-						'120' => __( 'Premium (120 requests/min)', 'wpaust' ),
-						'360' => __( 'Premium (360 requests/min)', 'wpaust' ),
-						'600' => __( 'Premium (600 requests/min)', 'wpaust' ),
+						'5'   => __( 'Free (5 requests/min)', 'stock-ticker' ),
+						'15'  => __( 'Premium (15 requests/min)', 'stock-ticker' ),
+						'60'  => __( 'Premium (60 requests/min)', 'stock-ticker' ),
+						'120' => __( 'Premium (120 requests/min)', 'stock-ticker' ),
+						'360' => __( 'Premium (360 requests/min)', 'stock-ticker' ),
+						'600' => __( 'Premium (600 requests/min)', 'stock-ticker' ),
 					),
 					'value' => $this->defaults['av_api_tier'],
 				)
@@ -126,26 +126,26 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 
 			add_settings_field(
 				$this->option_name . 'all_symbols',
-				__( 'All Stock Symbols', 'wpaust' ),
+				__( 'All Stock Symbols', 'stock-ticker' ),
 				array( &$this, 'settings_field_input_text' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[all_symbols]',
-					'description' => __( 'You can use some or all of those symbils in any ticker on website. Please note, you have to define which symbols you will use per widget/shortcode. Enter stock symbols separated with comma.', 'wpaust' ),
+					'description' => __( 'You can use some or all of those symbils in any ticker on website. Please note, you have to define which symbols you will use per widget/shortcode. Enter stock symbols separated with comma.', 'stock-ticker' ),
 					'class'       => 'widefat',
 					'value'       => $this->defaults['all_symbols'],
 				)
 			);
 			add_settings_field(
 				$this->option_name . 'loading_message',
-				__( 'Loading Message', 'wpaust' ),
+				__( 'Loading Message', 'stock-ticker' ),
 				array( &$this, 'settings_field_input_text' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[loading_message]',
-					'description' => __( 'Customize message displayed to visitor until plugin load stock data through AJAX.', 'wpaust' ),
+					'description' => __( 'Customize message displayed to visitor until plugin load stock data through AJAX.', 'stock-ticker' ),
 					'class'       => 'widefat',
 					'value'       => $this->defaults['loading_message'],
 				)
@@ -153,7 +153,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Default error message.
 			add_settings_field(
 				$this->option_name . 'error_message',
-				__( 'Error Message', 'wpaust' ),
+				__( 'Error Message', 'stock-ticker' ),
 				array( &$this, 'settings_field_input_text' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
@@ -161,7 +161,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'field'       => $this->option_name . '[error_message]',
 					'description' => __(
 						'When we do not have pre-fetched stock data for symbols requested in block from AlphaVantage.co, display this message in ticker',
-						'wpaust'
+						'stock-ticker'
 					),
 					'class'       => 'widefat',
 					'value'       => $this->defaults['error_message'],
@@ -170,7 +170,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Force fetch stock
 			add_settings_field(
 				$this->option_name . 'force_fetch',
-				__( 'Force data fetch', 'wpaust' ),
+				__( 'Force data fetch', 'stock-ticker' ),
 				array( &$this, 'settings_js_forcedatafetch' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker'
@@ -180,44 +180,44 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Add separator for Defaults section
 			add_settings_field(
 				$this->option_name . 'default_section',
-				__( 'Defaults', 'wpaust' ),
+				__( 'Defaults', 'stock-ticker' ),
 				array( &$this, 'settings_field_section_divider' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
-					'description' => __( 'Predefine default settings for Stock Ticker. Here you can set stock symbols and how you wish to present companies in ticker.', 'wpaust' ),
+					'description' => __( 'Predefine default settings for Stock Ticker. Here you can set stock symbols and how you wish to present companies in ticker.', 'stock-ticker' ),
 				)
 			);
 
 			// Add setting's fields.
 			add_settings_field(
 				$this->option_name . 'symbols',
-				__( 'Stock Symbols', 'wpaust' ),
+				__( 'Stock Symbols', 'stock-ticker' ),
 				array( &$this, 'settings_field_input_text' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[symbols]',
-					'description' => __( 'Those simbols are used as default for shortcodes w/o provided symbols, but not for widgets as widget have own symbols setting. Enter stock symbols separated with comma.', 'wpaust' ),
+					'description' => __( 'Those simbols are used as default for shortcodes w/o provided symbols, but not for widgets as widget have own symbols setting. Enter stock symbols separated with comma.', 'stock-ticker' ),
 					'class'       => 'widefat',
 					'value'       => $this->defaults['symbols'],
 				)
 			);
 			add_settings_field(
 				$this->option_name . 'show',
-				__( 'Show Company as', 'wpaust' ),
+				__( 'Show Company as', 'stock-ticker' ),
 				array( &$this, 'settings_field_select' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[show]',
 					'description' => sprintf(
-						__( 'What to show as Company identifier by default for shortcodes if not provided shortcode parameter %s. Widget have own setting for this.', 'wpaust' ),
+						__( 'What to show as Company identifier by default for shortcodes if not provided shortcode parameter %s. Widget have own setting for this.', 'stock-ticker' ),
 						"'show'"
 					),
 					'items'       => array(
-						'name'   => __( 'Company Name', 'wpaust' ),
-						'symbol' => __( 'Stock Symbol', 'wpaust' ),
+						'name'   => __( 'Company Name', 'stock-ticker' ),
+						'symbol' => __( 'Stock Symbol', 'stock-ticker' ),
 					),
 					'value' => $this->defaults['show'],
 				)
@@ -225,13 +225,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 
 			add_settings_field(
 				$this->option_name . 'number_format',
-				__( 'Number format', 'wpaust' ),
+				__( 'Number format', 'stock-ticker' ),
 				array( &$this, 'settings_field_select' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[number_format]',
-					'description' => __( 'Select default number format', 'stock-quote' ),
+					'description' => __( 'Select default number format', 'stock-ticker' ),
 					'items'       => array(
 						'cd' => '0,000.00',
 						'dc' => '0.000,00',
@@ -244,18 +244,18 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			);
 			add_settings_field(
 				$this->option_name . 'decimals',
-				__( 'Decimal places', 'wpaust' ),
+				__( 'Decimal places', 'stock-ticker' ),
 				array( &$this, 'settings_field_select' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[decimals]',
-					'description' => __( 'Select amount of decimal places for numbers', 'stock-quote' ),
+					'description' => __( 'Select amount of decimal places for numbers', 'stock-ticker' ),
 					'items'       => array(
-						'1' => __( 'One', 'stock-quote' ),
-						'2' => __( 'Two', 'stock-quote' ),
-						'3' => __( 'Three', 'stock-quote' ),
-						'4' => __( 'Four', 'stock-quote' ),
+						'1' => __( 'One', 'stock-ticker' ),
+						'2' => __( 'Two', 'stock-ticker' ),
+						'3' => __( 'Three', 'stock-ticker' ),
+						'4' => __( 'Four', 'stock-ticker' ),
 					),
 					'value' => $this->defaults['decimals'],
 					'class'       => 'regular-text',
@@ -265,39 +265,39 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Unchanged.
 			add_settings_field(
 				$this->option_name . 'quote_zero',
-				__( 'Unchanged Quote', 'wpaust' ),
+				__( 'Unchanged Quote', 'stock-ticker' ),
 				array( &$this, 'settings_field_colour_picker' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[zero]',
-					'description' => __( 'Set colour for unchanged quote', 'wpaust' ),
+					'description' => __( 'Set colour for unchanged quote', 'stock-ticker' ),
 					'value'       => $this->defaults['zero'],
 				)
 			);
 			// Minus.
 			add_settings_field(
 				$this->option_name . 'quote_minus',
-				__( 'Negative Change', 'wpaust' ),
+				__( 'Negative Change', 'stock-ticker' ),
 				array( &$this, 'settings_field_colour_picker' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[minus]',
-					'description' => __( 'Set colour for negative change', 'wpaust' ),
+					'description' => __( 'Set colour for negative change', 'stock-ticker' ),
 					'value'       => $this->defaults['minus'],
 				)
 			);
 			// Plus.
 			add_settings_field(
 				$this->option_name . 'quote_plus',
-				__( 'Positive Change', 'wpaust' ),
+				__( 'Positive Change', 'stock-ticker' ),
 				array( &$this, 'settings_field_colour_picker' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[plus]',
-					'description' => __( 'Set colour for positive change', 'wpaust' ),
+					'description' => __( 'Set colour for positive change', 'stock-ticker' ),
 					'value'       => $this->defaults['plus'],
 				)
 			);
@@ -306,25 +306,25 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Add separator for Advanced section
 			add_settings_field(
 				$this->option_name . 'advanced_section',
-				__( 'Advanced', 'wpaust' ),
+				__( 'Advanced', 'stock-ticker' ),
 				array( &$this, 'settings_field_section_divider' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
-					'description' => __( 'Set advanced options important for caching quote feeds.', 'wpaust' ),
+					'description' => __( 'Set advanced options important for caching quote feeds.', 'stock-ticker' ),
 				)
 			);
 
 			// Ticker speed.
 			add_settings_field(
 				$this->option_name . 'speed',
-				__( 'Ticker Speed', 'wpaust' ),
+				__( 'Ticker Speed', 'stock-ticker' ),
 				array( &$this, 'settings_field_input_number' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[speed]',
-					'description' => __( 'Define speed of ticker scrolling in pixels per second (default is 50)', 'wpaust' ),
+					'description' => __( 'Define speed of ticker scrolling in pixels per second (default is 50)', 'stock-ticker' ),
 					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['speed'] ) ? $this->defaults['speed'] : 50,
 					'min'         => 10,
@@ -335,16 +335,16 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Default ticker item template.
 			add_settings_field(
 				$this->option_name . 'template',
-				__( 'Item Template', 'wpaust' ),
+				__( 'Item Template', 'stock-ticker' ),
 				array( &$this, 'settings_field_textarea' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[template]',
 					'description' => sprintf(
-						__( 'Custom template for item. You can use macro keywords %1$s and %2$s mixed with HTML tags %3$s and/or %4$s.', 'wpaust' ),
-						'%exch_symbol%, %symbol%, %company%, %price%, %volume%, %change%',
-						'%changep%',
+						__( 'Custom template for item. You can use macro keywords %1$s or %2$s mixed with HTML tags %3$s and/or %4$s.', 'stock-ticker' ),
+						'%exch_symbol%, %symbol%, %company%, %price%, %volume%, %change%, %changep%, %ltrade%',
+						'%ltrade|l, jS \of F Y%',
 						'&lt;span&gt;, &lt;em&gt;',
 						'&lt;strong&gt;'
 					),
@@ -356,7 +356,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Custom name.
 			add_settings_field(
 				$this->option_name . 'legend',
-				__( 'Custom Names', 'wpaust' ),
+				__( 'Custom Names', 'stock-ticker' ),
 				array( &$this, 'settings_field_textarea' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
@@ -367,7 +367,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'rows'        => 7,
 					'description' => __(
 						'Define custom names for symbols. Single symbol per row in format EXCHANGE:SYMBOL;CUSTOM_NAME',
-						'wpaust'
+						'stock-ticker'
 					),
 				)
 			);
@@ -375,13 +375,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Caching timeout field.
 			add_settings_field(
 				$this->option_name . 'cache_timeout',
-				__( 'Cache Timeout', 'wpaust' ),
+				__( 'Cache Timeout', 'stock-ticker' ),
 				array( &$this, 'settings_field_input_number' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[cache_timeout]',
-					'description' => __( 'Define timeout before next round of fetching symbols data start, in seconds. Make sure to set this value to (at least) number of **All Stock Symbols** × **Fetch Timeout** + **50%** (if you have 10 symbols and 10 second fetch timeout, set to at least 150 seconds). Please note, Alpha Vantage update quotes on 15 minutes!', 'wpaust' ),
+					'description' => __( 'Define timeout before next round of fetching symbols data start, in seconds. Make sure to set this value to (at least) number of **All Stock Symbols** × **Fetch Timeout** + **50%** (if you have 10 symbols and 10 second fetch timeout, set to at least 150 seconds). Please note, Alpha Vantage update quotes on 15 minutes!', 'stock-ticker' ),
 					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['cache_timeout'] ) ? $this->defaults['cache_timeout'] : 180,
 					'min'         => 0,
@@ -392,13 +392,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Fetch timeout field.
 			add_settings_field(
 				$this->option_name . 'timeout',
-				__( 'Fetch Timeout', 'wpaust' ),
+				__( 'Fetch Timeout', 'stock-ticker' ),
 				array( &$this, 'settings_field_input_number' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[timeout]',
-					'description' => __( 'Define timeout to fetch quote feed before give up and display error message, in seconds (default is 2)', 'wpaust' ),
+					'description' => __( 'Define timeout to fetch quote feed before give up and display error message, in seconds (default is 2)', 'stock-ticker' ),
 					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['timeout'] ) ? $this->defaults['timeout'] : 2,
 					'min'         => 1,
@@ -410,7 +410,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Default styling.
 			add_settings_field(
 				$this->option_name . 'style',
-				__( 'Custom Style', 'wpaust' ),
+				__( 'Custom Style', 'stock-ticker' ),
 				array( &$this, 'settings_field_textarea' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
@@ -419,20 +419,20 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'class'       => 'widefat',
 					'rows'        => 2,
 					'value'       => $this->defaults['style'],
-					'description' => __( 'Define custom CSS style for ticker item (font family, size, weight)', 'wpaust' ),
+					'description' => __( 'Define custom CSS style for ticker item (font family, size, weight)', 'stock-ticker' ),
 				)
 			);
 
 			// Refresh checkbox.
 			add_settings_field(
 				$this->option_name . 'refresh',
-				__( 'Auto Refresh', 'wpaust' ),
+				__( 'Auto Refresh', 'stock-ticker' ),
 				array( &$this, 'settings_field_checkbox' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[refresh]',
-					'description' => __( 'Enable this option to auto refresh all stock tickers on page w/o requirement to reload page manually.', 'wpaust' ),
+					'description' => __( 'Enable this option to auto refresh all stock tickers on page w/o requirement to reload page manually.', 'stock-ticker' ),
 					'class'       => 'checkbox',
 					'value'       => isset( $this->defaults['refresh'] ) ? $this->defaults['refresh'] : false,
 				) // args
@@ -441,13 +441,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Refresh timeout field.
 			add_settings_field(
 				$this->option_name . 'refresh_timeout',
-				__( 'Auto Refresh Timeout', 'wpaust' ),
+				__( 'Auto Refresh Timeout', 'stock-ticker' ),
 				array( &$this, 'settings_field_input_number' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[refresh_timeout]',
-					'description' => __( 'Define auto refresh timeout, in seconds. This value is for reloading ticker on webpage without refrehsing page, and does not affect how ofter plugin refresh data from AlphaVantage API!', 'wpaust' ),
+					'description' => __( 'Define auto refresh timeout, in seconds. This value is for reloading ticker on webpage without refrehsing page, and does not affect how ofter plugin refresh data from AlphaVantage API!', 'stock-ticker' ),
 					'class'       => 'num small-text',
 					'value'       => isset( $this->defaults['refresh_timeout'] ) ? $this->defaults['refresh_timeout'] : 2,
 					'min'         => 0,
@@ -459,13 +459,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Global enqueue assets.
 			add_settings_field(
 				$this->option_name . 'globalassets',
-				__( 'Load assets on all pages?', 'wpaust' ),
+				__( 'Load assets on all pages?', 'stock-ticker' ),
 				array( &$this, 'settings_field_checkbox' ),
 				$wpau_stockticker->plugin_slug,
 				'wpau_stock_ticker',
 				array(
 					'field'       => $this->option_name . '[globalassets]',
-					'description' => __( 'By default, Stock Ticker will load corresponding JavaScript files on demand. But, if you need to load assets on all pages, check this option. (For example, if you have some plugin that load widgets or content via Ajax, you should enable this option)', 'wpaust' ),
+					'description' => __( 'By default, Stock Ticker will load corresponding JavaScript files on demand. But, if you need to load assets on all pages, check this option. (For example, if you have some plugin that load widgets or content via Ajax, you should enable this option)', 'stock-ticker' ),
 					'class'       => 'checkbox',
 					'value'       => isset( $this->defaults['globalassets'] ) ? $this->defaults['globalassets'] : false,
 				) // args
@@ -497,7 +497,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Think of this as help text for the section.
 			esc_attr_e(
 				'',
-				'wpaust'
+				'stock-ticker'
 			);
 		}
 
@@ -831,8 +831,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			global $wpau_stockticker;
 			// Add a page to manage this plugin's settings.
 			add_options_page(
-				__( 'Stock Ticker', 'wpaust' ),
-				__( 'Stock Ticker', 'wpaust' ),
+				__( 'Stock Ticker', 'stock-ticker' ),
+				__( 'Stock Ticker', 'stock-ticker' ),
 				'manage_options',
 				$wpau_stockticker->plugin_slug,
 				array( &$this, 'plugin_settings_page' )
