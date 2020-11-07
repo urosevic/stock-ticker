@@ -241,7 +241,7 @@ function au_stockticker_update_routine_9() {
 	}
 } // END function au_stockticker_update_routine_9()
 
-// Rename auto Remove Intraday setting
+// Rename refresh to reload
 function au_stockticker_update_routine_10() {
 	$defaults = get_option( 'stockticker_defaults' );
 
