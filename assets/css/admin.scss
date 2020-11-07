@@ -2,7 +2,7 @@
     .stock_ticker_wrapper {
         display: table;
 
-        .content_cell {
+        .content_container {
             display: table-cell;
 
             button[name="st_force_data_fetch_stop"] {
@@ -21,6 +21,22 @@
                 padding: 5px;
                 font-family: monospace;
             }
+            .st_symbol_search_test_log {
+                &:empty {
+                    display: none;
+                }
+                .error {
+                    color: #D8442F;
+                }
+                pre {
+                    background: #23282d;
+                    color: #ccc;
+                    margin-top: 10px;
+                    padding: 5px;
+                    font-family: monospace;
+                    white-space: pre-wrap;
+                }
+            }
         }
 
         .sidebar_container {
@@ -28,39 +44,154 @@
             padding: 0 0 0 20px;
             width: 25%;
 
-            .aust-button {
-                display: block;
+            .references {
+                padding: 5px;
+                margin-bottom: 20px;
+
+                .aust-button {
+                    display: block;
+                    background: #fff;
+                    border-radius: 7px;
+                    border: 1px solid rgba(0,0,0,0.1);
+                    box-shadow: 0 0 0 5px rgba(0,0,0,0.1);
+                    padding: 11px 15px;
+                    white-space: nowrap;
+                    line-height: 18px;
+                    color: #bdbdbd;
+                    text-shadow: 1px 1px #fff;
+                    text-decoration: none;
+                    position: relative;
+                    min-width: 120px;
+
+                    &:hover {
+                        color: #6796a9;
+                        background-color: #c2edff;
+                    }
+
+                    &.paypal_donate:after {
+                        content: ' ';
+                        background-image: url(../img/paypal.png);
+                        background-repeat: no-repeat;
+                        background-position: center right;
+                        width: 62px;
+                        height: 100%;
+                        display: inline-block;
+                        position: absolute;
+                        right: 15px;
+                        top: 0;
+                        bottom: 0;
+                    }
+                } // .aust-button
+            } // .references
+            .disclaimer {
                 background: #fff;
-                border-radius: 7px;
-                border: 1px solid rgba(0,0,0,0.1);
-                box-shadow: 0 0 0 5px rgba(0,0,0,0.1);
-                padding: 11px 15px;
-                white-space: nowrap;
-                line-height: 18px;
-                color: #bdbdbd;
-                text-shadow: 1px 1px #fff;
-                text-decoration: none;
-                position: relative;
-                min-width: 120px;
+                border: 1px dashed rgba(0,0,0,0.2);
+                padding: 20px;
 
-                &:hover {
-                    color: #6796a9;
-                    background-color: #c2edff;
+                h2 {
+                    margin-top: 0;
                 }
+                p:last-child {
+                    margin-bottom: 0;
+                }
+            } // .disclaimer
+        }
+    }
 
-                &.paypal_donate:after {
-                    content: ' ';
-                    background-image: url(../img/paypal.png);
-                    background-repeat: no-repeat;
-                    background-position: center right;
-                    width: 62px;
-                    height: 100%;
-                    display: inline-block;
-                    position: absolute;
-                    right: 15px;
-                    top: 0;
-                    bottom: 0;
+    .help {
+        display: flex;
+        flex-direction: row;
+        background: #fff;
+        padding: 20px;
+        border: 1px solid #000;
+
+        .overview {
+            width: 60%;
+            display: inline-flex;
+            flex-direction: column;
+
+            table {
+                width: 100%;
+                tbody th {text-align: left; }
+                tr th, tr td {
+                    border-bottom: 1px solid #000;
                 }
+            }
+            dl {
+                padding-top: 5px;
+                dt {
+                    float: left;
+                    width: 110px;
+                    padding: 5px;
+                    &.head {
+                        font-weight: 600;
+                    }
+                }
+                dd {
+                    &.head {
+                        border-top: 1px solid #ccc;
+                        font-weight: 600;
+                    }
+                    box-sizing: border-box;
+                    width: 100%;
+                    border: 1px solid #ccc;
+                    border-top: 0;
+                    margin: 0;
+                    padding: 5px 5px 5px 120px;
+                }
+            }
+        }
+        .exchanges {
+            width: 40%;
+            display: flex;
+            justify-content: space-between;
+            .exchanges-supported,
+            .exchanges-unsupported {
+                display: inline-flex;
+                flex-direction: column;
+                padding-left: 20px;
+            }
+            .exchanges-supported * {
+                color: #009D59;
+            }
+            .exchanges-unsupported * {
+                color: #D8442F;
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: 1480px) {
+    #stock_ticker_settings {
+        .help {
+            flex-direction: column;
+            .overview {
+                width: 100%;
+            }
+            .exchanges {
+                width: 100%;
+                justify-content: flex-start;
+                .exchanges-supported {
+                    padding-left: 0;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 782px) {
+    #stock_ticker_settings {
+        .stock_ticker_wrapper {
+            display: block;
+
+            .content_container,
+            .sidebar_container {
+                width: 100%;
+                display: block;
+            }
+            .sidebar_container {
+                padding: 0;
+                margin-bottom: 20px;
             }
         }
     }

@@ -15,7 +15,7 @@ Easy add customizable moving or static ticker tapes with stock information for c
 
 A simple and easy configurable plugin for WordPress that allows you to insert stock ticker with stock price information to posts, pages, widgets or even to template files. Insertion is enabled by shortcode or multi instance widget.
 
-Please note, stock data has been provided by [Alpha Vantage](https://www.alphavantage.co/)
+Please note, stock data has been provided by [Alpha Vantage](https://www.alphavantage.co/) which does not support indexes since mid-2020!
 
 Stock Ticker is advanced variation of [Stock Quote](https://wordpress.org/plugins/stock-quote/) plugin.
 
@@ -48,8 +48,9 @@ You can set custom template for visible change value. Default format is `%compan
 * `%price%` - Price value, like *125.22*
 * `%change%` - Change value, like *-5.53*
 * `%changep%` - Change percentage, like *-4.23%*
+* `%ltrade%` - Last trade day (like *2020-09-25*), which can be followed by [the PHP date format](https://www.php.net/manual/en/datetime.format.php) to customize date output, separate by pipe character, eg. *|l, jS \of F Y*
 
-For feature requests or help [send feedback](https://urosevic.net/wordpress/plugins/stock-ticker/ "Official plugin page") or use support forum on WordPress.
+For feature requests or help [send feedback](https://urosevic.net/wordpress/plugins/stock-ticker/ "Official plugin page") or use [official WordPress support forum](https://wordpress.org/support/plugin/stock-ticker/).
 
 == How To Use ==
 
@@ -136,30 +137,31 @@ A big **thank you** goes to [@flexer](https://wordpress.org/support/users/flexer
 
 = How to know which stock symbols to use? =
 
-You can use standard symbols from supported stock exchanges.
-To start with you can try with AAPL,MSFT,IBM,CSCO,GOOG,YHOO,AMZN (Apple Inc; Microsoft Corporation; International Business Machines Corporation; Cisco Systems, Inc.; Google Inc; Yahoo! Inc; Amazon.com, Inc.)
-
-= How to get Dow Jones Industrial Average or other Indexes? =
-
-Since version 3.0.0 we use Alpha Vantage, which support Indexes. To get quote for index, simply add symbol as `.DJI` (or `^DJI` if you prefer).
-
-= How to get currency exchange rate? =
-
-Use Currency symbols like `EURGBP=X` to get rate of `1 Euro` = `? British Pounds`
-
-= How to get Crude Oil, Gold and other commodities? =
-
-Unfortunately, Alpha Vantage does not provide data for commodities (metals, energies, grains, meats, softs). That is why Stock Ticker can't provide quotes for them.
-
-= How to get proper stock price from proper stock exchange? =
-
-Enter symbol in format `EXCHANGE:SYMBOL` like `LON:FFX` for FairFX Group PLC from London Stock Exchange market.
+You can use standard symbols from stock exchanges supported by AlphaVantage.co.
+For example, you can try with AAPL, MSFT, IBM, CSCO, GOOG, YHOO, AMZN (Apple Inc; Microsoft Corporation; International Business Machines Corporation; Cisco Systems, Inc.; Google Inc; Yahoo! Inc; Amazon.com, Inc.)
+To check if AlphaVantage.co support your preferred symbol(s), you can use *Symbol Search & Test* tool on plugin settings page to search for keysords and symbols on AlphaVantage.co directly from your WordPress dashboard.
 
 = Stock Exchange or Symbol I need does not work! =
 
-If Stock Exchange or symbol you need does not work (like `BVMF:BVMF3`), first look for your symbol on [Yahoo! Finance](https://finance.yahoo.com) and try to use symbol Yahoo put in parenthesys (like `BVMF3.SA` for our example, or `^BSESN` for index of Bombay Stock Exchange of India).
+Try to find correct symbol on AlphaVantage.co by looing for it in *Symbol Search & Test* tool. Even try alternatives or company name. If that does not help, search Alpha Vantage community forum [www.alpha-vantage.community](https://www.alpha-vantage.community/)
 
-If you already set proper symbol but no data got fetched from AlphaVantage, please verify that Alpha Vantage have data for your symbol. If they don't support symbol you need, feel free to ask AlphaVantage support to include it to their data set by community forum [www.alpha-vantage.community](https://www.alpha-vantage.community/)
+= How to get Dow Jones Industrial Average or other Indexes? =
+
+Unfortunately, AlphaVantage.co no longer supports indexes (mid-2020). That is why Stock Ticker no longer provide quotes for them.
+
+= How to get Crude Oil, Gold and other commodities? =
+
+Unfortunately, AlphaVantage.co does not support commodities (metals, energies, grains, meats, softs). That is why Stock Ticker can't provide quotes for them.
+
+= How to get currency exchange rate? =
+
+Use Currency exchange symbols like `EURGBP` to get rate of `1 Euro` = `? British Pounds`
+Please note, since mid-2020 AlphaVantage.co does not support anymore format `EURGBP=X` so use syntax without `=X`.
+
+= How to get proper stock price from proper stock exchange? =
+
+Enter symbol in format `EXCHANGE:SYMBOL` like `LON:LLOY` or `SYMBOL.EXCHANGE` like `LLOY.LON` for Lloyds Banking Group Plc from London Stock Exchange market.
+Please note that AlphaVantage.co does not provide stock data always for all existing stocks.
 
 = How to get descriptive title for currency exchange rates? =
 
@@ -175,7 +177,7 @@ Add this to your template file (you also can add custom parameters for shortcode
 
 = How to customize quote output? =
 
-On Settings page for plugin you can set custom Value template. You can use macro keywords `%exch_symbol%`, `%symbol%`, `%company%`, `%price%`, `%volume%`, `%change%` and `%changep%` mixed with HTML tags `<span>`, `<em>` and/or `<strong>`.
+On Settings page for plugin you can set custom Value template. You can use macro keywords `%exch_symbol%`, `%symbol%`, `%company%`, `%price%`, `%volume%`, `%change%`, `%changep%` and `%ltrade%` mixed with HTML tags `<span>`, `<em>` and/or `<strong>`.
 
 Default template is `%company% %price% %change% %changep%` but you can format it like:
 
@@ -187,7 +189,7 @@ Please note that Alpha Vantage does not provide company name in retrieved feeds.
 
 = How to resolve error `Unfortunately, we could not get stock quotes this time`? =
 
-This can be temporary problem. First try to access front-end page with appended parameter `?stockticker_purge_cache=1`.
+This can be temporary issue. First try to access front-end page with appended parameter `?stockticker_purge_cache=1`.
 
 If that does not help, next try to increase *Fetch Timeout* option on general plugin settings and then visit frontend page with appended address parameter `?stockticker_purge_cache=1`.
 
@@ -264,9 +266,15 @@ array(2) {
 
 == Changelog ==
 
-=3.2.0 (20200825) =
-* Add: new template keyword `%ltrade%` with customizable date format like `%ltrade|l, jS \of F Y%`
-* Improve: translatable strings and update Text Domain to from `wpaust` to `stock-ticker`
+=3.2.0 (20201107) =
+* Update: FAQ
+* Improve: Help section on plugin settings page
+* Improve: spelling and grammar
+* Change: rename option `Auto Refresh` to `Auto Reload` to be clear what it is for
+* Tested: WordPress 5.5.3 and PHP 7.4.10
+* (20201002) Improve: translatable strings and update Text Domain to from `wpaust` to `stock-ticker`
+* Add: *Symbol Search & Test* to help users find correct symbol notation on AlphaVantage.co
+* (20200825) Add: new template keyword `%ltrade%` with customizable date format like `%ltrade|l, jS \of F Y%`
 
 = 3.1.0.1 (20200810) =
 * Tested: WordPress 5.5-RC2-48768 and PHP 7.4.1

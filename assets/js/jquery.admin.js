@@ -18,17 +18,25 @@ jQuery(document).ready(function($) {
 		e.preventDefault();
 		$(this).data('stop','true');
 	});
+	// Toggle clickable elements
+	var sockticker_elements_toggle = function(state) {
+		$('button[name="st_force_data_fetch"], input[name="st_symbol_search_keywords"], button[name="st_symbol_search_test_button"], input[name="st_symbol_search_test"], select[name="st_symbol_search_test_endpoint"]').prop('disabled', state);
+	};
+	// API Tier timeout
+	var stockticker_api_timeout = function() {
+		var av_api_tier = $('select[name="stockticker_defaults[av_api_tier]"]').val();
+		return ( 60 / av_api_tier ) * 1000;
+	};
 	$('button[name="st_force_data_fetch"]').on('click', function(e){
 		e.preventDefault();
 		var fetch_button = this;
 		var fetch_button_stop = $('button[name="st_force_data_fetch_stop"]');
-		var av_api_tier = $('select[name="stockticker_defaults[av_api_tier]"]').val();
-		var av_api_timeout = ( 60 / av_api_tier ) * 1000;
+		var av_api_timeout = stockticker_api_timeout();
 
-		// disable button
-		$(fetch_button).prop('disabled',true);
+		// Disable clickable elements
+		sockticker_elements_toggle(true);
 		$(fetch_button_stop).addClass('enabled');
-		/* First reset fetching loop */
+		// First reset fetching loop
 		$.ajax({
 			type: 'post',
 			dataType: 'json',
@@ -41,7 +49,7 @@ jQuery(document).ready(function($) {
 				// Update log container
 				$('.st_force_data_fetch').html( 'Reset fetching loop and fetch data again. We`ll make pause ' + (av_api_timeout / 1000) + ' second(s) between each symbol fetch. Please wait...<br /><br />' );
 				function fetchNextSymbol() {
-					/* Then do AJAX request */
+					// Then do AJAX request
 					$.ajax({
 						type: 'post',
 						dataType: 'json',
@@ -75,14 +83,57 @@ jQuery(document).ready(function($) {
 								$('.st_force_data_fetch').append( '<br />DONE' );
 							}
 							// Enable button again when all is finished
-							$(fetch_button).prop('disabled',false);
 							$(fetch_button_stop).removeClass('enabled').data('stop','false');
+							sockticker_elements_toggle(false);
 						}
 					}).fail(function(response) {
 						$('.st_force_data_fetch').append( '<br />[Error] ' + response.message );
 					});
-				};
+				}
 				fetchNextSymbol();
 		});
 	});
+
+	$('button[name="st_symbol_search_test_button"]').on('click', function(e){
+		e.preventDefault();
+		var av_symbol_search_test = $('input[name="st_symbol_search_test"]').val();
+		if (0 == av_symbol_search_test.length) {
+			$('.st_symbol_search_test_log').append('<p class="error">Please enter keyword or symbol to search or test!</p>');
+			return;
+		}
+		var av_search_test_endpoint = $('select[name="st_symbol_search_test_endpoint"]').val();
+		if (0 == av_search_test_endpoint.length) {
+			$('.st_symbol_search_test_log').append('<p class="error">Please select AlphaVantage.co API endpoint from dropdown above!</p>');
+			return;
+		}
+		var av_search_test_button = this;
+		var av_api_timeout = stockticker_api_timeout();
+
+		// disable clickable elements
+		sockticker_elements_toggle(true);
+
+		$('.st_symbol_search_test_log').html('<pre>Lookup for <em>' + av_symbol_search_test + '</em> on API endpoint <em>' + av_search_test_endpoint + '</em> and waiting <em>' + (av_api_timeout/1000) + '</em> seconds until next action...\n\n</pre>');
+		$.ajax({
+			type: 'post',
+			dataType: 'json',
+			async: true,
+			url: stockTickerJs.ajax_url,
+			data: {
+				'action': 'stockticker_symbol_search_test',
+				'symbol': av_symbol_search_test,
+				'endpoint': av_search_test_endpoint
+			}
+		}).done(function(response){
+			$('.st_symbol_search_test_log pre').append(response.message);
+			setTimeout(function() {
+				sockticker_elements_toggle(false);
+			}, av_api_timeout);
+		}).fail(function(response){
+			$('.st_symbol_search_test_log pre').append(response.message);
+			setTimeout(function() {
+				sockticker_elements_toggle(false);
+			}, av_api_timeout);
+		});
+	});
+
 });

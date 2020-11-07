@@ -240,3 +240,33 @@ function au_stockticker_update_routine_9() {
 		} catch (Exception $w) {}
 	}
 } // END function au_stockticker_update_routine_9()
+
+// Rename auto Remove Intraday setting
+function au_stockticker_update_routine_10() {
+	$defaults = get_option( 'stockticker_defaults' );
+
+	if ( isset( $defaults['refresh'] ) || isset( $defaults['refresh_timeout'] ) ) {
+		try {
+			// Rename refresh_timeout -> reload_timeout
+			if ( isset( $defaults['refresh_timeout'] ) && intval( $defaults['refresh_timeout'] ) > 30 ) {
+				$defaults['reload_timeout'] = $defaults['refresh_timeout'];
+				unset( $defaults['refresh_timeout'] );
+			} else {
+				$defaults['reload_timeout'] = 5 * MINUTE_IN_SECONDS;
+			}
+			// Rename refresh -> reload
+			if ( isset( $defaults['refresh'] ) ) {
+				$defaults['reload'] = $defaults['refresh'];
+				unset( $defaults['refresh'] );
+				// Regenerate reload JS if required.
+				$upload_dir = wp_upload_dir();
+				$js = sprintf( 'var stockTickers = setInterval(function(){ stocktickers_load() }, %s);', intval( $defaults['reload_timeout'] ) * 1000 );
+				file_put_contents( $upload_dir['basedir'] . '/stock-ticker-reload.js', $js, LOCK_EX );
+			} else {
+				$defaults['reload'] = false;
+			}
+
+			update_option( 'stockticker_defaults', $defaults );
+		} catch (Exception $w) {}
+	}
+} // END function au_stockticker_update_routine_10()

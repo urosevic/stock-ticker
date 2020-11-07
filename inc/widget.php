@@ -178,28 +178,28 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		<p>
 		<label for="<?php echo $this->get_field_id( 'show' ); ?>"><?php esc_attr_e( 'Represent Company as', 'wpaust' ); ?>:</label>
 		<select class="widefat" id="<?php echo $this->get_field_id( 'show' ); ?>" name="<?php echo $this->get_field_name( 'show' ); ?>">
-			<option <?php echo ('name' == $show) ? 'selected="selected"' : ''; ?> value="name"><?php esc_attr_e( 'Company Name', 'wpaust' ); ?></option>
-			<option <?php echo ('symbol' == $show) ? 'selected="selected"' : ''; ?> value="symbol"><?php esc_attr_e( 'Stock Symbol', 'wpaust' ); ?></option>
+			<option <?php echo ( 'name' == $show ) ? 'selected="selected"' : ''; ?> value="name"><?php esc_attr_e( 'Company Name', 'wpaust' ); ?></option>
+			<option <?php echo ( 'symbol' == $show ) ? 'selected="selected"' : ''; ?> value="symbol"><?php esc_attr_e( 'Stock Symbol', 'wpaust' ); ?></option>
 		</select>
 		</p>
 
 		<p>
 		<label for="<?php echo $this->get_field_id( 'number_format' ); ?>"><?php esc_attr_e( 'Number format', 'wpaust' ); ?>:</label>
 		<select class="widefat" id="<?php echo $this->get_field_id( 'number_format' ); ?>" name="<?php echo $this->get_field_name( 'number_format' ); ?>">
-			<option <?php echo ('cd' == $number_format) ? 'selected="selected"' : ''; ?> value="cd">0,000.00</option>
-			<option <?php echo ('dc' == $number_format) ? 'selected="selected"' : ''; ?> value="dc">0.000,00</option>
-			<option <?php echo ('sd' == $number_format) ? 'selected="selected"' : ''; ?> value="sd">0 000.00</option>
-			<option <?php echo ('sc' == $number_format) ? 'selected="selected"' : ''; ?> value="sc">0 000,00</option>
+			<option <?php echo ( 'cd' == $number_format ) ? 'selected="selected"' : ''; ?> value="cd">0,000.00</option>
+			<option <?php echo ( 'dc' == $number_format ) ? 'selected="selected"' : ''; ?> value="dc">0.000,00</option>
+			<option <?php echo ( 'sd' == $number_format ) ? 'selected="selected"' : ''; ?> value="sd">0 000.00</option>
+			<option <?php echo ( 'sc' == $number_format ) ? 'selected="selected"' : ''; ?> value="sc">0 000,00</option>
 		</select>
 		</p>
 
 		<p>
 		<label for="<?php echo $this->get_field_id( 'decimals' ); ?>"><?php esc_attr_e( 'Decimal places', 'wpaust' ); ?>:</label>
 		<select class="widefat" id="<?php echo $this->get_field_id( 'decimals' ); ?>" name="<?php echo $this->get_field_name( 'decimals' ); ?>">
-			<option <?php echo (1 == $decimals) ? 'selected="selected"' : ''; ?> value="1">One</option>
-			<option <?php echo (2 == $decimals) ? 'selected="selected"' : ''; ?> value="2">Two</option>
-			<option <?php echo (3 == $decimals) ? 'selected="selected"' : ''; ?> value="3">Three</option>
-			<option <?php echo (4 == $decimals) ? 'selected="selected"' : ''; ?> value="4">Four</option>
+			<option <?php echo ( 1 == $decimals ) ? 'selected="selected"' : ''; ?> value="1">One</option>
+			<option <?php echo ( 2 == $decimals ) ? 'selected="selected"' : ''; ?> value="2">Two</option>
+			<option <?php echo ( 3 == $decimals ) ? 'selected="selected"' : ''; ?> value="3">Three</option>
+			<option <?php echo ( 4 == $decimals ) ? 'selected="selected"' : ''; ?> value="4">Four</option>
 		</select>
 		</p>
 

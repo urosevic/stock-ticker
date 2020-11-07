@@ -5,7 +5,7 @@
  * Plugin Name: Stock Ticker
  * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
  * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
- * Version:     3.1.0.1
+ * Version:     3.2.0
  * Author:      Aleksandar Urosevic
  * Author URI:  https://urosevic.net
  * License:     GNU GPLv3
@@ -48,40 +48,46 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	 */
 	class Wpau_Stock_Ticker {
 
-		const DB_VER = 9;
-		const VER = '3.1.0.1';
+		const DB_VER = 10;
+		const VER = '3.2.0';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
 		public $plugin_option = 'stockticker_defaults';
 		public $plugin_url;
 
-		public static $exchanges = array(
-			'ASX'    => 'Australian Securities Exchange',
-			'BOM'    => 'Bombay Stock Exchange',
-			'BIT'    => 'Borsa Italiana Milan Stock Exchange',
-			'TSE'    => 'Canadian/Toronto Securities Exchange',
-			'FRA'    => 'Deutsche Boerse Frankfurt Stock Exchange',
-			'ETR'    => 'Deutsche Boerse Frankfurt Stock Exchange',
-			'AMS'    => 'Euronext Amsterdam',
-			'EBR'    => 'Euronext Brussels',
-			'ELI'    => 'Euronext Lisbon',
-			'EPA'    => 'Euronext Paris',
-			'LON'    => 'London Stock Exchange',
-			// 'MCX'    => 'Moscow Exchange',
-			'NASDAQ' => 'NASDAQ Exchange',
-			'CPH'    => 'NASDAQ OMX Copenhagen',
-			'HEL'    => 'NASDAQ OMX Helsinki',
-			'ICE'    => 'NASDAQ OMX Iceland',
-			'STO'    => 'NASDAQ OMX Stockholm',
-			'NSE'    => 'National Stock Exchange of India',
-			'NYSE'   => 'New York Stock Exchange',
-			'SGX'    => 'Singapore Exchange',
-			'SHA'    => 'Shanghai Stock Exchange',
-			'SHE'    => 'Shenzhen Stock Exchange',
-			'TPE'    => 'Taiwan Stock Exchange',
-			'TYO'    => 'Tokyo Stock Exchange',
-		);
+		public $endpoints = [ 'SYMBOL_SEARCH', 'GLOBAL_QUOTE', 'TIME_SERIES_DAILY', 'TIME_SERIES_INTRADAY', 'OVERVIEW' ];
+
+		public static $exchanges = [
+			'supported' => [
+				'BOM'    => 'Bombay Stock Exchange',
+				'BIT'    => 'Borsa Italiana Milan Stock Exchange',
+				'TSE'    => 'Canadian/Toronto Securities Exchange',
+				'FRA'    => 'Deutsche Boerse Frankfurt Stock Exchange',
+				'ETR'    => 'Deutsche Boerse Frankfurt Stock Exchange',
+				'AMS'    => 'Euronext Amsterdam',
+				'EBR'    => 'Euronext Brussels',
+				'ELI'    => 'Euronext Lisbon',
+				'EPA'    => 'Euronext Paris',
+				'LON'    => 'London Stock Exchange',
+				'NASDAQ' => 'NASDAQ Exchange',
+				'CPH'    => 'NASDAQ OMX Copenhagen',
+				'HEL'    => 'NASDAQ OMX Helsinki',
+				'ICE'    => 'NASDAQ OMX Iceland',
+				'STO'    => 'NASDAQ OMX Stockholm',
+				'NYSE'   => 'New York Stock Exchange',
+				'SHA'    => 'Shanghai Stock Exchange',
+				'SHE'    => 'Shenzhen Stock Exchange',
+				'TPE'    => 'Taiwan Stock Exchange',
+				'TYO'    => 'Tokyo Stock Exchange',
+			],
+			'unsupported' => [
+				'ASX'    => 'Australian Securities Exchange',
+				'MCX'    => 'Moscow Exchange',
+				'NSE'    => 'National Stock Exchange of India',
+				'SGX'    => 'Singapore Exchange',
+			],
+		];
 
 		/**
 		 * Construct the plugin object
@@ -119,6 +125,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Register AJAX stock updater
 			add_action( 'wp_ajax_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
 			add_action( 'wp_ajax_nopriv_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
+			// Register AJAX symbol search and test
+			add_action( 'wp_ajax_stockticker_symbol_search_test', array( $this, 'ajax_stockticker_symbol_search_test' ) );
+			add_action( 'wp_ajax_nopriv_stockticker_symbol_search_test', array( $this, 'ajax_stockticker_symbol_search_test' ) );
 			// Restart fetching loop by AJAX request
 			add_action( 'wp_ajax_stockticker_purge_cache', array( $this, 'ajax_restart_av_fetching' ) );
 			add_action( 'wp_ajax_nopriv_stockticker_purge_cache', array( $this, 'ajax_restart_av_fetching' ) );
@@ -230,8 +239,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'legend'          => "AAPL;Apple Inc.\nFB;Facebook, Inc.\nCSCO;Cisco Systems, Inc.\nGOOG;Google Inc.\nINTC;Intel Corporation\nLNKD;LinkedIn Corporation\nMSFT;Microsoft Corporation\nTWTR;Twitter, Inc.\nBABA;Alibaba Group Holding Limited\nIBM;International Business Machines Corporationn\n.DJI;Dow Jones Industrial Average\nEURGBP;Euro (€) ⇨ British Pound Sterling (£)",
 				'style'           => 'font-family:"Open Sans",Helvetica,Arial,sans-serif;font-weight:normal;font-size:14px;',
 				'timeout'         => 4,
-				'refresh'         => false,
-				'refresh_timeout' => 5 * MINUTE_IN_SECONDS,
+				'reload'          => false,
+				'reload_timeout'  => 5 * MINUTE_IN_SECONDS,
 				'speed'           => 50,
 				'globalassets'    => false,
 				'avapikey'        => '',
@@ -396,16 +405,16 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				wp_enqueue_script( 'stock-ticker' );
 			}
 
-			// Register refresh script if option is enabled
-			if ( ! empty( $defaults['refresh'] ) ) {
+			// Register reload script if option is enabled
+			if ( ! empty( $defaults['reload'] ) ) {
 				wp_register_script(
-					'stock-ticker-refresh',
-					set_url_scheme( $upload_dir['baseurl'] ) . '/stock-ticker-refresh.js',
+					'stock-ticker-reload',
+					set_url_scheme( $upload_dir['baseurl'] ) . '/stock-ticker-reload.js',
 					array( 'jquery', 'jquery-webticker', 'stock-ticker' ),
 					self::VER,
 					true
 				);
-				wp_enqueue_script( 'stock-ticker-refresh' );
+				wp_enqueue_script( 'stock-ticker-reload' );
 			}
 
 		} // END function enqueue_scripts()
@@ -506,6 +515,99 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			echo $result;
 			wp_die();
 		} // END function ajax_stockticker_update_quotes()
+
+		/**
+		 * AJAX to search for symbol on AlphaVantage.co
+		 */
+		function ajax_stockticker_symbol_search_test() {
+			$symbol = $_POST['symbol'];
+			$endpoint = $_POST['endpoint'];
+			$result['message'] = $this->av_query_endpoint( $endpoint, $symbol );
+			echo json_encode( $result );
+			wp_die();
+		} // END function ajax_stockticker_symbol_search_test()
+
+		/**
+		 * Do AlphaVantage.co API request to targeted endpoint
+		 * @param  string $endpoint AlphaVantage.co supported endpoint GLOBAL_QUOTE or SYMBOL_SEARCH
+		 * @param  string $item     Item to query for (symbol or keywords)
+		 * @return string           Error message or JSON encoded response from API
+		 */
+		public function av_query_endpoint( $endpoint = '', $item = '' ) {
+			// Exit if we don't have API Key, supported endpoint and requested item.
+			if ( empty( $this->defaults['avapikey'] ) ) {
+				return 'Stock Ticker Fatal Error: AlphaVantage.co API key has not set.';
+			} else if ( empty( $item ) ) {
+				return 'Stock Ticker Fatal Error: No item provided for query.';
+			} else if ( ! in_array( $endpoint, $this->endpoints ) ) {
+				return 'Stock Ticker Fatal Error: AlphaVantage.co API endpoint ' . strtoupper( $endpoint ) . ' has not supported.';
+			}
+
+			// Get current timestamp (for reference)
+			$timestamp_now = time();
+
+			// Get API Tier and calculate timeout
+			$av_api_tier = ! empty( $this->defaults['av_api_tier'] ) ? $this->defaults['av_api_tier'] : 5;
+			$av_api_tier_timeout = 60 / $av_api_tier;
+
+			// Get API Tier end timestamp for previous fetch
+			$api_tier_end_timestamp = get_option( 'stockticker_av_tier_end_timestamp', $timestamp_now );
+			if ( $timestamp_now < $api_tier_end_timestamp ) {
+				self::log( 'API Tier timeout for previous request of ' . $av_api_tier_timeout . ' seconds has not expired... waiting...' );
+				return json_encode( array(
+					'message' => "API Tier timeout for previous request has not expired. Try again in {$av_api_tier_timeout} second(s) ...",
+					'method'  => 'wait',
+				) );
+			}
+
+			// Calculate API tier pause and save it to options and get data
+			$av_api_tier_end_timestamp = $timestamp_now + $av_api_tier_timeout;
+			update_option( 'stockticker_av_tier_end_timestamp', $av_api_tier_end_timestamp );
+
+			self::log( "Use endpoint {$endpoint} for {$item}..." );
+
+			if ( 'TIME_SERIES_INTRADAY' == $endpoint ) {
+				$extra_params = '&interval=60min';
+			} else {
+				$extra_params = '';
+			}
+
+			// Define AplhaVantage API URL
+			$feed_url = sprintf(
+				'https://www.alphavantage.co/query?function=%1$s&apikey=%2$s&datatype=json&%3$s=%4$s%5$s',
+				$endpoint,
+				$this->defaults['avapikey'],
+				'SYMBOL_SEARCH' == $endpoint ? 'keywords' : 'symbol',
+				$item,
+				$extra_params
+			);
+			$wparg = array(
+				'timeout' => intval( $this->defaults['timeout'] ),
+			);
+
+			self::log( 'Fetching data from AV: ' . $feed_url );
+			$response = wp_remote_get( $feed_url, $wparg );
+
+			// If we have WP error log it and return none
+			if ( is_wp_error( $response ) ) {
+				return 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message();
+			} else {
+				// Get response from AV and parse it - look for error
+				$json = wp_remote_retrieve_body( $response );
+				$response_arr = json_decode( $json, true );
+
+				// If we got some error from AV, log to self::log and return none
+				if ( ! empty( $response_arr['Error Message'] ) ) {
+					return 'Stock Ticker connected to AlphaVantage.co but got error: ' . $response_arr['Error Message'];
+				} else if ( ! empty( $response_arr['Information'] ) ) {
+					return 'Stock Ticker connected to AlphaVantage.co and got response: ' . $response_arr['Information'];
+				} else if ( 'GLOBAL_QUOTE' == $endpoint && ! isset( $response_arr['Global Quote'] ) ) {
+					return 'Bad API response: Stock Ticker connected to AlphaVantage.co and received response w/o Global Quote object!';
+				} else {
+					return $json;
+				}
+			}
+		} // END public function av_query_endpoint($endpoint = '', $item = '')
 
 		/**
 		 * Generate and output stock ticker block
@@ -660,7 +762,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 				$url_query = $q_symbol;
 				if ( ! empty( $q_exch ) ) {
-					$quote_title = $q_name . ' (' . self::$exchanges[ $q_exch ] . ', Volume ' . $q_volume . ', Last trade ' . $q_ltrade . ')';
+					$quote_title = $q_name . ' (' . self::$exchanges['supported'][ $q_exch ] . ', Volume ' . $q_volume . ', Last trade ' . $q_ltrade . ')';
 				} else {
 					$quote_title = $q_name . ' (Last trade ' . $q_ltrade . ')';
 				}
@@ -680,25 +782,25 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 				// Check if template has custom date format for %ltrade%
 				// Usage: %ltrade% custom date format %ltrade|F j, Y%
-				if (strpos($template, '%ltrade|') !== false) {
+				if ( false !== strpos( $template, '%ltrade|' ) ) {
 					// Match all %ltrade% occurances with custom date format
-					preg_match_all('/(\%ltrade\|[^%]+\%)+/', $template, $ltrade_formats);
+					preg_match_all( '/(\%ltrade\|[^%]+\%)+/', $template, $ltrade_formats );
 
 					// Just for testing...
 					$test = $ltrade_formats[0];
 
 					// If matches array exists, proceed with custom formatting
-					if (!empty($ltrade_formats[0])) {
+					if ( ! empty( $ltrade_formats[0] ) ) {
 						// Convert date from quote to timestamp - use $q_ltrade and $q_tz for timezone conversion.
-						$ltrade_datetime = strtotime($q_ltrade_raw);
-						$ltrade_date = date_create_from_format('Y-m-d H:i:s', $q_ltrade_raw, new DateTimeZone($q_tz));
-						
+						$ltrade_datetime = strtotime( $q_ltrade_raw );
+						$ltrade_date = date_create_from_format( 'Y-m-d H:i:s', $q_ltrade_raw, new DateTimeZone( $q_tz ) );
+
 						// Now process each custom date format %ltrade% occurance.
 						foreach ( $ltrade_formats[0] as $ltrade_format ) {
 
 							// Extract custom date format.
-							$ltrade_date_format = str_replace('%ltrade|', '', $ltrade_format);
-							$ltrade_date_format = str_replace('%','', $ltrade_date_format);
+							$ltrade_date_format = str_replace( '%ltrade|', '', $ltrade_format );
+							$ltrade_date_format = str_replace( '%', '', $ltrade_date_format );
 
 							// Format timestamp to custom date format.
 							$ltrade_date_formatted = date_format(
@@ -763,8 +865,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// Enqueue script parser on demand
 				if ( empty( $defaults['globalassets'] ) ) {
 					wp_enqueue_script( 'stock-ticker' );
-					if ( ! empty( $defaults['refresh'] ) ) {
-						wp_enqueue_script( 'stock-ticker-refresh' );
+					if ( ! empty( $defaults['reload'] ) ) {
+						wp_enqueue_script( 'stock-ticker-reload' );
 					}
 				}
 
@@ -829,7 +931,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// From below we'll do magic within database
 			global $wpdb;
 
-			// put all in the query, prepare and get results
+			// Put all in the query, prepare and get results
 			$stock_data_a = $wpdb->get_results( $wpdb->prepare(
 				"
 				SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
@@ -929,10 +1031,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				if ( strpos( $stock_data, 'Invalid API call' ) >= 0 ) {
 					self::log( "Damn, we got Invalid API call for symbol {$to_fetch['symbol']}" );
 					update_option( 'stockticker_av_last', $to_fetch['symbol'] );
-				}
-				// Bad response
-				// Stock Ticker connected to AlphaVantage.co but received unusable response. Try to prefix symbol with stock exchange.
-				elseif ( strpos( $stock_data, 'Bad API response' ) >= 0 ) {
+				} elseif ( strpos( $stock_data, 'Bad API response' ) >= 0 ) {
+					// Bad response
+					// Stock Ticker connected to AlphaVantage.co but received unusable response. Try to prefix symbol with stock exchange.
 					self::log( "Damn, we got Bad API response for symbol {$to_fetch['symbol']}" );
 					update_option( 'stockticker_av_last', $to_fetch['symbol'] );
 				}
