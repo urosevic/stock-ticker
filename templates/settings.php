@@ -85,7 +85,7 @@ global $wpau_stockticker;
 					<?php
 					printf(
 						esc_attr__( 'Override default number format for values (default from this settings page used if no custom set by shortcode). Valid options are: %1$s and %2$s', 'stock-ticker' ),
-						sprintf( '<code>cd</code> %1$s <em>0.000,00</em>; <code>dc</code> %1$s <em>0,000.00</em>; <code>sd</code> %1$s <em>0 000.00</em>', __( 'for', 'stock-ticker' ) ),
+						sprintf( '<code>cd</code> %1$s <em>0,000.00</em>; <code>dc</code> %1$s <em>0.000,00</em>; <code>sd</code> %1$s <em>0 000.00</em>', __( 'for', 'stock-ticker' ) ),
 						sprintf( '<code>sc</code> %s <em>0 000,00</em>', __( 'for', 'stock-ticker' )
 						)
 					);

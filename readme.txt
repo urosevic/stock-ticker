@@ -1,10 +1,10 @@
 === Stock Ticker ===
-Contributors: urkekg
+Contributors: urkekg, techwebux
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
-Tags: stock, sotck quote, ticker, trading, forex
+Tags: stock, stock ticker, sotck quote, ticker, trading, forex
 Requires at least: 4.9
-Tested up to: 5.5
-Stable tag: 3.2.0
+Tested up to: 5.8
+Stable tag: 3.2.1
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -72,9 +72,9 @@ Use simple shortcode `[stock_ticker]` without any parameter in post or page, to 
 = Examples =
 
 * Scrolling ticker
-`[stock_ticker symbols="BABA,.DJI,EURGBP=X,LON:FFX" show="symbol"]`
+`[stock_ticker symbols="BABA,EURGBP,LLOY.LON" show="symbol"]`
 * Static unordered list
-`[stock_ticker symbols="BABA,.DJI,EURGBP=X,LON:FFX" show="symbol" static="1"]`
+`[stock_ticker symbols="BABA,EURGBP,LLOY.LON" show="symbol" static="1"]`
 
 == Supported Stock Exchange Markets ==
 
@@ -94,7 +94,6 @@ Alpha Vantage provide stock data for following stock exchange markets:
 * **CPH** - NASDAQ OMX Copenhagen
 * **HEL** - NASDAQ OMX Helsinki
 * **ICE** - NASDAQ OMX Iceland
-* **STO** - NASDAQ OMX Stockholm
 * **NYSE** - New York Stock Exchange
 * **SHA** - Shanghai Stock Exchange
 * **SHE** - Shenzhen Stock Exchange
@@ -102,10 +101,12 @@ Alpha Vantage provide stock data for following stock exchange markets:
 * **TYO** - Tokyo Stock Exchange
 
 Not supported:
+
 * **MCX** - Moscow Exchange (since December 2018) - eg. `MCX:GAZP`
 * **ASX** - Australian Securities Exchange ([since since May 2020](https://twitter.com/moinzaman/status/1262522914227712000)) - eg. `ASX:MSB`
 * **SGX** - Singapore Exchange ([since July 13th 2020](https://kpo-and-czm.blogspot.com/2017/11/bye-yahoo-finance-hi-alpha-vantage.html?showComment=1596075191464#c3946519402226422619)) - eg. `C29.SI`
 * **NSE** - National Stock Exchange of India ([since July 2020](https://twitter.com/sachinmankapure/status/1279794312210010114)) - eg. `NSE:VB`
+* **STO** - NASDAQ OMX Stockholm (since October 2021) - eg. `STO:ATCO-A`
 
 == Installation ==
 
@@ -269,7 +270,11 @@ array(2) {
 
 == Changelog ==
 
-=3.2.0 (20201107) =
+= 3.2.1 (20211113) =
+* Fix: custom `number_format` has no effect
+* Tested: WordPress 5.8.2 and PHP 7.4.24
+
+= 3.2.0 (20201107) =
 * Update: FAQ
 * Improve: Help section on plugin settings page
 * Improve: spelling and grammar

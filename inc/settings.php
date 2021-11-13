@@ -28,10 +28,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			global $wpau_stockticker;
 
 			// Get default values.
-			$this->slug = $wpau_stockticker->plugin_slug;
+			$this->slug        = $wpau_stockticker->plugin_slug;
 			$this->option_name = $wpau_stockticker->plugin_option;
-			$this->defaults = $wpau_stockticker->defaults;
-			$this->endpoints = $wpau_stockticker->endpoints;
+			$this->defaults    = $wpau_stockticker->defaults;
+			$this->endpoints   = $wpau_stockticker->endpoints;
 
 			add_action( 'admin_init', array( &$this, 'register_settings' ) );
 			add_action( 'admin_menu', array( &$this, 'add_menu' ) );
@@ -83,7 +83,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 							),
 							array(
 								'a' => array(
-									'href' => array(),
+									'href'   => array(),
 									'target' => array( '_blank' ),
 								),
 							)
@@ -125,7 +125,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						'360' => esc_attr__( 'Premium (360 requests/min)', 'stock-ticker' ),
 						'600' => esc_attr__( 'Premium (600 requests/min)', 'stock-ticker' ),
 					),
-					'value' => $this->defaults['av_api_tier'],
+					'value'       => $this->defaults['av_api_tier'],
 				)
 			);
 
@@ -233,7 +233,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						'name'   => esc_attr__( 'Company Name', 'stock-ticker' ),
 						'symbol' => esc_attr__( 'Stock Symbol', 'stock-ticker' ),
 					),
-					'value' => $this->defaults['show'],
+					'value'       => $this->defaults['show'],
 				)
 			);
 
@@ -248,11 +248,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'description' => __( 'Select default number format', 'stock-ticker' ),
 					'items'       => array(
 						'cd' => '0,000.00',
-						'dc' => '0.000,00',
+						'dc' => '0.000,00', // default
 						'sd' => '0 000.00',
 						'sc' => '0 000,00',
 					),
-					'value' => $this->defaults['number_format'],
+					'value'       => $this->defaults['number_format'],
 					'class'       => 'regular-text',
 				)
 			);
@@ -271,7 +271,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						'3' => __( 'Three', 'stock-ticker' ),
 						'4' => __( 'Four', 'stock-ticker' ),
 					),
-					'value' => $this->defaults['decimals'],
+					'value'       => $this->defaults['decimals'],
 					'class'       => 'regular-text',
 				)
 			);
@@ -362,9 +362,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						'&lt;span&gt;, &lt;em&gt;',
 						'&lt;strong&gt;'
 					),
-					'class' => 'widefat',
-					'rows'  => 2,
-					'value' => $this->defaults['template'],
+					'class'       => 'widefat',
+					'rows'        => 2,
+					'value'       => $this->defaults['template'],
 				)
 			);
 			// Custom name.
@@ -657,7 +657,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				sanitize_html_class( $args['class'] )
 			);
 			foreach ( $args['items'] as $key => $val ) {
-				$selected = ( $args['value'] == $key ) ? 'selected=selected' : '';
+				$selected = ( $args['value'] === $key ) ? 'selected=selected' : '';
 				printf(
 					'<option %1$s value="%2$s">%3$s</option>',
 					esc_attr( $selected ),      // 1
@@ -719,7 +719,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		 * @return string       HTML formatted text
 		 */
 		function format_description( $text ) {
-			$pattern = '/(\*\*)([^\*]+)(\*\*)/';
+			$pattern     = '/(\*\*)([^\*]+)(\*\*)/';
 			$replacement = '<strong>${2}</strong>';
 			return preg_replace( $pattern, $replacement, $text );
 		} // END function format_description( $text )
@@ -731,7 +731,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		 */
 		public function sanitize_options( $options ) {
 
-			$sanitized = get_option( $this->option_name );
+			$sanitized        = get_option( $this->option_name );
 			$previous_options = $sanitized;
 
 			// If there is no POST option_page keyword, return initial plugin options
@@ -746,7 +746,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						$value = preg_replace( '/[^0-9A-Z]+/', '', $value );
 						break;
 					case 'av_api_tier':
-						if ( ! in_array( $value, array( 5, 15, 60, 120, 360, 600 ) ) ) {
+						if ( ! in_array( $value, array( 5, 15, 60, 120, 360, 600 ), true ) ) {
 							$value = 5;
 						}
 						break;
@@ -774,7 +774,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						break;
 					case 'show':
 						$value = strip_tags( stripslashes( $value ) );
-						if ( ! in_array( $value, array( 'name', 'symbol' ) ) ) {
+						if ( ! in_array( $value, array( 'name', 'symbol' ), true ) ) {
 							$value = 'name';
 						}
 						break;
@@ -804,8 +804,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						break;
 					case 'number_format':
 						$value = strip_tags( stripslashes( $value ) );
-						if ( ! in_array( $value, array( 'dc', 'sd', 'sc', 'cd' ) ) ) {
-							$value = 'dc';
+						if ( ! in_array( $value, array( 'dc', 'sd', 'sc', 'cd' ), true ) ) {
+							$value = 'dc'; // dot comma
 						}
 						break;
 					// Checkboxes
@@ -826,7 +826,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			}
 
 			// Generate static CSS
-			$css = "ul.stock_ticker li .sqitem{{$sanitized['style']}}";
+			$css  = "ul.stock_ticker li .sqitem{{$sanitized['style']}}";
 			$css .= "ul.stock_ticker li.zero .sqitem,ul.stock_ticker li.zero .sqitem:hover {color:{$sanitized['zero']}}";
 			$css .= "ul.stock_ticker li.minus .sqitem,ul.stock_ticker li.minus .sqitem:hover {color:{$sanitized['minus']}}";
 			$css .= "ul.stock_ticker li.plus .sqitem,ul.stock_ticker li.plus .sqitem:hover {color:{$sanitized['plus']}}";
@@ -919,8 +919,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		 */
 		private function alpha_symbols( $symbols, $control ) {
 			$symbols_supported = array();
-			$symbols_removed = array();
-			$symbols_arr = explode( ',', $symbols );
+			$symbols_removed   = array();
+			$symbols_arr       = explode( ',', $symbols );
 			// Remove unsupported stock exchanges from global array to prevent API errors
 			foreach ( $symbols_arr as $symbol_pos => $symbol_to_check ) {
 				$symbol_to_check = trim( $symbol_to_check );
@@ -934,7 +934,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					} else {
 						$symbols_removed[] = $symbol_to_check;
 					}
-				} else if ( ! empty( $symbol_to_check ) ) {
+				} elseif ( ! empty( $symbol_to_check ) ) {
 					// Add symbol w/o exchange to query array
 					$symbols_supported[] = $symbol_to_check;
 				}
@@ -942,11 +942,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			// Remove duplicate symbols
 			$symbols_supported = array_unique( $symbols_supported );
 			// Set back supported symbols
-			$symbols = join( ',', $symbols_supported );
+			$symbols = implode( ',', $symbols_supported );
 			// If we have removed symbols, add settings error message
 			if ( ! empty( $symbols_removed ) ) {
-				$symbols_removed_str = join( ', ', $symbols_removed );
-				$opt_name = 'all_symbols' == $control ? 'All Stock Symbols' : 'Stock Symbols';
+				$symbols_removed_str = implode( ', ', $symbols_removed );
+				$opt_name            = 'all_symbols' === $control ? 'All Stock Symbols' : 'Stock Symbols';
 				add_settings_error(
 					$control,
 					$control,

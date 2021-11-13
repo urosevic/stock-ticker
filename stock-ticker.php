@@ -5,7 +5,7 @@
  * Plugin Name: Stock Ticker
  * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
  * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
- * Version:     3.2.0
+ * Version:     3.2.1
  * Author:      Aleksandar Urosevic
  * Author URI:  https://urosevic.net
  * License:     GNU GPLv3
@@ -14,7 +14,7 @@
  */
 
 /**
-Copyright 2014-2020 Aleksandar Urosevic (urke.kg@gmail.com)
+Copyright 2014-2021 Aleksandar Urosevic (urke.kg@gmail.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -49,17 +49,17 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 10;
-		const VER = '3.2.0';
+		const VER    = '3.2.1';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
 		public $plugin_option = 'stockticker_defaults';
 		public $plugin_url;
 
-		public $endpoints = [ 'SYMBOL_SEARCH', 'GLOBAL_QUOTE', 'TIME_SERIES_DAILY', 'TIME_SERIES_INTRADAY', 'OVERVIEW' ];
+		public $endpoints = array( 'SYMBOL_SEARCH', 'GLOBAL_QUOTE', 'TIME_SERIES_DAILY', 'TIME_SERIES_INTRADAY', 'OVERVIEW' );
 
-		public static $exchanges = [
-			'supported' => [
+		public static $exchanges = array(
+			'supported'   => array(
 				'BOM'    => 'Bombay Stock Exchange',
 				'BIT'    => 'Borsa Italiana Milan Stock Exchange',
 				'TSE'    => 'Canadian/Toronto Securities Exchange',
@@ -74,27 +74,27 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'CPH'    => 'NASDAQ OMX Copenhagen',
 				'HEL'    => 'NASDAQ OMX Helsinki',
 				'ICE'    => 'NASDAQ OMX Iceland',
-				'STO'    => 'NASDAQ OMX Stockholm',
 				'NYSE'   => 'New York Stock Exchange',
 				'SHA'    => 'Shanghai Stock Exchange',
 				'SHE'    => 'Shenzhen Stock Exchange',
 				'TPE'    => 'Taiwan Stock Exchange',
 				'TYO'    => 'Tokyo Stock Exchange',
-			],
-			'unsupported' => [
-				'ASX'    => 'Australian Securities Exchange',
-				'MCX'    => 'Moscow Exchange',
-				'NSE'    => 'National Stock Exchange of India',
-				'SGX'    => 'Singapore Exchange',
-			],
-		];
+			),
+			'unsupported' => array(
+				'ASX' => 'Australian Securities Exchange',
+				'MCX' => 'Moscow Exchange',
+				'NSE' => 'National Stock Exchange of India',
+				'SGX' => 'Singapore Exchange',
+				'STO' => 'NASDAQ OMX Stockholm',
+			),
+		);
 
 		/**
 		 * Construct the plugin object
 		 */
 		public function __construct() {
 
-			$this->plugin_url = plugin_dir_url( __FILE__ );
+			$this->plugin_url  = plugin_dir_url( __FILE__ );
 			$this->plugin_file = plugin_basename( __FILE__ );
 			load_plugin_textdomain( $this->plugin_slug, false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
@@ -154,7 +154,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Throw notice that plugin does not work on Multisite
 		 */
 		function multisite_notice() {
-			$class = 'notice notice-error';
+			$class   = 'notice notice-error';
 			$message = sprintf(
 				__( 'We are sorry, %1$s v%2$s does not support Multisite WordPress.', 'wpaust' ),
 				$this->plugin_name,
@@ -178,11 +178,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 
 			if ( ! empty( $missing_option ) ) {
-				$class = 'notice notice-error';
-				$missing_options = '<ul><li>' . join( '</li><li>', $missing_option ) . '</li></ul>';
-				$settings_title = __( 'Settings' );
-				$settings_link = "<a href=\"options-general.php?page={$this->plugin_slug}\">{$settings_title}</a>";
-				$message = sprintf(
+				$class           = 'notice notice-error';
+				$missing_options = '<ul><li>' . implode( '</li><li>', $missing_option ) . '</li></ul>';
+				$settings_title  = __( 'Settings' );
+				$settings_link   = "<a href=\"options-general.php?page={$this->plugin_slug}\">{$settings_title}</a>";
+				$message         = sprintf(
 					__( 'Plugin %1$s v%2$s require that you have defined options listed below to work properly. Please visit plugin %3$s page and read description for those options. %4$s', 'wpaust' ),
 					"<strong>{$this->plugin_name}</strong>",
 					self::VER,
@@ -201,11 +201,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Auto disable on WPMU
 			if ( is_multisite() ) {
 				deactivate_plugins( plugin_basename( __FILE__ ) );
-				wp_die( sprintf(
-					__( 'We are sorry, %1$s v%2$s does not support Multisite WordPress.', 'wpaust' ),
-					$this->plugin_name,
-					self::VER
-				) );
+				wp_die(
+					sprintf(
+						__( 'We are sorry, %1$s v%2$s does not support Multisite WordPress.', 'wpaust' ),
+						$this->plugin_name,
+						self::VER
+					)
+				);
 			}
 			// Single WP activation process
 			global $wpau_stockticker;
@@ -245,7 +247,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'globalassets'    => false,
 				'avapikey'        => '',
 				'loading_message' => 'Loading stock data...',
-				'number_format'   => 'dc',
+				'number_format'   => 'dc', // dot comma
 				'decimals'        => 2,
 				'av_api_tier'     => 5, // 5 = free
 			);
@@ -324,7 +326,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 */
 		function plugin_settings_link( $links ) {
 			$settings_title = __( 'Settings' );
-			$settings_link = "<a href=\"options-general.php?page={$this->plugin_slug}\">{$settings_title}</a>";
+			$settings_link  = "<a href=\"options-general.php?page={$this->plugin_slug}\">{$settings_title}</a>";
 			array_unshift( $links, $settings_link );
 			return $links;
 		} // END function plugin_settings_link()
@@ -333,7 +335,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Enqueue the colour picker and admin style
 		 */
 		function admin_scripts( $hook ) {
-			if ( 'settings_page_' . $this->plugin_slug == $hook ) {
+			if ( 'settings_page_' . $this->plugin_slug === $hook ) {
 				wp_enqueue_style( 'wp-color-picker' );
 				wp_enqueue_script( 'wp-color-picker' );
 				wp_enqueue_style(
@@ -365,7 +367,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Enqueue frontend assets
 		 */
 		function enqueue_scripts() {
-			$defaults = $this->defaults;
+			$defaults   = $this->defaults;
 			$upload_dir = wp_upload_dir();
 
 			wp_enqueue_script(
@@ -446,7 +448,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			self::restart_av_fetching();
 			$result['status']  = 'success';
 			$result['message'] = 'OK';
-			$result = json_encode( $result );
+			$result            = json_encode( $result );
 			echo $result;
 			wp_die();
 		} // END function ajax_restart_av_fetching() {
@@ -457,7 +459,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// Sanitize data
 				$symbols       = strip_tags( $_POST['symbols'] );
 				$show          = strip_tags( $_POST['show'] );
-				$number_format = (int) $_POST['number_format'];
+				$number_format = strip_tags( $_POST['number_format'] );
 				$decimals      = (int) $_POST['decimals'];
 				$static        = (int) $_POST['static'];
 				$empty         = (int) $_POST['empty'];
@@ -468,7 +470,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				// Treat as error if no stock ticker composed but 'Unfortunately' message displayed
 				$message = self::stock_ticker( $symbols, $show, $number_format, $decimals, $static, $empty, $duplicate, $class );
 				if ( strpos( $message, 'error' ) !== false ) {
-					$message = strip_tags( $message );
+					$message           = strip_tags( $message );
 					$result['status']  = 'error';
 					$result['message'] = $message;
 				} else {
@@ -489,14 +491,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * AJAX to update AlphaVantage.co quotes
 		 */
 		function ajax_stockticker_update_quotes() {
-			$response = $this->get_alphavantage_quotes();
+			$response          = $this->get_alphavantage_quotes();
 			$result['status']  = 'success';
 			$result['message'] = $response['message'];
 			$result['symbol']  = $response['symbol'];
 			$result['method']  = $response['method'];
 
 			if ( strpos( $result['message'], 'no need to start' ) !== false ) {
-				$result['done'] = true;
+				$result['done']    = true;
 				$result['message'] = 'DONE';
 			} else {
 				$result['done'] = false;
@@ -520,8 +522,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * AJAX to search for symbol on AlphaVantage.co
 		 */
 		function ajax_stockticker_symbol_search_test() {
-			$symbol = $_POST['symbol'];
-			$endpoint = $_POST['endpoint'];
+			$symbol            = $_POST['symbol'];
+			$endpoint          = $_POST['endpoint'];
 			$result['message'] = $this->av_query_endpoint( $endpoint, $symbol );
 			echo json_encode( $result );
 			wp_die();
@@ -537,9 +539,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Exit if we don't have API Key, supported endpoint and requested item.
 			if ( empty( $this->defaults['avapikey'] ) ) {
 				return 'Stock Ticker Fatal Error: AlphaVantage.co API key has not set.';
-			} else if ( empty( $item ) ) {
+			} elseif ( empty( $item ) ) {
 				return 'Stock Ticker Fatal Error: No item provided for query.';
-			} else if ( ! in_array( $endpoint, $this->endpoints ) ) {
+			} elseif ( ! in_array( $endpoint, $this->endpoints, true ) ) {
 				return 'Stock Ticker Fatal Error: AlphaVantage.co API endpoint ' . strtoupper( $endpoint ) . ' has not supported.';
 			}
 
@@ -547,17 +549,19 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$timestamp_now = time();
 
 			// Get API Tier and calculate timeout
-			$av_api_tier = ! empty( $this->defaults['av_api_tier'] ) ? $this->defaults['av_api_tier'] : 5;
+			$av_api_tier         = ! empty( $this->defaults['av_api_tier'] ) ? $this->defaults['av_api_tier'] : 5;
 			$av_api_tier_timeout = 60 / $av_api_tier;
 
 			// Get API Tier end timestamp for previous fetch
 			$api_tier_end_timestamp = get_option( 'stockticker_av_tier_end_timestamp', $timestamp_now );
 			if ( $timestamp_now < $api_tier_end_timestamp ) {
 				self::log( 'API Tier timeout for previous request of ' . $av_api_tier_timeout . ' seconds has not expired... waiting...' );
-				return json_encode( array(
-					'message' => "API Tier timeout for previous request has not expired. Try again in {$av_api_tier_timeout} second(s) ...",
-					'method'  => 'wait',
-				) );
+				return json_encode(
+					array(
+						'message' => "API Tier timeout for previous request has not expired. Try again in {$av_api_tier_timeout} second(s) ...",
+						'method'  => 'wait',
+					)
+				);
 			}
 
 			// Calculate API tier pause and save it to options and get data
@@ -566,7 +570,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			self::log( "Use endpoint {$endpoint} for {$item}..." );
 
-			if ( 'TIME_SERIES_INTRADAY' == $endpoint ) {
+			if ( 'TIME_SERIES_INTRADAY' === $endpoint ) {
 				$extra_params = '&interval=60min';
 			} else {
 				$extra_params = '';
@@ -577,11 +581,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'https://www.alphavantage.co/query?function=%1$s&apikey=%2$s&datatype=json&%3$s=%4$s%5$s',
 				$endpoint,
 				$this->defaults['avapikey'],
-				'SYMBOL_SEARCH' == $endpoint ? 'keywords' : 'symbol',
+				'SYMBOL_SEARCH' === $endpoint ? 'keywords' : 'symbol',
 				$item,
 				$extra_params
 			);
-			$wparg = array(
+			$wparg    = array(
 				'timeout' => intval( $this->defaults['timeout'] ),
 			);
 
@@ -593,15 +597,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				return 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message();
 			} else {
 				// Get response from AV and parse it - look for error
-				$json = wp_remote_retrieve_body( $response );
+				$json         = wp_remote_retrieve_body( $response );
 				$response_arr = json_decode( $json, true );
 
 				// If we got some error from AV, log to self::log and return none
 				if ( ! empty( $response_arr['Error Message'] ) ) {
 					return 'Stock Ticker connected to AlphaVantage.co but got error: ' . $response_arr['Error Message'];
-				} else if ( ! empty( $response_arr['Information'] ) ) {
+				} elseif ( ! empty( $response_arr['Information'] ) ) {
 					return 'Stock Ticker connected to AlphaVantage.co and got response: ' . $response_arr['Information'];
-				} else if ( 'GLOBAL_QUOTE' == $endpoint && ! isset( $response_arr['Global Quote'] ) ) {
+				} elseif ( 'GLOBAL_QUOTE' === $endpoint && ! isset( $response_arr['Global Quote'] ) ) {
 					return 'Bad API response: Stock Ticker connected to AlphaVantage.co and received response w/o Global Quote object!';
 				} else {
 					return $json;
@@ -631,15 +635,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$defaults = $this->defaults;
 
 			// Prepare number format
-			if ( ! empty( $number_format ) && in_array( $number_format, array( 'dc', 'sd', 'sc', 'cd' ) ) ) {
+			if ( ! empty( $number_format ) && in_array( $number_format, array( 'dc', 'sd', 'sc', 'cd' ), true ) ) {
 				$defaults['number_format'] = $number_format;
-			} else if ( ! isset( $defaults['number_format'] ) ) {
-				$defaults['number_format'] = 'cd';
+			} elseif ( ! isset( $defaults['number_format'] ) ) {
+				$defaults['number_format'] = 'dc';
 			}
 			switch ( $defaults['number_format'] ) {
-				case 'dc': // 0.000,00
-					$thousands_sep = '.';
-					$dec_point     = ',';
+				case 'cd': // 0,000.00
+					$thousands_sep = ',';
+					$dec_point     = '.';
 					break;
 				case 'sd': // 0 000.00
 					$thousands_sep = ' ';
@@ -649,9 +653,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					$thousands_sep = ' ';
 					$dec_point     = ',';
 					break;
-				default: // 0,000.00
-					$thousands_sep = ',';
-					$dec_point     = '.';
+				default: // dc - 0.000,00
+					$thousands_sep = '.';
+					$dec_point     = ',';
 			}
 
 			// Prepare number of decimals
@@ -668,7 +672,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// Parse legend
 			$matrix = explode( "\n", $defaults['legend'] );
-			$msize = count( $matrix );
+			$msize  = count( $matrix );
 			for ( $m = 0; $m < $msize; ++$m ) {
 				$line = explode( ';', $matrix[ $m ] );
 				if ( ! empty( $line[0] ) && ! empty( $line[1] ) ) {
@@ -678,13 +682,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			unset( $m, $msize, $matrix, $line );
 
 			// Prepare ticker.
-			if ( ! empty( $static ) && 1 == $static ) {
+			if ( ! empty( $static ) && 1 === $static ) {
 				$class .= ' static';
 			}
 
 			// Prepare out vars
-			$out_start = sprintf( '<ul class="stock_ticker %s">', $class );
-			$out_end = '</ul>';
+			$out_start     = sprintf( '<ul class="stock_ticker %s">', $class );
+			$out_end       = '</ul>';
 			$out_error_msg = "<li class=\"error\">{$defaults['error_message']}</li>";
 
 			// Get stock data from database
@@ -712,13 +716,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$q_changep = $stock_data[ $symbol ]['changep']; // ['cp'];
 				$q_volume  = $stock_data[ $symbol ]['last_volume'];
 				// Timezone.
-				$q_tz      = $stock_data[ $symbol ]['tz'];
+				$q_tz = $stock_data[ $symbol ]['tz'];
 				// Date.
 				$q_ltrade_raw = $stock_data[ $symbol ]['last_refreshed'];
 				// Make default plugin date format (for tooltip) w/o zero time.
-				$q_ltrade  = $q_ltrade_raw; // ['lt'];
-				$q_ltrade  = str_replace( ' 00:00:00', '', $q_ltrade ); // Strip zero time from last trade date string
-				$q_ltrade  = "{$q_ltrade} {$q_tz}";
+				$q_ltrade = $q_ltrade_raw; // ['lt'];
+				$q_ltrade = str_replace( ' 00:00:00', '', $q_ltrade ); // Strip zero time from last trade date string
+				$q_ltrade = "{$q_ltrade} {$q_tz}";
 				// Extract Exchange from Symbol.
 				$q_exch = '';
 				if ( strpos( $symbol, ':' ) !== false ) {
@@ -731,9 +735,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					$chclass = 'minus';
 				} elseif ( $q_change > 0 ) {
 					$chclass = 'plus';
-					$prefix = '+';
+					$prefix  = '+';
 				} else {
-					$chclass = 'zero';
+					$chclass  = 'zero';
 					$q_change = '0.00';
 				}
 
@@ -747,7 +751,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				}
 
 				// What to show: Symbol or Company Name?
-				if ( 'name' == $show ) {
+				if ( 'name' === $show ) {
 					$company_show = $q_name;
 				} else {
 					$company_show = $q_symbol;
@@ -793,7 +797,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					if ( ! empty( $ltrade_formats[0] ) ) {
 						// Convert date from quote to timestamp - use $q_ltrade and $q_tz for timezone conversion.
 						$ltrade_datetime = strtotime( $q_ltrade_raw );
-						$ltrade_date = date_create_from_format( 'Y-m-d H:i:s', $q_ltrade_raw, new DateTimeZone( $q_tz ) );
+						$ltrade_date     = date_create_from_format( 'Y-m-d H:i:s', $q_ltrade_raw, new DateTimeZone( $q_tz ) );
 
 						// Now process each custom date format %ltrade% occurance.
 						foreach ( $ltrade_formats[0] as $ltrade_format ) {
@@ -843,19 +847,22 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		public function shortcode( $atts ) {
 			$defaults = $this->defaults;
 
-			$atts = shortcode_atts( array(
-				'symbols'         => $defaults['symbols'],
-				'show'            => $defaults['show'],
-				'number_format'   => isset( $defaults['number_format'] ) ? $defaults['number_format'] : 'dc',
-				'decimals'        => isset( $defaults['decimals'] ) ? $defaults['decimals'] : 2,
-				'static'          => 0,
-				'nolink'          => 0,
-				'prefill'         => 0,
-				'duplicate'       => 0,
-				'speed'           => isset( $defaults['speed'] ) ? $defaults['speed'] : 50,
-				'class'           => '',
-				'loading_message' => isset( $defaults['loading_message'] ) ? $defaults['loading_message'] : __( 'Loading stock data...', 'wpaust' ),
-			), $atts );
+			$atts = shortcode_atts(
+				array(
+					'symbols'         => $defaults['symbols'],
+					'show'            => $defaults['show'],
+					'number_format'   => isset( $defaults['number_format'] ) ? $defaults['number_format'] : 'dc', // dot comma
+					'decimals'        => isset( $defaults['decimals'] ) ? $defaults['decimals'] : 2,
+					'static'          => 0,
+					'nolink'          => 0,
+					'prefill'         => 0,
+					'duplicate'       => 0,
+					'speed'           => isset( $defaults['speed'] ) ? $defaults['speed'] : 50,
+					'class'           => '',
+					'loading_message' => isset( $defaults['loading_message'] ) ? $defaults['loading_message'] : __( 'Loading stock data...', 'wpaust' ),
+				),
+				$atts
+			);
 
 			// If we have defined symbols, enqueue script and print stock holder
 			if ( ! empty( $atts['symbols'] ) ) {
@@ -932,14 +939,17 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			global $wpdb;
 
 			// Put all in the query, prepare and get results
-			$stock_data_a = $wpdb->get_results( $wpdb->prepare(
-				"
-				SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
-				FROM {$wpdb->prefix}stock_ticker_data
-				WHERE symbol IN ($format)
-				",
-				$symbols_arr
-			), ARRAY_A );
+			$stock_data_a = $wpdb->get_results(
+				$wpdb->prepare(
+					"
+					SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
+					FROM {$wpdb->prefix}stock_ticker_data
+					WHERE symbol IN ($format)
+					",
+					$symbols_arr
+				),
+				ARRAY_A
+			);
 
 			// If we don't have anything retrieved, just exit
 			if ( empty( $stock_data_a ) ) {
@@ -966,7 +976,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$timestamp_now = time();
 
 			// Get API Tier and calculate timeout
-			$av_api_tier = ! empty( $this->defaults['av_api_tier'] ) ? $this->defaults['av_api_tier'] : 5;
+			$av_api_tier         = ! empty( $this->defaults['av_api_tier'] ) ? $this->defaults['av_api_tier'] : 5;
 			$av_api_tier_timeout = 60 / $av_api_tier;
 
 			// Get API Tier end timestamp for previous fetch
@@ -982,7 +992,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// Check is fetch in progress (even with expired API Tier timeout)
 			$progress = get_option( 'stockticker_av_progress', false );
-			if ( false != $progress ) {
+			if ( false !== $progress ) {
 				return array(
 					'message' => 'Stock Ticker already fetching data. Skip.',
 					'symbol'  => '',
@@ -998,9 +1008,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// If $to_fetch['index'] is 0 and cache timeout has not expired,
 			// do not attempt to fetch again but wait to expire timeout for next loop (UTC)
-			if ( 0 == $to_fetch['index'] ) {
+			if ( 0 === $to_fetch['index'] ) {
 				$last_fetched_timestamp = get_option( 'stockticker_av_last_timestamp', $timestamp_now );
-				$target_timestamp = $last_fetched_timestamp + (int) $this->defaults['cache_timeout'];
+				$target_timestamp       = $last_fetched_timestamp + (int) $this->defaults['cache_timeout'];
 				if ( $target_timestamp > $timestamp_now ) {
 					// If timestamp not expired, do not fetch but exit
 					self::unlock_fetch();
@@ -1039,7 +1049,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				}
 
 				// If we got some error for first symbol, (and resnponse has not invalid API) revert last timestamp
-				if ( 0 == $to_fetch['index'] && false === strpos( $stock_data, 'Invalid API call' ) && false === strpos( $stock_data, 'Bad API response' ) ) {
+				if ( 0 === $to_fetch['index'] && false === strpos( $stock_data, 'Invalid API call' ) && false === strpos( $stock_data, 'Bad API response' ) ) {
 					self::log( 'Failed fetching and crunching for first symbol, set back previous timestamp' );
 					update_option( 'stockticker_av_last_timestamp', $last_fetched_timestamp );
 				}
@@ -1099,14 +1109,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// Default symbol to fetch first (first from array)
 			$current_symbol_index = 0;
-			$symbol_to_fetch = $symbols_arr[ $current_symbol_index ];
+			$symbol_to_fetch      = $symbols_arr[ $current_symbol_index ];
 
 			// Get last fetched symbol
 			$last_fetched = strtoupper( get_option( 'stockticker_av_last' ) );
 
 			// Find which symbol we should fetch
 			if ( ! empty( $last_fetched ) ) {
-				$last_symbol_index = array_search( $last_fetched, $symbols_arr );
+				$last_symbol_index    = array_search( $last_fetched, $symbols_arr, true );
 				$current_symbol_index = $last_symbol_index + 1;
 				// If we have less than next symbol, then rewind to beginning
 				if ( count( $symbols_arr ) <= $current_symbol_index ) {
@@ -1137,14 +1147,16 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			$table_name = $wpdb->prefix . 'stock_ticker_data';
 			// Check does symbol already exists in DB (to update or to insert new one)
 			// I'm not using here $wpdb->replace() as I wish to avoid reinserting row to table which change primary key (delete row, insert new row)
-			$symbol_exists = $wpdb->get_var( $wpdb->prepare(
-				"
-					SELECT symbol
-					FROM {$wpdb->prefix}stock_ticker_data
-					WHERE symbol = %s
-				",
-				$to_fetch['symbol']
-			) );
+			$symbol_exists = $wpdb->get_var(
+				$wpdb->prepare(
+					"
+						SELECT symbol
+						FROM {$wpdb->prefix}stock_ticker_data
+						WHERE symbol = %s
+					",
+					$to_fetch['symbol']
+				)
+			);
 			if ( ! empty( $symbol_exists ) ) {
 				// UPDATE
 				$ret = $wpdb->update(
@@ -1260,14 +1272,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				return 'Stock Ticker got error fetching feed from AlphaVantage.co: ' . $response->get_error_message();
 			} else {
 				// Get response from AV and parse it - look for error
-				$json = wp_remote_retrieve_body( $response );
+				$json         = wp_remote_retrieve_body( $response );
 				$response_arr = json_decode( $json, true );
 				// If we got some error from AV, log to self::log and return none
 				if ( ! empty( $response_arr['Error Message'] ) ) {
 					return 'Stock Ticker connected to AlphaVantage.co but got error: ' . $response_arr['Error Message'];
-				} else if ( ! empty( $response_arr['Information'] ) ) {
+				} elseif ( ! empty( $response_arr['Information'] ) ) {
 					return 'Stock Ticker connected to AlphaVantage.co and got response: ' . $response_arr['Information'];
-				} else if ( ! isset( $response_arr['Global Quote'] ) ) {
+				} elseif ( ! isset( $response_arr['Global Quote'] ) ) {
 					return 'Bad API response: Stock Ticker connected to AlphaVantage.co and received response w/o Global Quote object!';
 				} else {
 					// Crunch data from AlphaVantage for symbol and prepare compact array
@@ -1325,7 +1337,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Only if WP_DEBUG is enabled
 			if ( defined( 'WP_DEBUG' ) && true === WP_DEBUG ) {
 				$log_file = trailingslashit( WP_CONTENT_DIR ) . 'stockticker.log';
-				$date = date( 'c' );
+				$date     = gmdate( 'c' );
 				error_log( "{$date}: {$str}\n", 3, $log_file );
 			}
 		}
