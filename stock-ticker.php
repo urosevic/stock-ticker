@@ -5,7 +5,7 @@
  * Plugin Name: Stock Ticker
  * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
  * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
- * Version:     3.2.1
+ * Version:     3.2.2
  * Author:      Aleksandar Urosevic
  * Author URI:  https://urosevic.net
  * License:     GNU GPLv3
@@ -14,7 +14,7 @@
  */
 
 /**
-Copyright 2014-2021 Aleksandar Urosevic (urke.kg@gmail.com)
+Copyright 2014-2022 Aleksandar Urosevic (urke.kg@gmail.com)
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 10;
-		const VER    = '3.2.1';
+		const VER    = '3.2.2';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -156,6 +156,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		function multisite_notice() {
 			$class   = 'notice notice-error';
 			$message = sprintf(
+				/* translators: %1$s is Plugin name, %2$s is Plugin version*/
 				__( 'We are sorry, %1$s v%2$s does not support Multisite WordPress.', 'wpaust' ),
 				$this->plugin_name,
 				self::VER
@@ -183,6 +184,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$settings_title  = __( 'Settings' );
 				$settings_link   = "<a href=\"options-general.php?page={$this->plugin_slug}\">{$settings_title}</a>";
 				$message         = sprintf(
+					/* translators: %1$s is Plugin name, %2$s is Plugin version, %3$s is link to the settings page, %4$s is list of missing options */
 					__( 'Plugin %1$s v%2$s require that you have defined options listed below to work properly. Please visit plugin %3$s page and read description for those options. %4$s', 'wpaust' ),
 					"<strong>{$this->plugin_name}</strong>",
 					self::VER,
@@ -203,6 +205,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				deactivate_plugins( plugin_basename( __FILE__ ) );
 				wp_die(
 					sprintf(
+						/* translators: %1$s is Plugin Name, %2$s is Plugin version */
 						__( 'We are sorry, %1$s v%2$s does not support Multisite WordPress.', 'wpaust' ),
 						$this->plugin_name,
 						self::VER
@@ -992,7 +995,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// Check is fetch in progress (even with expired API Tier timeout)
 			$progress = get_option( 'stockticker_av_progress', false );
-			if ( false !== $progress ) {
+			if ( true === $progress ) {
 				return array(
 					'message' => 'Stock Ticker already fetching data. Skip.',
 					'symbol'  => '',

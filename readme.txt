@@ -3,8 +3,8 @@ Contributors: urkekg, techwebux
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: stock, stock ticker, sotck quote, ticker, trading, forex
 Requires at least: 4.9
-Tested up to: 5.8
-Stable tag: 3.2.1
+Tested up to: 5.9
+Stable tag: 3.2.2
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -269,6 +269,10 @@ array(2) {
 `
 
 == Changelog ==
+
+= 3.2.2 (20220102) =
+* Fix: Fix bug introduced with release 3.2.1 which prevent stocks to be updated
+* Tested: WordPress 5.9 and PHP 8.0.11
 
 = 3.2.1 (20211113) =
 * Fix: custom `number_format` has no effect
