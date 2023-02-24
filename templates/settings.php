@@ -29,13 +29,11 @@ global $wpau_stockticker;
 
 		<div class="sidebar_container">
 			<div class="references">
-				<a href="https://urosevic.net/wordpress/donate/?donate_for=stock-ticker" class="aust-button paypal_donate" target="_blank"><?php _e( 'Donate', 'stock-ticker' ); ?></a>
+				<a href="https://wordpress.org/plugins/stock-ticker/#faq-header" class="aust-button" target="_blank"><?php _e( 'FAQ', 'stock-ticker' ); ?></a>
 				<br />
-				<a href="https://wordpress.org/plugins/stock-ticker/faq/" class="aust-button" target="_blank"><?php _e( 'FAQ', 'stock-ticker' ); ?></a>
+				<a href="https://wordpress.org/support/plugin/stock-ticker/" class="aust-button" target="_blank"><?php _e( 'Community Support', 'stock-ticker' ); ?></a>
 				<br />
-				<a href="https://wordpress.org/support/plugin/stock-ticker" class="aust-button" target="_blank"><?php _e( 'Community Support', 'stock-ticker' ); ?></a>
-				<br />
-				<a href="https://wordpress.org/support/view/plugin-reviews/stock-ticker#postform" class="aust-button" target="_blank"><?php _e( 'Review this plugin', 'stock-ticker' ); ?></a>
+				<a href="https://wordpress.org/support/plugin/stock-ticker/reviews/#new-post" class="aust-button" target="_blank"><?php _e( 'Review this plugin', 'stock-ticker' ); ?></a>
 			</div><!-- .references -->
 			<div class="disclaimer">
 				<h2><?php esc_attr_e( 'Disclaimer', 'stock-ticker' ); ?></h2>

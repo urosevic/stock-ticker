@@ -3,8 +3,8 @@ Contributors: urkekg, techwebux
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: stock, stock ticker, sotck quote, ticker, trading, forex
 Requires at least: 4.9
-Tested up to: 5.9
-Stable tag: 3.2.2
+Tested up to: 6.2
+Stable tag: 3.23.0
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -269,6 +269,10 @@ array(2) {
 `
 
 == Changelog ==
+
+= 3.23.0 (20230223) =
+* Security: Fix CSRF vulnerability, thanks to [Mika/Patchstack](https://patchstack.com/database/researcher/5ade6efe-f495-4836-906d-3de30c24edad)
+* Tested: WordPress 6.2-beta3 with theme Twenty Twenty-Three and PHP 8.2.1
 
 = 3.2.2 (20220102) =
 * Fix: Fix bug introduced with release 3.2.1 which prevent stocks to be updated

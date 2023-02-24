@@ -43,7 +43,8 @@ jQuery(document).ready(function($) {
 			async: true,
 			url: stockTickerJs.ajax_url,
 			data: {
-				'action': 'stockticker_purge_cache'
+				'action': 'stockticker_purge_cache',
+				'nonce' : stockTickerJs.nonce
 			}
 		}).done( function(response) {
 				// Update log container
@@ -56,7 +57,8 @@ jQuery(document).ready(function($) {
 						async: true,
 						url: stockTickerJs.ajax_url,
 						data: {
-							'action': 'stockticker_update_quotes'
+							'action': 'stockticker_update_quotes',
+							'nonce': stockTickerJs.nonce
 						}
 					}).done(function(response) {
 						if ( ! response.done && 'true' != $(fetch_button_stop).data('stop') ) {
@@ -121,7 +123,8 @@ jQuery(document).ready(function($) {
 			data: {
 				'action': 'stockticker_symbol_search_test',
 				'symbol': av_symbol_search_test,
-				'endpoint': av_search_test_endpoint
+				'endpoint': av_search_test_endpoint,
+				'nonce': stockTickerJs.nonce
 			}
 		}).done(function(response){
 			$('.st_symbol_search_test_log pre').append(response.message);

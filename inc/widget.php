@@ -26,9 +26,9 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		// Widget actual processes.
 		parent::__construct(
 			'stock_ticker', // Base ID.
-			__( 'Stock Ticker', 'wpaust' ), // Name.
+			__( 'Stock Ticker', 'stock-ticker' ), // Name.
 			array(
-				'description'                 => __( 'Show ticker with stock trends', 'wpaust' ),
+				'description'                 => __( 'Show ticker with stock trends', 'stock-ticker' ),
 				'customize_selective_refresh' => true,
 			) // Args.
 		);
@@ -56,7 +56,7 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		// Get defaults in instance is empty (for customizer).
 		if ( empty( $instance ) ) {
 			$instance          = $wpau_stockticker->defaults;
-			$instance['title'] = __( 'Stock Ticker', 'wpaust' );
+			$instance['title'] = __( 'Stock Ticker', 'stock-ticker' );
 		}
 
 		// Outputs the content of the widget.
@@ -109,7 +109,7 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		if ( isset( $instance['title'] ) ) {
 			$title = $instance['title'];
 		} else {
-			$title = __( 'Stock Ticker', 'wpaust' );
+			$title = __( 'Stock Ticker', 'stock-ticker' );
 		}
 		if ( isset( $instance['symbols'] ) ) {
 			$symbols = $instance['symbols'];
@@ -171,20 +171,20 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo esc_attr( $title ); ?>" />
 		</p>
 		<p>
-		<label for="<?php echo $this->get_field_id( 'symbols' ); ?>"><?php esc_attr_e( 'Stock Symbols', 'wpaust' ); ?>:</label>
-		<input class="widefat" id="<?php echo $this->get_field_id( 'symbols' ); ?>" name="<?php echo $this->get_field_name( 'symbols' ); ?>" type="text" value="<?php echo esc_attr( $symbols ); ?>" title="<?php esc_html_e( 'For currencies use format EURGBP=X; for Dow Jones use .DJI; for specific stock exchange use format EXCHANGE:SYMBOL like LON:FFX', 'wpaust' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'symbols' ); ?>"><?php esc_attr_e( 'Stock Symbols', 'stock-ticker' ); ?>:</label>
+		<input class="widefat" id="<?php echo $this->get_field_id( 'symbols' ); ?>" name="<?php echo $this->get_field_name( 'symbols' ); ?>" type="text" value="<?php echo esc_attr( $symbols ); ?>" title="<?php esc_html_e( 'For currencies use format EURGBP=X; for Dow Jones use .DJI; for specific stock exchange use format EXCHANGE:SYMBOL like LON:FFX', 'stock-ticker' ); ?>" />
 		</p>
 
 		<p>
-		<label for="<?php echo $this->get_field_id( 'show' ); ?>"><?php esc_attr_e( 'Represent Company as', 'wpaust' ); ?>:</label>
+		<label for="<?php echo $this->get_field_id( 'show' ); ?>"><?php esc_attr_e( 'Represent Company as', 'stock-ticker' ); ?>:</label>
 		<select class="widefat" id="<?php echo $this->get_field_id( 'show' ); ?>" name="<?php echo $this->get_field_name( 'show' ); ?>">
-			<option <?php echo ( 'name' === $show ) ? 'selected="selected"' : ''; ?> value="name"><?php esc_attr_e( 'Company Name', 'wpaust' ); ?></option>
-			<option <?php echo ( 'symbol' === $show ) ? 'selected="selected"' : ''; ?> value="symbol"><?php esc_attr_e( 'Stock Symbol', 'wpaust' ); ?></option>
+			<option <?php echo ( 'name' === $show ) ? 'selected="selected"' : ''; ?> value="name"><?php esc_attr_e( 'Company Name', 'stock-ticker' ); ?></option>
+			<option <?php echo ( 'symbol' === $show ) ? 'selected="selected"' : ''; ?> value="symbol"><?php esc_attr_e( 'Stock Symbol', 'stock-ticker' ); ?></option>
 		</select>
 		</p>
 
 		<p>
-		<label for="<?php echo $this->get_field_id( 'number_format' ); ?>"><?php esc_attr_e( 'Number format', 'wpaust' ); ?>:</label>
+		<label for="<?php echo $this->get_field_id( 'number_format' ); ?>"><?php esc_attr_e( 'Number format', 'stock-ticker' ); ?>:</label>
 		<select class="widefat" id="<?php echo $this->get_field_id( 'number_format' ); ?>" name="<?php echo $this->get_field_name( 'number_format' ); ?>">
 			<option <?php echo ( 'cd' === $number_format ) ? 'selected="selected"' : ''; ?> value="cd">0,000.00</option>
 			<option <?php echo ( 'dc' === $number_format ) ? 'selected="selected"' : ''; ?> value="dc">0.000,00</option>
@@ -194,7 +194,7 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		</p>
 
 		<p>
-		<label for="<?php echo $this->get_field_id( 'decimals' ); ?>"><?php esc_attr_e( 'Decimal places', 'wpaust' ); ?>:</label>
+		<label for="<?php echo $this->get_field_id( 'decimals' ); ?>"><?php esc_attr_e( 'Decimal places', 'stock-ticker' ); ?>:</label>
 		<select class="widefat" id="<?php echo $this->get_field_id( 'decimals' ); ?>" name="<?php echo $this->get_field_name( 'decimals' ); ?>">
 			<option <?php echo ( 1 === $decimals ) ? 'selected="selected"' : ''; ?> value="1">One</option>
 			<option <?php echo ( 2 === $decimals ) ? 'selected="selected"' : ''; ?> value="2">Two</option>
@@ -204,29 +204,29 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 		</p>
 
 		<p>
-		<label for="<?php echo $this->get_field_id( 'speed' ); ?>"><?php esc_attr_e( 'Ticker Speed', 'wpaust' ); ?>:</label>
+		<label for="<?php echo $this->get_field_id( 'speed' ); ?>"><?php esc_attr_e( 'Ticker Speed', 'stock-ticker' ); ?>:</label>
 		<input class="number small-text" id="<?php echo $this->get_field_id( 'speed' ); ?>" name="<?php echo $this->get_field_name( 'speed' ); ?>" type="number" value="<?php echo esc_attr( $speed ); ?>" />
 		</p>
 
 		<p>
 		<label for="<?php echo $this->get_field_id( 'static' ); ?>">
 		<input class="checkbox" id="<?php echo $this->get_field_id( 'static' ); ?>" name="<?php echo $this->get_field_name( 'static' ); ?>" type="checkbox" value="1" <?php checked( $static, true, true ); ?> />
-		<?php esc_attr_e( 'Make this ticker static (disable scrolling)', 'wpaust' ); ?>
+		<?php esc_attr_e( 'Make this ticker static (disable scrolling)', 'stock-ticker' ); ?>
 		</label>
 		<br />
 		<label for="<?php echo $this->get_field_id( 'prefill' ); ?>">
 		<input class="checkbox" id="<?php echo $this->get_field_id( 'prefill' ); ?>" name="<?php echo $this->get_field_name( 'prefill' ); ?>" type="checkbox" value="1" <?php checked( $prefill, true, true ); ?> />
-		<?php esc_attr_e( 'Start ticker prefilled with data', 'wpaust' ); ?>
+		<?php esc_attr_e( 'Start ticker prefilled with data', 'stock-ticker' ); ?>
 		</label>
 		<br />
 		<label for="<?php echo $this->get_field_id( 'duplicate' ); ?>">
 		<input class="checkbox" id="<?php echo $this->get_field_id( 'duplicate' ); ?>" name="<?php echo $this->get_field_name( 'duplicate' ); ?>" type="checkbox" value="1" <?php checked( $duplicate, true, true ); ?> />
-		<?php esc_attr_e( 'Duplicate items to make ticker continuous', 'wpaust' ); ?>
+		<?php esc_attr_e( 'Duplicate items to make ticker continuous', 'stock-ticker' ); ?>
 		</label>
 		</p>
 		<p>
-		<label for="<?php echo $this->get_field_id( 'class' ); ?>"><?php esc_attr_e( 'Cusom Class', 'wpaust' ); ?>:</label>
-		<input class="widefat" id="<?php echo $this->get_field_id( 'class' ); ?>" name="<?php echo $this->get_field_name( 'class' ); ?>" type="text" value="<?php echo esc_attr( $class ); ?>" title="<?php esc_html_e( 'Set custom CSS class to customize block look', 'wpaust' ); ?>" />
+		<label for="<?php echo $this->get_field_id( 'class' ); ?>"><?php esc_attr_e( 'Cusom Class', 'stock-ticker' ); ?>:</label>
+		<input class="widefat" id="<?php echo $this->get_field_id( 'class' ); ?>" name="<?php echo $this->get_field_name( 'class' ); ?>" type="text" value="<?php echo esc_attr( $class ); ?>" title="<?php esc_html_e( 'Set custom CSS class to customize block look', 'stock-ticker' ); ?>" />
 		</p>
 		<?php
 	}

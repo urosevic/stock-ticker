@@ -18,7 +18,8 @@ var stocktickers_load = function() {
 					'class': jQuery(this).data('stockticker_class'),
 					'speed': jQuery(this).data('stockticker_speed'),
 					'empty': jQuery(this).data('stockticker_empty'),
-					'duplicate': jQuery(this).data('stockticker_duplicate')
+					'duplicate': jQuery(this).data('stockticker_duplicate'),
+					'nonce': stockTickerJs.nonce
 				},
 				success: function(response) {
 					if ( response.status == 'success' ) {
@@ -51,7 +52,8 @@ jQuery(document).ready(function() {
 			async: true,
 			url: stockTickerJs.ajax_url,
 			data: {
-				'action': 'stockticker_update_quotes'
+				'action': 'stockticker_update_quotes',
+				'nonce': stockTickerJs.nonce
 			}
 		}).done(function(response){
 			console.log( 'Stock Ticker update quotes response: ' + response.message );

@@ -5,8 +5,8 @@
  * Plugin Name: Stock Ticker
  * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
  * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
- * Version:     3.2.2
- * Author:      Aleksandar Urosevic
+ * Version:     3.23.0
+ * Author:      Aleksandar Urošević
  * Author URI:  https://urosevic.net
  * License:     GNU GPLv3
  * License URI: https://www.gnu.org/licenses/gpl-3.0.txt
@@ -14,20 +14,20 @@
  */
 
 /**
-Copyright 2014-2022 Aleksandar Urosevic (urke.kg@gmail.com)
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * Copyright 2014-2023 Aleksandar Urosevic (urke.kg@gmail.com)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 // Exit if accessed directly
@@ -49,12 +49,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 10;
-		const VER    = '3.2.2';
+		const VER    = '3.23.0';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
 		public $plugin_option = 'stockticker_defaults';
 		public $plugin_url;
+		public $plugin_file;
+		public $defaults;
 
 		public $endpoints = array( 'SYMBOL_SEARCH', 'GLOBAL_QUOTE', 'TIME_SERIES_DAILY', 'TIME_SERIES_INTRADAY', 'OVERVIEW' );
 
@@ -280,7 +282,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		function admin_init() {
 
 			// Add plugin Settings link.
-			add_filter( 'plugin_action_links_' . $this->plugin_file, array( $this, 'plugin_settings_link' ) );
+			add_filter( 'plugin_action_links_' . $this->plugin_file, array( $this, 'add_action_links' ) );
 
 			// Update links in plugin row on Plugins page.
 			add_filter( 'plugin_row_meta', array( $this, 'add_plugin_meta_links' ), 10, 2 );
@@ -298,41 +300,38 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		} // END function admin_init_settings()
 
 		/**
-		 * Add link to official plugin pages
-		 * @param array $links  Array of existing plugin row links.
-		 * @param string $file  Path of current plugin file.
-		 * @return array        Array of updated plugin row links
+		 * Append Settings link for Plugins page
+		 *
+		 * @param array $links Array of default plugin links
+		 *
+		 * @return array       Array of plugin links with appended link for Settings page
 		 */
-		function add_plugin_meta_links( $links, $file ) {
-			if ( 'stock-ticker/stock-ticker.php' === $file ) {
-				return array_merge(
-					$links,
-					array(
-						sprintf(
-							'<a href="https://wordpress.org/support/plugin/stock-ticker" target="_blank">%s</a>',
-							__( 'Support' )
-						),
-						sprintf(
-							'<a href="https://urosevic.net/wordpress/donate/?donate_for=stock-ticker" target="_blank">%s</a>',
-							__( 'Donate' )
-						),
-					)
-				);
-			}
+		function add_action_links( $links ) {
+
+			$links[] = '<a href="' . esc_url( admin_url( 'options-general.php?page=' . $this->plugin_slug ) ) . '">' . esc_html__( 'Settings' ) . '</a>';
+
 			return $links;
-		} // END function add_plugin_meta_links()
+
+		} // END function add_action_links()
 
 		/**
-		 * Generate Settings link on Plugins page listing
-		 * @param  array $links Array of existing plugin row links.
-		 * @return array        Updated array of plugin row links with link to Settings page
+		 * Add link to plugin community support
+		 *
+		 * @param array $links Array of default plugin meta links
+		 * @param string $file Current hook file path
+		 *
+		 * @return array       Array of default plugin meta links with appended link for Support community forum
 		 */
-		function plugin_settings_link( $links ) {
-			$settings_title = __( 'Settings' );
-			$settings_link  = "<a href=\"options-general.php?page={$this->plugin_slug}\">{$settings_title}</a>";
-			array_unshift( $links, $settings_link );
+		function add_plugin_meta_links( $links, $file ) {
+
+			if ( 'stock-ticker/stock-ticker.php' === $file ) {
+				$links[] = '<a href="https://wordpress.org/support/plugin/stock-ticker/" target="_blank">' . esc_html__( 'Support' ) . '</a>';
+			}
+
+			// Return updated array of links
 			return $links;
-		} // END function plugin_settings_link()
+
+		} // END function add_plugin_meta_links()
 
 		/**
 		 * Enqueue the colour picker and admin style
@@ -360,6 +359,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					array(
 						'ajax_url' => admin_url( 'admin-ajax.php' ),
 						'avurl'    => 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=' . $this->defaults['avapikey'] . '&datatype=json&symbol=',
+						'nonce'    => wp_create_nonce( 'stock-ticker-js' ),
 					)
 				);
 				wp_enqueue_script( 'stock-ticker-admin' );
@@ -403,7 +403,10 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			wp_localize_script(
 				'stock-ticker',
 				'stockTickerJs',
-				array( 'ajax_url' => admin_url( 'admin-ajax.php' ) )
+				array(
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'nonce'    => wp_create_nonce( 'stock-ticker-js' ),
+				)
 			);
 			// Enqueue script parser
 			if ( isset( $defaults['globalassets'] ) ) {
@@ -436,6 +439,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			return $defaults;
 		} // END public function defaults()
 
+		private static function check_nonce() {
+			$nonce = ! empty( $_REQUEST['nonce'] ) ? $_REQUEST['nonce'] : '';
+			if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $nonce, 'stock-ticker-js' ) ) {
+				wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
+			}
+			return true;
+		}
+
 		/**
 		 * Delete control options to force re-fetching from first symbol
 		 */
@@ -448,6 +459,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		} // END public static function restart_av_fetching() {
 
 		function ajax_restart_av_fetching() {
+			self::check_nonce();
 			self::restart_av_fetching();
 			$result['status']  = 'success';
 			$result['message'] = 'OK';
@@ -457,6 +469,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		} // END function ajax_restart_av_fetching() {
 
 		function ajax_stockticker_load() {
+			self::check_nonce();
 			// @TODO Provide error message if any of params missing + add nonce check
 			if ( ! empty( $_POST['symbols'] ) ) {
 				// Sanitize data
@@ -494,6 +507,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * AJAX to update AlphaVantage.co quotes
 		 */
 		function ajax_stockticker_update_quotes() {
+			self::check_nonce();
 			$response          = $this->get_alphavantage_quotes();
 			$result['status']  = 'success';
 			$result['message'] = $response['message'];
@@ -525,6 +539,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * AJAX to search for symbol on AlphaVantage.co
 		 */
 		function ajax_stockticker_symbol_search_test() {
+			self::check_nonce();
 			$symbol            = $_POST['symbol'];
 			$endpoint          = $_POST['endpoint'];
 			$result['message'] = $this->av_query_endpoint( $endpoint, $symbol );
@@ -944,11 +959,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Put all in the query, prepare and get results
 			$stock_data_a = $wpdb->get_results(
 				$wpdb->prepare(
+					// phpcs:ignore Squiz.Strings.DoubleQuoteUsage.NotRequired
 					"
 					SELECT `symbol`,`tz`,`last_refreshed`,`last_open`,`last_high`,`last_low`,`last_close`,`last_volume`,`change`,`changep`,`range`
-					FROM {$wpdb->prefix}stock_ticker_data
-					WHERE symbol IN ($format)
-					",
+					FROM " . $wpdb->prefix . "stock_ticker_data
+					WHERE symbol IN ( $format )", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 					$symbols_arr
 				),
 				ARRAY_A
@@ -1148,15 +1163,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			global $wpdb;
 			// Define plugin table name
 			$table_name = $wpdb->prefix . 'stock_ticker_data';
+
 			// Check does symbol already exists in DB (to update or to insert new one)
 			// I'm not using here $wpdb->replace() as I wish to avoid reinserting row to table which change primary key (delete row, insert new row)
 			$symbol_exists = $wpdb->get_var(
 				$wpdb->prepare(
-					"
-						SELECT symbol
-						FROM {$wpdb->prefix}stock_ticker_data
-						WHERE symbol = %s
-					",
+					// phpcs:ignore Squiz.Strings.DoubleQuoteUsage.NotRequired
+					"SELECT symbol FROM " . $wpdb->prefix . "stock_ticker_data WHERE symbol = %s",
 					$to_fetch['symbol']
 				)
 			);

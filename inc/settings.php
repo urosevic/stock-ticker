@@ -21,6 +21,11 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 	 * @link https://urosevic.net
 	 */
 	class Wpau_Stock_Ticker_Settings {
+
+		public $slug;
+		public $option_name;
+		public $defaults;
+		public $endpoints;
 		/**
 		 * Construct the plugin object
 		 */
@@ -73,6 +78,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				array(
 					'field'       => $this->option_name . '[avapikey]',
 					'description' => sprintf(
+						// translators: %1$s is replaced with AlphaVantage.co, %2$s is replaced with Alpha Vantage API Key anchor
 						__( 'We get stock data from 3rd party API service %1$s. %2$s if you do not owe it already, and enter it here. Please note, a free API key is limited to five API requests per minute.', 'stock-ticker' ),
 						'AlphaVantage.co',
 						wp_kses(
@@ -104,6 +110,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'field'       => $this->option_name . '[av_api_tier]',
 					'description' => sprintf(
 						wp_kses(
+							/*
+							 * translators: %1$s is replaced with AlphaVantage.co free URL
+							 * %2$s with translated keyword `Free`
+							 * %3$s with link to AlphaVantage.co premium URL
+							 * %4$s with trnslated keyword `Premium`
+							 */
 							__( 'Which Alpha Vantage API Key membership you have (<a href="%1$s" target="_blank">%2$s</a> or <a href="%3$s" target="_blank">%4$s</a>)?', 'stock-ticker' ),
 							array(
 								'a' => array(
@@ -197,6 +209,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				'wpau_stock_ticker',
 				array(
 					'description' => sprintf(
+						// translators: %s is replaced with translated plugin name
 						esc_attr__( 'Predefine default settings for %s. Here you can set stock symbols and how you wish to present companies in ticker.', 'stock-ticker' ),
 						esc_attr__( 'Stock Ticker', 'stock-ticker' )
 					),
@@ -226,6 +239,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				array(
 					'field'       => $this->option_name . '[show]',
 					'description' => sprintf(
+						// translators: %s is replaced with untranslatable keyword `show`
 						esc_attr__( 'What to show as Company identifier by default for shortcodes if not provided shortcode parameter %s. The widget has its setting for this.', 'stock-ticker' ),
 						"'show'"
 					),
@@ -356,6 +370,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				array(
 					'field'       => $this->option_name . '[template]',
 					'description' => sprintf(
+						// translators: %1$s and %2$s are replaved with untranslatable template placeholders, %2$s is replaved with available HTML tags
 						__( 'Custom template for item. You can use macro keywords %1$s or %2$s mixed with HTML tags %3$s and/or %4$s.', 'stock-ticker' ),
 						'%exch_symbol%, %symbol%, %company%, %price%, %volume%, %change%, %changep%, %ltrade%',
 						'%ltrade|l, jS \of F Y%',
@@ -501,6 +516,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				<br />
 				<?php
 				printf(
+					// translators: %1$s is replaved with untranslatable label `Timeout`, %2$s is replaced with translated `Fetch Timeout`
 					esc_attr__( 'If you get too much %1$s statuses during fetch, try to increase %2$s option, save settings and fetch data again.', 'stock-ticker' ),
 					'<code>[Timeout]</code>',
 					'<strong>' . __( 'Fetch Timeout', 'stock-ticker' ) . '</strong>'
@@ -518,6 +534,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			<p class="description">
 				<?php
 				printf(
+					// translators: %s is replaved with translated `Test` buton label
 					esc_attr__( 'If you do not know which symbol to use, enter keywords or symbol to field below and %s.', 'stock-ticker' ),
 					'<strong>' . __( 'Test', 'stock-ticker' ) . '</strong>'
 				);
@@ -525,6 +542,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				<br />
 				<?php
 				printf(
+					// translators: %1$s is replaved with API domain, %2$s and %2$s with untranslatable API endpoints
 					esc_attr__( 'Please note, even if %1$s return symbol for %2$s, that does not guarantee they will also provide any stock data for %3$s.', 'stock-ticker' ),
 					'AlphaVantage.co',
 					'<code>SYMBOL_SEARCH</code>',
@@ -534,6 +552,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				<br />
 				<?php
 				printf(
+					// translators: %s is replaced with plugin name
 					esc_attr__( 'Other API endpoints are there only for testing purposes, but they are not used in %s.', 'stock-ticker' ),
 					__( 'Stock Ticker', 'stock-ticker' )
 				);
@@ -541,7 +560,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			</p>
 			<input type="text" name="st_symbol_search_test" class="regular-text" placeholder="Enter keyword or symbol..." />
 			<select name="st_symbol_search_test_endpoint" class="regular-text">
-				<option value=""><?php printf( esc_attr__( 'Please select %s endpoint', 'stock-ticker' ), 'AlphaVantage.co API' ); ?></option>
+				<option value="">
+					<?php
+					// translators: %s is replaced with API RUL
+					printf( esc_html__( 'Please select %s endpoint', 'stock-ticker' ), 'AlphaVantage.co API' );
+					?>
+				</option>
 				<?php
 				foreach ( $this->endpoints as $endpoint ) {
 					printf( '<option value="%1$s">%1$s</option>', $endpoint );
@@ -839,6 +863,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 					'stock-ticker-update',
 					esc_attr( 'stock-ticker-custom-css' ),
 					sprintf(
+						// translators: %1$s is replaced with error message, %2$s is replaced with CSS code
 						__( 'Failed to write custom CSS file because of error <em>%1$s</em><br />Please create mentioned file manually and add following code to it:<br /><code>%2$s</code>', 'stock-ticker' ),
 						$error['message'],
 						$css
@@ -857,6 +882,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						'stock-ticker-update',
 						esc_attr( 'stock-ticker-custom-js' ),
 						sprintf(
+							// translators: %1$s is replaced with error message, %2$s is replaced with JavaScript code
 							__( 'Failed to write custom JS file for auto reloading ticker because of error <em>%1$s</em><br />Please create mentioned file manually and add following code to it:<br /><code>%2$s</code>', 'stock-ticker' ),
 							$error['message'],
 							$js
