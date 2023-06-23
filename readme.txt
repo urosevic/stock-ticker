@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: stock, stock ticker, sotck quote, ticker, trading, forex
 Requires at least: 4.9
 Tested up to: 6.2
-Stable tag: 3.23.0
+Stable tag: 3.23.1
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -193,11 +193,11 @@ Please note that Alpha Vantage does not provide company name in retrieved feeds.
 
 = How to resolve error `Unfortunately, we could not get stock quotes this time`? =
 
-This can be temporary issue. First try to access front-end page with appended parameter `?stockticker_purge_cache=1`.
+This can be temporary issue. First try to run `Fetch Stock Data Now!` on plugin settings page.
 
-If that does not help, next try to increase *Fetch Timeout* option on general plugin settings and then visit frontend page with appended address parameter `?stockticker_purge_cache=1`.
+If that does not help, next try to increase *Fetch Timeout* option on general plugin settings and then run `Fetch Stock Data Now!`.
 
-If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker) and don't forget to provide URL to your website where you have inserted Stock Ticker.
+If you still experiencing issue, please contact us through [support forum](https://wordpress.org/support/plugin/stock-ticker).
 
 = Can I get stock data for my custom code? =
 
@@ -269,6 +269,10 @@ array(2) {
 `
 
 == Changelog ==
+
+= 3.23.1 (20230223) =
+* Security: Patch Broken Access Control
+* Security: Remove URL parameter `stockticker_purge_cache` which allow unauthorised user to purge stock cache (from now purge stock cache by updating `All Stock Symbols` or running `Fetch Stock Data Now` on plugin settings page)
 
 = 3.23.0 (20230223) =
 * Security: Fix CSRF vulnerability, thanks to [Mika/Patchstack](https://patchstack.com/database/researcher/5ade6efe-f495-4836-906d-3de30c24edad)

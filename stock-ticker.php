@@ -5,7 +5,7 @@
  * Plugin Name: Stock Ticker
  * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
  * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
- * Version:     3.23.0
+ * Version:     3.23.1
  * Author:      Aleksandar Urošević
  * Author URI:  https://urosevic.net
  * License:     GNU GPLv3
@@ -49,7 +49,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 10;
-		const VER    = '3.23.0';
+		const VER    = '3.23.1';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -113,11 +113,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Maybe update trigger.
 			add_action( 'plugins_loaded', array( $this, 'maybe_update' ) );
 
-			// Cleanup transients
-			if ( ! empty( $_GET['stockticker_purge_cache'] ) ) {
-				self::restart_av_fetching();
-			}
-
 			// Initialize default settings
 			$this->defaults = self::defaults();
 
@@ -127,12 +122,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Register AJAX stock updater
 			add_action( 'wp_ajax_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
 			add_action( 'wp_ajax_nopriv_stockticker_update_quotes', array( $this, 'ajax_stockticker_update_quotes' ) );
-			// Register AJAX symbol search and test
+			// Register AJAX symbol search and test (only for logged in users)
 			add_action( 'wp_ajax_stockticker_symbol_search_test', array( $this, 'ajax_stockticker_symbol_search_test' ) );
-			add_action( 'wp_ajax_nopriv_stockticker_symbol_search_test', array( $this, 'ajax_stockticker_symbol_search_test' ) );
-			// Restart fetching loop by AJAX request
+			// add_action( 'wp_ajax_nopriv_stockticker_symbol_search_test', array( $this, 'ajax_stockticker_symbol_search_test' ) );
+			// Restart fetching loop by AJAX request (only for logged in users)
 			add_action( 'wp_ajax_stockticker_purge_cache', array( $this, 'ajax_restart_av_fetching' ) );
-			add_action( 'wp_ajax_nopriv_stockticker_purge_cache', array( $this, 'ajax_restart_av_fetching' ) );
+			// add_action( 'wp_ajax_nopriv_stockticker_purge_cache', array( $this, 'ajax_restart_av_fetching' ) );
 
 			if ( is_admin() ) {
 				// Initialize Plugin Settings Magic
@@ -439,14 +434,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			return $defaults;
 		} // END public function defaults()
 
-		private static function check_nonce() {
-			$nonce = ! empty( $_REQUEST['nonce'] ) ? $_REQUEST['nonce'] : '';
-			if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $nonce, 'stock-ticker-js' ) ) {
-				wp_die( __( 'You do not have sufficient permissions to access this page.' ) );
-			}
-			return true;
-		}
-
 		/**
 		 * Delete control options to force re-fetching from first symbol
 		 */
@@ -458,18 +445,36 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			self::log( 'Stock Ticker: data fetching from first symbol has been restarted' );
 		} // END public static function restart_av_fetching() {
 
+		/**
+		 * Restart AV fetching
+		 * Allowed only on backend for logged in users with `manage_options` permission
+		 *
+		 * @return json|void
+		 */
 		function ajax_restart_av_fetching() {
-			self::check_nonce();
+			// Check permission and validate ajax nonce
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_die( -1, 403 );
+			}
+			check_ajax_referer( 'stock-ticker-js', 'nonce' );
+
 			self::restart_av_fetching();
 			$result['status']  = 'success';
 			$result['message'] = 'OK';
-			$result            = json_encode( $result );
-			echo $result;
+
+			echo json_encode( $result );
 			wp_die();
 		} // END function ajax_restart_av_fetching() {
 
+		/**
+		 * Function to get stock data from DB and return JSON object
+		 * Allowed for backend and frontend
+		 *
+		 * @return json
+		 */
 		function ajax_stockticker_load() {
-			self::check_nonce();
+			check_ajax_referer( 'stock-ticker-js', 'nonce' );
+
 			// @TODO Provide error message if any of params missing + add nonce check
 			if ( ! empty( $_POST['symbols'] ) ) {
 				// Sanitize data
@@ -498,16 +503,20 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$result['status']  = 'error';
 				$result['message'] = 'Error ocurred: No symbols provided';
 			}
-			$result = json_encode( $result );
-			echo $result;
+
+			echo json_encode( $result );
 			wp_die();
 		} // END function ajax_stockticker_load() {
 
 		/**
 		 * AJAX to update AlphaVantage.co quotes
+		 * Allowed for backend and frontend
+		 *
+		 * @return json
 		 */
 		function ajax_stockticker_update_quotes() {
-			self::check_nonce();
+			check_ajax_referer( 'stock-ticker-js', 'nonce' );
+
 			$response          = $this->get_alphavantage_quotes();
 			$result['status']  = 'success';
 			$result['message'] = $response['message'];
@@ -529,20 +538,28 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					$result['done'] = true;
 				}
 			}
-			$result = json_encode( $result );
 
-			echo $result;
+			echo json_encode( $result );
 			wp_die();
 		} // END function ajax_stockticker_update_quotes()
 
 		/**
 		 * AJAX to search for symbol on AlphaVantage.co
+		 * Allowed only on backend for logged in users with `manage_options` permission
+		 *
+		 * @return json
 		 */
 		function ajax_stockticker_symbol_search_test() {
-			self::check_nonce();
+			// Check permission and validate ajax nonce
+			if ( ! current_user_can( 'manage_options' ) ) {
+				wp_die( -1, 403 );
+			}
+			check_ajax_referer( 'stock-ticker-js', 'nonce' );
+
 			$symbol            = $_POST['symbol'];
 			$endpoint          = $_POST['endpoint'];
 			$result['message'] = $this->av_query_endpoint( $endpoint, $symbol );
+
 			echo json_encode( $result );
 			wp_die();
 		} // END function ajax_stockticker_symbol_search_test()
