@@ -1,15 +1,18 @@
 /*!
- * webTicker 2.2.0.1
+ * webTicker 2.2.0.2
  * Examples and documentation at:
  * http://jonmifsud.com/open-source/jquery/jquery-webticker/
  * 2011 Jonathan Mifsud
- * Version: 2.2.0.1 (15-FEB-2016/24-FEB-2017)
+ * Version: 2.2.0.2 (22-JUN-2023)
  * Dual licensed under the Creative Commons and DonationWare licenses:
  * http://creativecommons.org/licenses/by-nc/3.0/
  * https://github.com/jonmifsud/Web-Ticker/blob/master/licence.md
  * Requires:
  * jQuery v1.4.2 or later
- * ChangeLog: fix 2nd line for 10k+ wide stripe, remove active console.log, remove Verdana font
+ * ChangeLog:
+ * * 2.2.0.2 (22-JUN-2023) remove resize event which punch 100% CPU on browser windowresize
+ * * 2.2.0.1 (15-FEB-2016/24-FEB-2017) make it stock ticker
+ * * 2.2.0 fix 2nd line for 10k+ wide stripe, remove active console.log, remove Verdana font
  */
 (function( $ ){
 	var cssTransitionsSupported = (function() {
@@ -206,14 +209,14 @@
 				var $mask = $strip.wrap('<div class="mask"></div>');
 				//$mask.after('<span class="tickeroverlay-left">&nbsp;</span><span class="tickeroverlay-right">&nbsp;</span>');
 				var $tickercontainer = $strip.parent().wrap('<div class="stock-ticker-container"></div>');
-				var resizeEvt; 
-				$(window).resize(function() {
-					clearTimeout(resizeEvt);
-					resizeEvt = setTimeout(function() {
-							//console.log('window was resized');
-							initialize($strip,false);
-					}, 500);
-				});
+				// var resizeEvt; 
+				// $(window).resize(function() {
+				// 	clearTimeout(resizeEvt);
+				// 	resizeEvt = setTimeout(function() {
+				// 			//console.log('window was resized');
+				// 			initialize($strip,false);
+				// 	}, 500);
+				// });
 
 				//adding required css rules
 				

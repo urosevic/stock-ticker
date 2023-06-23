@@ -5,7 +5,7 @@
  * Plugin Name: Stock Ticker
  * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
  * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
- * Version:     3.23.1
+ * Version:     3.23.2
  * Author:      Aleksandar Urošević
  * Author URI:  https://urosevic.net
  * License:     GNU GPLv3
@@ -49,7 +49,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 10;
-		const VER    = '3.23.1';
+		const VER    = '3.23.2';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -153,7 +153,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		function multisite_notice() {
 			$class   = 'notice notice-error';
 			$message = sprintf(
-				/* translators: %1$s is Plugin name, %2$s is Plugin version*/
+				/* translators: %1$s is Plugin name, %2$s is Plugin version */
 				__( 'We are sorry, %1$s v%2$s does not support Multisite WordPress.', 'wpaust' ),
 				$this->plugin_name,
 				self::VER
@@ -292,7 +292,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				$wpau_stockticker_settings = new Wpau_Stock_Ticker_Settings();
 			}
 
-		} // END function admin_init_settings()
+		} // END function admin_init()
 
 		/**
 		 * Append Settings link for Plugins page
@@ -372,7 +372,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'jquery-webticker',
 				$this->plugin_url . ( WP_DEBUG ? 'assets/js/jquery.webticker.js' : 'assets/js/jquery.webticker.min.js' ),
 				array( 'jquery' ),
-				'2.2.0.1',
+				'2.2.0.2',
 				true
 			);
 			wp_enqueue_style(
