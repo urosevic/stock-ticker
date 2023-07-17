@@ -99,10 +99,14 @@ jQuery(document).ready(function($) {
 	$('button[name="st_symbol_search_test_button"]').on('click', function(e){
 		e.preventDefault();
 		var av_symbol_search_test = $('input[name="st_symbol_search_test"]').val();
+		// strip HTML tags
+		av_symbol_search_test = av_symbol_search_test.replace(/(<([^>]+)>)/gi, "");
+		$('input[name="st_symbol_search_test"]').val(av_symbol_search_test);
 		if (0 == av_symbol_search_test.length) {
-			$('.st_symbol_search_test_log').append('<p class="error">Please enter keyword or symbol to search or test!</p>');
+			$('.st_symbol_search_test_log').append('<p class="error">Please enter valid keyword or symbol to search or test!</p>');
 			return;
 		}
+		
 		var av_search_test_endpoint = $('select[name="st_symbol_search_test_endpoint"]').val();
 		if (0 == av_search_test_endpoint.length) {
 			$('.st_symbol_search_test_log').append('<p class="error">Please select AlphaVantage.co API endpoint from dropdown above!</p>');

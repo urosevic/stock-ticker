@@ -5,7 +5,7 @@
  * Plugin Name: Stock Ticker
  * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
  * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
- * Version:     3.23.2
+ * Version:     3.23.3
  * Author:      Aleksandar Urošević
  * Author URI:  https://urosevic.net
  * License:     GNU GPLv3
@@ -49,7 +49,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 10;
-		const VER    = '3.23.2';
+		const VER    = '3.23.3';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -550,14 +550,15 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * @return json
 		 */
 		function ajax_stockticker_symbol_search_test() {
+
 			// Check permission and validate ajax nonce
 			if ( ! current_user_can( 'manage_options' ) ) {
 				wp_die( -1, 403 );
 			}
 			check_ajax_referer( 'stock-ticker-js', 'nonce' );
 
-			$symbol            = $_POST['symbol'];
-			$endpoint          = $_POST['endpoint'];
+			$symbol            = strip_tags( $_POST['symbol'] );
+			$endpoint          = strip_tags( $_POST['endpoint'] );
 			$result['message'] = $this->av_query_endpoint( $endpoint, $symbol );
 
 			echo json_encode( $result );

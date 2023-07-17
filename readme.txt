@@ -4,7 +4,7 @@ Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: stock, stock ticker, sotck quote, ticker, trading, forex
 Requires at least: 4.9
 Tested up to: 6.2
-Stable tag: 3.23.2
+Stable tag: 3.23.3
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -269,6 +269,9 @@ array(2) {
 `
 
 == Changelog ==
+
+= 3.23.3 (20230717) =
+* Security: Fix XSS of Symbol Search & Test
 
 = 3.23.2 (20230622) =
 * Fix: webTicker jQuery library punch CPU to 100% on window resize
