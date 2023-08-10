@@ -3,8 +3,8 @@ Contributors: urkekg, techwebux
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: stock, stock ticker, sotck quote, ticker, trading, forex
 Requires at least: 4.9
-Tested up to: 6.2
-Stable tag: 3.23.3
+Tested up to: 6.3
+Stable tag: 3.23.4
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -134,6 +134,8 @@ https://youtu.be/_tSQ5-ODVfs
 6. Stock ticker through Gutenberg Shortcode block
 
 == Hall of Fame ==
+
+Kudos to [patchstack researchers](https://patchstack.com/database/vulnerability/stock-ticker) for early reporting vulnerabilities!
 
 A big **thank you** goes to [@flexer](https://wordpress.org/support/users/flexer/), [@khunmax](https://wordpress.org/support/users/khunmax/), [@k2_1971](https://wordpress.org/support/users/k2_1971/) and [@vijaleshk](https://wordpress.org/support/users/vijaleshk/) who do tests with alpha versions of plugin until we finally released v3.0.0. And also important to mention [@eigood](https://wordpress.org/support/users/eigood/) who pointed me to AlphaVantage.co as a replacement for Google Finance.
 
@@ -269,6 +271,10 @@ array(2) {
 `
 
 == Changelog ==
+
+= 3.23.4 (20230810) =
+* Security: Fix CSS of stockticker_load
+* Tested: WordPress 6.3 with Twenty Twenty-Three 1.2 and PHP 8.2.8
 
 = 3.23.3 (20230717) =
 * Security: Fix XSS of Symbol Search & Test

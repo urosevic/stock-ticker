@@ -5,7 +5,7 @@
  * Plugin Name: Stock Ticker
  * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
  * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
- * Version:     3.23.3
+ * Version:     3.23.4
  * Author:      Aleksandar Urošević
  * Author URI:  https://urosevic.net
  * License:     GNU GPLv3
@@ -49,7 +49,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	class Wpau_Stock_Ticker {
 
 		const DB_VER = 10;
-		const VER    = '3.23.3';
+		const VER    = '3.23.4';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -478,14 +478,14 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// @TODO Provide error message if any of params missing + add nonce check
 			if ( ! empty( $_POST['symbols'] ) ) {
 				// Sanitize data
-				$symbols       = strip_tags( $_POST['symbols'] );
-				$show          = strip_tags( $_POST['show'] );
-				$number_format = strip_tags( $_POST['number_format'] );
+				$symbols       = self::sanitize_symbols( $_POST['symbols'] );
+				$show          = sanitize_html_class( $_POST['show'] );
+				$number_format = sanitize_html_class( $_POST['number_format'] );
 				$decimals      = (int) $_POST['decimals'];
 				$static        = (int) $_POST['static'];
 				$empty         = (int) $_POST['empty'];
 				$duplicate     = (int) $_POST['duplicate'];
-				$class         = strip_tags( $_POST['class'] );
+				$class         = sanitize_html_class( $_POST['class'] );
 				$speed         = (int) $_POST['speed'];
 
 				// Treat as error if no stock ticker composed but 'Unfortunately' message displayed
