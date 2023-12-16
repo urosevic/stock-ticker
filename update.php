@@ -225,7 +225,7 @@ function au_stockticker_update_routine_8() {
 			$upload_dir = wp_upload_dir();
 			$js = sprintf( 'var stockTickers = setInterval(function(){ stocktickers_load() }, %s);', intval( $defaults['refresh_timeout'] ) * 1000 );
 			file_put_contents( $upload_dir['basedir'] . '/stock-ticker-refresh.js', $js, LOCK_EX );
-		} catch (Exception $w) {}
+		} catch ( Exception $w ) {}
 	}
 } // END function au_stockticker_update_routine_8()
 
@@ -237,7 +237,7 @@ function au_stockticker_update_routine_9() {
 			unset( $defaults['intraday'] );
 			$defaults['av_api_tier'] = 5; // 5 = free
 			update_option( 'stockticker_defaults', $defaults );
-		} catch (Exception $w) {}
+		} catch ( Exception $w ) {}
 	}
 } // END function au_stockticker_update_routine_9()
 
@@ -267,6 +267,35 @@ function au_stockticker_update_routine_10() {
 			}
 
 			update_option( 'stockticker_defaults', $defaults );
-		} catch (Exception $w) {}
+		} catch ( Exception $w ) {}
 	}
 } // END function au_stockticker_update_routine_10()
+
+// Replace Premium tiers
+function au_stockticker_update_routine_11() {
+	$defaults = get_option( 'stockticker_defaults' );
+
+	if ( isset( $defaults['av_api_tier'] ) ) {
+		try {
+			switch ( intval( $defaults['av_api_tier'] ) ) {
+				case 15:
+					$defaults['av_api_tier'] = 30;
+					break;
+				case 60:
+					$defaults['av_api_tier'] = 75;
+					break;
+				case 120:
+					$defaults['av_api_tier'] = 150;
+					break;
+				case 360:
+					$defaults['av_api_tier'] = 300;
+					break;
+				default:
+					$defaults['av_api_tier'] = 5;
+					break;
+			}
+
+			update_option( 'stockticker_defaults', $defaults );
+		} catch ( Exception $w ) {}
+	}
+} // END function au_stockticker_update_routine_11()

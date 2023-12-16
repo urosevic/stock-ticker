@@ -29,22 +29,29 @@ global $wpau_stockticker;
 
 		<div class="sidebar_container">
 			<div class="references">
-				<a href="https://wordpress.org/plugins/stock-ticker/#faq-header" class="aust-button" target="_blank"><?php _e( 'FAQ', 'stock-ticker' ); ?></a>
-				<br />
-				<a href="https://wordpress.org/support/plugin/stock-ticker/" class="aust-button" target="_blank"><?php _e( 'Community Support', 'stock-ticker' ); ?></a>
-				<br />
-				<a href="https://wordpress.org/support/plugin/stock-ticker/reviews/#new-post" class="aust-button" target="_blank"><?php _e( 'Review this plugin', 'stock-ticker' ); ?></a>
+				<ul role="list">
+					<li><a href="https://wordpress.org/plugins/stock-ticker/#faq-header" class="button button-primary" target="_blank"><?php _e( 'FAQ', 'stock-ticker' ); ?></a></li>
+					<li><a href="https://wordpress.org/support/plugin/stock-ticker/" class="button button-primary" target="_blank"><?php _e( 'Community Support', 'stock-ticker' ); ?></a></li>
+					<li><a href="https://wordpress.org/support/plugin/stock-ticker/reviews/#new-post" class="button button-primary" target="_blank">
+						<?php
+						printf(
+							/* translators: %s is replaced with plugin name */
+							__( 'Review %s', 'stock-ticker' ),
+							__( 'Stock Ticker', 'stock-ticker' )
+						);
+						?>
+					</a></li>
+				</ul><!-- role:list -->
 			</div><!-- .references -->
 			<div class="disclaimer">
 				<h2><?php esc_attr_e( 'Disclaimer', 'stock-ticker' ); ?></h2>
 				<div class="description">
 					<?php
 					printf(
-						'<p>' . __( 'Since %1$s version %2$s source for all stock data used in plugin is provided by %3$s. Author of Stock Ticker can not guarantee that stock prices are always accurate.', 'stock-ticker' ) . '</p>' .
-						'<p>' . __( 'The information displayed by the %1$s is for informational and educational purposes only, and it is not investment advice. Seek a duly licensed professional for investment advice.', 'stock-ticker' ) . '</p>' .
-						'<p>' . __( 'Author of %1$s does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results.', 'stock-ticker' ) . '</p>',
-						__( 'Stock Ticker', 'stock-ticker' ),
-						'3.0.0',
+						'<p>' . __( '%1$s retrieve stock exchange data from %2$s. The author of Stock Ticker can not guarantee that stock prices are always accurate.', 'stock-ticker' ) . '</p>' .
+						'<p>' . __( 'The information displayed by the %1$s is for informational and educational purposes only, not a investment advice. Seek a duly licensed professional for investment advice.', 'stock-ticker' ) . '</p>' .
+						'<p>' . __( 'The author of %1$s does not accept liability or responsibility for your use of the plugin, including but not limited to trading and investment results.', 'stock-ticker' ) . '</p>',
+						'<strong>' . __( 'Stock Ticker', 'stock-ticker' ) . '</strong>',
 						'<strong>Alpha Vantage</strong>'
 					);
 					?>

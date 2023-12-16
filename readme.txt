@@ -3,8 +3,8 @@ Contributors: urkekg, techwebux
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: stock, stock ticker, sotck quote, ticker, trading, forex
 Requires at least: 4.9
-Tested up to: 6.3
-Stable tag: 3.23.4
+Tested up to: 6.4.2
+Stable tag: 3.23.5
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -26,6 +26,8 @@ Stock Ticker is advanced variation of [Stock Quote](https://wordpress.org/plugin
 == Disclaimer ==
 
 All stock data used in **Stock Ticker** is provided by **Alpha Vantage**, displayed for informational and educational purposes only and should not be considered as investment advise.
+
+Since end of year 2023 AlphaVantage limited Free API tier to 25 requests per day.
 
 Author of the **Stock Ticker** plugin does not accept liability or responsibility for your use of plugin, including but not limited to trading and investment results. Along to that, author of **Stock Ticker** plugin can not guarantee that stock prices are always accurate as they are provided by 3rd party service for free.
 
@@ -81,7 +83,6 @@ Use simple shortcode `[stock_ticker]` without any parameter in post or page, to 
 Alpha Vantage provide stock data for following stock exchange markets:
 
 * **BOM** - Bombay Stock Exchange
-* **BIT** - Borsa Italiana Milan Stock Exchange
 * **TSE** - Canadian/Toronto Securities Exchange
 * **FRA** - Deutsche Boerse Frankfurt Stock Exchange
 * **ETR** - Deutsche Boerse Frankfurt Stock Exchange
@@ -107,6 +108,7 @@ Not supported:
 * **SGX** - Singapore Exchange ([since July 13th 2020](https://kpo-and-czm.blogspot.com/2017/11/bye-yahoo-finance-hi-alpha-vantage.html?showComment=1596075191464#c3946519402226422619)) - eg. `C29.SI`
 * **NSE** - National Stock Exchange of India ([since July 2020](https://twitter.com/sachinmankapure/status/1279794312210010114)) - eg. `NSE:VB`
 * **STO** - NASDAQ OMX Stockholm (since October 2021) - eg. `STO:ATCO-A`
+* **BIT** - Borsa Italiana Milan Stock Exchange ([since December 2023](https://wordpress.org/support/topic/bit-not-working/)) - eg. `BIT:OLI`
 
 == Installation ==
 
@@ -149,7 +151,7 @@ To check if AlphaVantage.co support your preferred symbol(s), you can use *Symbo
 
 = Stock Exchange or Symbol I need does not work! =
 
-Try to find correct symbol on AlphaVantage.co by looing for it in *Symbol Search & Test* tool. Even try alternatives or company name. If that does not help, search Alpha Vantage community forum [www.alpha-vantage.community](https://www.alpha-vantage.community/)
+Try to find correct symbol on AlphaVantage.co by looing for it in *Symbol Search & Test* tool. Even try alternatives or company name. If that does not help, search Alpha Vantage community forum [www.alpha-vantage.community](https://www.alpha-vantage.community/) or contact [Alpha Vantage support](https://www.alphavantage.co/support/#support).
 
 = How to get Dow Jones Industrial Average or other Indexes? =
 
@@ -270,12 +272,16 @@ array(2) {
 }
 `
 
-= Where do I report security bugs found in this plugin? =
-
-Please report security bugs found in the source code of the Stock Ticker plugin through the [Patchstack Vulnerability Disclosure Program](https://patchstack.com/database/vdp/stock-ticker). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
-
-
 == Changelog ==
+
+= 3.24.5 (20231216) =
+* Security: Fix XSS in shortvode() method (reported by resecured.io via patchstack)
+* Tested: WordPress 6.4.2 with Twenty Twenty-Three 1.3 and PHP 8.2.13
+* Change: Discard symbols that contains carret and equals sign
+* Change: AlphaVantage introduced 25 requests per day for Free tier
+* Change: Deprecated Premium tiers 15, 60, 120, 360, added new Premium tiers 30, 75, 150 and 1200 requests per minute
+* Simplify: Plugin Settings page sidebar
+* Readme: Removed BIT Italian Stock Exchange from supported by AlphaVantage
 
 = 3.23.4 (20230810) =
 * Security: Fix CSS of stockticker_load

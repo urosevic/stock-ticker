@@ -5,7 +5,7 @@
  * Plugin Name: Stock Ticker
  * Plugin URI:  https://urosevic.net/wordpress/plugins/stock-ticker/
  * Description: Easy add customizable moving or static ticker tapes with stock information for custom stock symbols.
- * Version:     3.23.4
+ * Version:     3.23.5
  * Author:      Aleksandar Urošević
  * Author URI:  https://urosevic.net
  * License:     GNU GPLv3
@@ -14,7 +14,7 @@
  */
 
 /**
- * Copyright 2014-2023 Aleksandar Urosevic (urke.kg@gmail.com)
+ * Copyright 2014-2024 Aleksandar Urosevic (urke.kg@gmail.com)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,8 +48,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 	 */
 	class Wpau_Stock_Ticker {
 
-		const DB_VER = 10;
-		const VER    = '3.23.4';
+		const DB_VER = 11;
+		const VER    = '3.23.5';
 
 		public $plugin_name   = 'Stock Ticker';
 		public $plugin_slug   = 'stock-ticker';
@@ -63,7 +63,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		public static $exchanges = array(
 			'supported'   => array(
 				'BOM'    => 'Bombay Stock Exchange',
-				'BIT'    => 'Borsa Italiana Milan Stock Exchange',
 				'TSE'    => 'Canadian/Toronto Securities Exchange',
 				'FRA'    => 'Deutsche Boerse Frankfurt Stock Exchange',
 				'ETR'    => 'Deutsche Boerse Frankfurt Stock Exchange',
@@ -88,6 +87,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'NSE' => 'National Stock Exchange of India',
 				'SGX' => 'Singapore Exchange',
 				'STO' => 'NASDAQ OMX Stockholm',
+				'BIT' => 'Borsa Italiana Milan Stock Exchange',
 			),
 		);
 
@@ -140,17 +140,16 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 
 			// Initialize Widget.
-			require_once( 'inc/widget.php' );
+			require_once 'inc/widget.php';
 
 			// Register stock_ticker shortcode.
 			add_shortcode( 'stock_ticker', array( $this, 'shortcode' ) );
-
 		} // END public function __construct()
 
 		/**
 		 * Throw notice that plugin does not work on Multisite
 		 */
-		function multisite_notice() {
+		public function multisite_notice() {
 			$class   = 'notice notice-error';
 			$message = sprintf(
 				/* translators: %1$s is Plugin name, %2$s is Plugin version */
@@ -161,7 +160,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), esc_html( $message ) );
 		}
 
-		function admin_notice() {
+		public function admin_notice() {
 
 			$missing_option = array();
 
@@ -190,13 +189,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				);
 				printf( '<div class="%1$s"><p>%2$s</p></div>', esc_attr( $class ), $message );
 			}
-
 		} // END function admin_notice()
 
 		/**
 		 * Activate the plugin
 		 */
-		function activate() {
+		public function activate() {
 			// Auto disable on WPMU
 			if ( is_multisite() ) {
 				deactivate_plugins( plugin_basename( __FILE__ ) );
@@ -218,7 +216,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		/**
 		 * Deactivate the plugin
 		 */
-		function deactivate() {
+		public function deactivate() {
 			// Do nothing.
 		} // END function deactivate()
 
@@ -226,7 +224,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Return initial options
 		 * @return array Global defaults for current plugin version
 		 */
-		function init_options() {
+		public function init_options() {
 
 			$init = array(
 				'all_symbols'     => 'AAPL,MSFT,INTC',
@@ -255,18 +253,17 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			add_option( $this->plugin_option, $init, '', 'no' );
 
 			return $init;
-
 		} // END function init_options() {
 
 		/**
 		 * Check do we need to migrate options
 		 */
-		function maybe_update() {
+		public function maybe_update() {
 			// Bail if this plugin data doesn't need updating
 			if ( get_option( 'stockticker_db_ver', 0 ) >= self::DB_VER ) {
 				return;
 			}
-			require_once( dirname( __FILE__ ) . '/update.php' );
+			require_once __DIR__ . '/update.php';
 			au_stockticker_update();
 		} // END function maybe_update()
 
@@ -274,7 +271,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Initialize Settings link for Plugins page and create Settings page
 		 *
 		 */
-		function admin_init() {
+		public function admin_init() {
 
 			// Add plugin Settings link.
 			add_filter( 'plugin_action_links_' . $this->plugin_file, array( $this, 'add_action_links' ) );
@@ -285,13 +282,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Load colour picker scripts on plugin settings page and on widgets/customizer.
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
-			require_once( 'inc/settings.php' );
+			require_once 'inc/settings.php';
 
 			global $wpau_stockticker_settings;
 			if ( empty( $wpau_stockticker_settings ) ) {
 				$wpau_stockticker_settings = new Wpau_Stock_Ticker_Settings();
 			}
-
 		} // END function admin_init()
 
 		/**
@@ -301,12 +297,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 *
 		 * @return array       Array of plugin links with appended link for Settings page
 		 */
-		function add_action_links( $links ) {
-
+		public function add_action_links( $links ) {
 			$links[] = '<a href="' . esc_url( admin_url( 'options-general.php?page=' . $this->plugin_slug ) ) . '">' . esc_html__( 'Settings' ) . '</a>';
-
 			return $links;
-
 		} // END function add_action_links()
 
 		/**
@@ -317,27 +310,25 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 *
 		 * @return array       Array of default plugin meta links with appended link for Support community forum
 		 */
-		function add_plugin_meta_links( $links, $file ) {
-
+		public function add_plugin_meta_links( $links, $file ) {
 			if ( 'stock-ticker/stock-ticker.php' === $file ) {
 				$links[] = '<a href="https://wordpress.org/support/plugin/stock-ticker/" target="_blank">' . esc_html__( 'Support' ) . '</a>';
 			}
 
 			// Return updated array of links
 			return $links;
-
 		} // END function add_plugin_meta_links()
 
 		/**
 		 * Enqueue the colour picker and admin style
 		 */
-		function admin_scripts( $hook ) {
+		public function admin_scripts( $hook ) {
 			if ( 'settings_page_' . $this->plugin_slug === $hook ) {
 				wp_enqueue_style( 'wp-color-picker' );
 				wp_enqueue_script( 'wp-color-picker' );
 				wp_enqueue_style(
 					$this->plugin_slug . '-admin', // 'stock-ticker',
-					plugins_url( 'assets/css/admin.css', __FILE__ ),
+					plugins_url( 'assets/css/admin.min.css', __FILE__ ),
 					array(),
 					self::VER
 				);
@@ -364,7 +355,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		/**
 		 * Enqueue frontend assets
 		 */
-		function enqueue_scripts() {
+		public function enqueue_scripts() {
 			$defaults   = $this->defaults;
 			$upload_dir = wp_upload_dir();
 
@@ -377,7 +368,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			);
 			wp_enqueue_style(
 				'stock-ticker',
-				$this->plugin_url . 'assets/css/stock-ticker.css',
+				$this->plugin_url . 'assets/css/stock-ticker.min.css',
 				array(),
 				self::VER
 			);
@@ -419,7 +410,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				);
 				wp_enqueue_script( 'stock-ticker-reload' );
 			}
-
 		} // END function enqueue_scripts()
 
 		/**
@@ -451,7 +441,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 *
 		 * @return json|void
 		 */
-		function ajax_restart_av_fetching() {
+		public function ajax_restart_av_fetching() {
 			// Check permission and validate ajax nonce
 			if ( ! current_user_can( 'manage_options' ) ) {
 				wp_die( -1, 403 );
@@ -472,7 +462,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 *
 		 * @return json
 		 */
-		function ajax_stockticker_load() {
+		public function ajax_stockticker_load() {
 			check_ajax_referer( 'stock-ticker-js', 'nonce' );
 
 			// @TODO Provide error message if any of params missing + add nonce check
@@ -514,7 +504,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 *
 		 * @return json
 		 */
-		function ajax_stockticker_update_quotes() {
+		public function ajax_stockticker_update_quotes() {
 			check_ajax_referer( 'stock-ticker-js', 'nonce' );
 
 			$response          = $this->get_alphavantage_quotes();
@@ -526,6 +516,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			if ( strpos( $result['message'], 'no need to start' ) !== false ) {
 				$result['done']    = true;
 				$result['message'] = 'DONE';
+			} elseif ( strpos( $result['message'], 'API Key tier daily quota reached' ) !== false ) {
+				$result['done'] = true;
 			} else {
 				$result['done'] = false;
 				// If we have some plugin functionality fatal error
@@ -549,7 +541,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 *
 		 * @return json
 		 */
-		function ajax_stockticker_symbol_search_test() {
+		public function ajax_stockticker_symbol_search_test() {
 
 			// Check permission and validate ajax nonce
 			if ( ! current_user_can( 'manage_options' ) ) {
@@ -587,6 +579,30 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Get API Tier and calculate timeout
 			$av_api_tier         = ! empty( $this->defaults['av_api_tier'] ) ? $this->defaults['av_api_tier'] : 5;
 			$av_api_tier_timeout = 60 / $av_api_tier;
+
+			// If user has Free tier, count daily limit (25 requests per day)
+			if ( 5 === $av_api_tier ) {
+				$av_api_tier_free_quota = get_option(
+					'av_api_tier_free_quota',
+					array(
+						'day'  => gmdate( 'Ymd' ),
+						'used' => 1,
+					)
+				);
+				if ( $av_api_tier_free_quota['used'] >= 25 ) {
+					if ( gmdate( 'Ymd' ) === $av_api_tier_free_quota['day'] ) {
+						self::log( 'API Free Tier daily quota reached.' );
+						return 'Alpha Vantage Free API Key tier daily quota reached (25 requests/day). Consider upgrade to Premium tier, or try again tomorrow...';
+					} else {
+						self::log( 'Reset used count to 1 when new day begins' );
+						$av_api_tier_free_quota['used'] = 1;
+					}
+				} else {
+					// Increase daily used number
+					$av_api_tier_free_quota['used'] = intval( $av_api_tier_free_quota['used'] ) + 1;
+				}
+				update_option( 'av_api_tier_free_quota', $av_api_tier_free_quota );
+			}
 
 			// Get API Tier end timestamp for previous fetch
 			$api_tier_end_timestamp = get_option( 'stockticker_av_tier_end_timestamp', $timestamp_now );
@@ -653,15 +669,24 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 		 * Generate and output stock ticker block
 		 * @param  string   $symbols       Comma separated array of symbols.
 		 * @param  string   $show          What to show (name or symbol).
-		 * @param  bool     $static        Request for static (non-animated) block.
-		 * @param  bool     $empty         Start ticker empty or prefilled with symbols.
+		 * @param  bool     $mode_static        Request for static (non-animated) block.
+		 * @param  bool     $start_empty         Start ticker empty or prefilled with symbols.
 		 * @param  bool     $duplicate     If there is less items than visible on the ticker make it continuous
-		 * @param  string   $class         Custom class for styling Stock Ticker block.
+		 * @param  string   $block_class         Custom class for styling Stock Ticker block.
 		 * @param  integer  $decimals      Number of decimal places.
 		 * @param  string   $number_format Which number format to use (dc, sc, cd, sd).
 		 * @return string          Composed HTML for block.
 		 */
-		public function stock_ticker( $symbols, $show, $number_format = null, $decimals = null, $static = false, $empty = true, $duplicate = false, $class = '' ) {
+		public function stock_ticker(
+			$symbols,
+			$show,
+			$number_format = null,
+			$decimals = null,
+			$mode_static = false,
+			$start_empty = true,
+			$duplicate = false,
+			$block_class = ''
+		) {
 
 			if ( empty( $symbols ) ) {
 				return;
@@ -718,12 +743,12 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			unset( $m, $msize, $matrix, $line );
 
 			// Prepare ticker.
-			if ( ! empty( $static ) && 1 === $static ) {
-				$class .= ' static';
+			if ( ! empty( $mode_static ) && 1 === $mode_static ) {
+				$block_class .= ' static';
 			}
 
 			// Prepare out vars
-			$out_start     = sprintf( '<ul class="stock_ticker %s">', $class );
+			$out_start     = sprintf( '<ul class="stock_ticker %s">', $block_class );
 			$out_end       = '</ul>';
 			$out_error_msg = "<li class=\"error\">{$defaults['error_message']}</li>";
 
@@ -832,8 +857,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					// If matches array exists, proceed with custom formatting
 					if ( ! empty( $ltrade_formats[0] ) ) {
 						// Convert date from quote to timestamp - use $q_ltrade and $q_tz for timezone conversion.
-						$ltrade_datetime = strtotime( $q_ltrade_raw );
-						$ltrade_date     = date_create_from_format( 'Y-m-d H:i:s', $q_ltrade_raw, new DateTimeZone( $q_tz ) );
+						// $ltrade_datetime = strtotime( $q_ltrade_raw );
+						$ltrade_date = date_create_from_format( 'Y-m-d H:i:s', $q_ltrade_raw, new DateTimeZone( $q_tz ) );
 
 						// Now process each custom date format %ltrade% occurance.
 						foreach ( $ltrade_formats[0] as $ltrade_format ) {
@@ -872,8 +897,8 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 
 			// Print ticker content if we have it.
 			return "{$out_start}{$q}{$out_end}";
-
-		} // END public function stock_ticker()
+		}
+		// END public function stock_ticker()
 
 		/**
 		 * Shortcode processor for Stock Ticker
@@ -903,7 +928,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// If we have defined symbols, enqueue script and print stock holder
 			if ( ! empty( $atts['symbols'] ) ) {
 				// Strip tags as we allow only real symbols
-				$atts['symbols'] = strip_tags( $atts['symbols'] );
+				$atts['symbols'] = $this->sanitize_symbols( strip_tags( $atts['symbols'] ) );
 
 				// Enqueue script parser on demand
 				if ( empty( $defaults['globalassets'] ) ) {
@@ -914,7 +939,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				}
 
 				// startEmpty based on prefill option
-				$empty = empty( $atts['prefill'] ) ? 'true' : 'false';
+				$start_empty = empty( $atts['prefill'] ) ? 'true' : 'false';
 				// duplicate
 				$duplicate = empty( $atts['duplicate'] ) ? 'false' : 'true';
 
@@ -938,14 +963,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 					$atts['number_format'],   // 4
 					$atts['class'],           // 5
 					$atts['speed'],           // 6
-					$empty,                   // 7
+					$start_empty,                   // 7
 					$duplicate,               // 8
 					$atts['loading_message'], // 9
 					$atts['decimals']         // 10
 				);
 			}
 			return false;
-
 		} // END public function shortcode()
 
 		// Thanks to https://coderwall.com/p/zepnaw/sanitizing-queries-with-in-clauses-with-wpdb-on-wordpress
@@ -1014,6 +1038,34 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			// Get API Tier and calculate timeout
 			$av_api_tier         = ! empty( $this->defaults['av_api_tier'] ) ? $this->defaults['av_api_tier'] : 5;
 			$av_api_tier_timeout = 60 / $av_api_tier;
+
+			// If user has Free tier, count daily limit (25 requests per day)
+			if ( 5 === $av_api_tier ) {
+				$av_api_tier_free_quota = get_option(
+					'av_api_tier_free_quota',
+					array(
+						'day'  => gmdate( 'Ymd' ),
+						'used' => 1,
+					)
+				);
+				if ( $av_api_tier_free_quota['used'] >= 25 ) {
+					if ( gmdate( 'Ymd' ) === $av_api_tier_free_quota['day'] ) {
+						self::log( 'API Free Tier daily quota reached.' );
+						return array(
+							'message' => 'Alpha Vantage Free API Key tier daily quota reached (25 requests/day). Consider upgrade to Premium tier, or try again tomorrow...', // phpcs:ignore
+							'symbol'  => '',
+							'method'  => 'skip',
+						);
+					} else {
+						self::log( 'Reset used count to 1 when new day begins' );
+						$av_api_tier_free_quota['used'] = 1;
+					}
+				} else {
+					// Increase daily used number
+					$av_api_tier_free_quota['used'] = intval( $av_api_tier_free_quota['used'] ) + 1;
+				}
+				update_option( 'av_api_tier_free_quota', $av_api_tier_free_quota );
+			}
 
 			// Get API Tier end timestamp for previous fetch
 			$api_tier_end_timestamp = get_option( 'stockticker_av_tier_end_timestamp', $timestamp_now );
@@ -1166,7 +1218,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 				'index'  => $current_symbol_index,
 				'symbol' => $symbol_to_fetch,
 			);
-
 		} // END public function get_symbol_to_fetch()
 
 		/**
@@ -1275,7 +1326,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			return $ret;
 		} // END private function data_to_db( $to_fetch, $stock_data )
 
-		function fetch_alphavantage_feed( $symbol ) {
+		public function fetch_alphavantage_feed( $symbol ) {
 
 			self::log( "Fetching data for symbol {$symbol}..." );
 
@@ -1346,17 +1397,28 @@ if ( ! class_exists( 'Wpau_Stock_Ticker' ) ) {
 			}
 
 			return $data_arr;
-
 		} // END function fetch_alphavantage_feed( $symbol )
 
 		/**
-		 * Allow only numbers, alphabet, comma, dot, semicolon, equal and carret
+		 * Filter out invalid stock symbols (eg. one with equals or carret sign)
+		 * Allow only numbers, alphabet, dot, and semicolon
+		 *
 		 * @param  string $symbols Unfiltered value of stock symbols
+		 *
 		 * @return string          Sanitized value of stock symbols
 		 */
 		public static function sanitize_symbols( $symbols ) {
-			$symbols = preg_replace( '/[^0-9A-Z\=\.\,\:\^\-]+/', '', strtoupper( $symbols ) );
-			return $symbols;
+
+			// Split symbols by comma
+			$symbols_arr   = explode( ',', $symbols );
+			$symbols_clean = array();
+			// Discard each symbol that contains equals or carret sign
+			foreach ( $symbols_arr as $symbol ) {
+				if ( false === strpos( $symbol, '=', 0 ) && false === strpos( $symbol, '^', 0 ) ) {
+					$symbols_clean[] = preg_replace( '/[^0-9A-Z\.\:\-]+/', '', strtoupper( $symbol ) );
+				}
+			}
+			return implode( ',', $symbols_clean );
 		} // END private function sanitize_symbols( $symbols )
 
 		private function lock_fetch() {

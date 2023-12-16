@@ -80,7 +80,11 @@ jQuery(document).ready(function($) {
 							}, av_api_timeout);
 						} else {
 							if ( response.message != 'DONE' ) {
-								$('.st_force_data_fetch').append( '<br />[' + response.symbol + '] ' + response.message );
+								if ( response.message.indexOf('API Key tier daily quota reached') >= 0 ) {
+									$('.st_force_data_fetch').append( '<br />[Free API Key] ' + response.message );
+								} else {
+									$('.st_force_data_fetch').append( '<br />[' + response.symbol + '] ' + response.message );
+								}
 							} else {
 								$('.st_force_data_fetch').append( '<br />DONE' );
 							}

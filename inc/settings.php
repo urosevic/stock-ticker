@@ -130,12 +130,13 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						esc_attr__( 'Premium', 'stock-ticker' )
 					),
 					'items'       => array(
-						'5'   => esc_attr__( 'Free (5 requests/min)', 'stock-ticker' ),
-						'15'  => esc_attr__( 'Premium (15 requests/min)', 'stock-ticker' ),
-						'60'  => esc_attr__( 'Premium (60 requests/min)', 'stock-ticker' ),
-						'120' => esc_attr__( 'Premium (120 requests/min)', 'stock-ticker' ),
-						'360' => esc_attr__( 'Premium (360 requests/min)', 'stock-ticker' ),
-						'600' => esc_attr__( 'Premium (600 requests/min)', 'stock-ticker' ),
+						'5'    => esc_attr__( 'Free (5 requests/min, 25 requests/day)', 'stock-ticker' ),
+						'30'   => esc_attr__( 'Premium (30 requests/min)', 'stock-ticker' ),
+						'75'   => esc_attr__( 'Premium (75 requests/min)', 'stock-ticker' ),
+						'150'  => esc_attr__( 'Premium (150 requests/min)', 'stock-ticker' ),
+						'300'  => esc_attr__( 'Premium (300 requests/min)', 'stock-ticker' ),
+						'600'  => esc_attr__( 'Premium (600 requests/min)', 'stock-ticker' ),
+						'1200' => esc_attr__( 'Premium (1200 requests/min)', 'stock-ticker' ),
 					),
 					'value'       => $this->defaults['av_api_tier'],
 				)
@@ -506,7 +507,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				$this->option_name,
 				array( &$this, 'sanitize_options' )
 			);
-
 		} // END public static function register_settings()
 
 		public function settings_js_forcedatafetch() {
@@ -524,7 +524,9 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				?>
 				<br />
 			If you get any <code>[Invalid API call]</code> or <code>[Bad API response]</code> for same symbol multiple times, then AlphaVantage.co does not have that symbol for GLOBAL_QUOTE scope. In that case you should try to prepend stock exchange to symbol, or remove faulty symbol from <strong>All Stock Symbols</strong>.</p>
-			<button name="st_force_data_fetch" class="button button-primary">Fetch Stock Data Now!</button> <button name="st_force_data_fetch_stop" class="button button-secondary">Stop Fetch</button>
+			<p class="fieldset-flex">
+				<button name="st_force_data_fetch" class="button button-primary">Fetch Stock Data Now!</button> <button name="st_force_data_fetch_stop" class="button button-secondary">Stop Fetch</button>
+			</p>
 			<div class="st_force_data_fetch"></div>
 			<?php
 		}
@@ -558,21 +560,23 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				);
 				?>
 			</p>
-			<input type="text" name="st_symbol_search_test" class="regular-text" placeholder="Enter keyword or symbol..." />
-			<select name="st_symbol_search_test_endpoint" class="regular-text">
-				<option value="">
+			<p class="fieldset-flex">
+				<input type="text" name="st_symbol_search_test" class="regular-text" placeholder="Enter keyword or symbol..." />
+				<select name="st_symbol_search_test_endpoint" class="regular-text">
+					<option value="">
+						<?php
+						// translators: %s is replaced with API RUL
+						printf( esc_html__( 'Please select %s endpoint', 'stock-ticker' ), 'AlphaVantage.co API' );
+						?>
+					</option>
 					<?php
-					// translators: %s is replaced with API RUL
-					printf( esc_html__( 'Please select %s endpoint', 'stock-ticker' ), 'AlphaVantage.co API' );
+					foreach ( $this->endpoints as $endpoint ) {
+						printf( '<option value="%1$s">%1$s</option>', $endpoint );
+					}
 					?>
-				</option>
-				<?php
-				foreach ( $this->endpoints as $endpoint ) {
-					printf( '<option value="%1$s">%1$s</option>', $endpoint );
-				}
-				?>
-			</select>
-			<button name="st_symbol_search_test_button" class="button button-primary">Test</button>
+				</select>
+				<button name="st_symbol_search_test_button" class="button button-primary">Test</button>
+			</p>
 			<div class="st_symbol_search_test_log"></div>
 			<?php
 		}
@@ -720,7 +724,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				$checked,
 				self::format_description( $args['description'] )
 			);
-
 		} // END public function settings_field_checkbox($args) {
 
 		/**
@@ -742,7 +745,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 		 * @param  string $text Raw ASCII text
 		 * @return string       HTML formatted text
 		 */
-		function format_description( $text ) {
+		public function format_description( $text ) {
 			$pattern     = '/(\*\*)([^\*]+)(\*\*)/';
 			$replacement = '<strong>${2}</strong>';
 			return preg_replace( $pattern, $replacement, $text );
@@ -770,7 +773,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						$value = preg_replace( '/[^0-9A-Z]+/', '', $value );
 						break;
 					case 'av_api_tier':
-						if ( ! in_array( $value, array( 5, 15, 60, 120, 360, 600 ), true ) ) {
+						if ( ! in_array( $value, array( 5, 30, 75, 150, 300, 600, 1200 ), true ) ) {
 							$value = 5;
 						}
 						break;
@@ -934,7 +937,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			}
 
 			// Render the settings template.
-			include( sprintf( '%s/../templates/settings.php', dirname( __FILE__ ) ) );
+			include sprintf( '%s/../templates/settings.php', __DIR__ );
 		} // END public function plugin_settings_page()
 
 		/**
@@ -986,6 +989,5 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			}
 			return $symbols;
 		} // END private function alpha_symbols( $symbols, $control )
-
 	} // END class Wpau_Stock_Ticker_Settings
 } // END if(!class_exists( 'Wpau_Stock_Ticker_Settings' ))
