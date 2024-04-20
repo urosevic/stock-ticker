@@ -685,7 +685,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 				sanitize_html_class( $args['class'] )
 			);
 			foreach ( $args['items'] as $key => $val ) {
-				$selected = ( $args['value'] === $key ) ? 'selected=selected' : '';
+				$selected = ( strval( $args['value'] ) === strval( $key ) ) ? 'selected=selected' : '';
 				printf(
 					'<option %1$s value="%2$s">%3$s</option>',
 					esc_attr( $selected ),      // 1
@@ -765,7 +765,6 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 			if ( empty( $_POST['option_page'] ) ) {
 				return $sanitized;
 			}
-
 			foreach ( $options as $key => $value ) {
 				switch ( $key ) {
 					case 'avapikey':
@@ -773,7 +772,7 @@ if ( ! class_exists( 'Wpau_Stock_Ticker_Settings' ) ) {
 						$value = preg_replace( '/[^0-9A-Z]+/', '', $value );
 						break;
 					case 'av_api_tier':
-						if ( ! in_array( $value, array( 5, 30, 75, 150, 300, 600, 1200 ), true ) ) {
+						if ( ! in_array( (int) $value, array( 5, 30, 75, 150, 300, 600, 1200 ), true ) ) {
 							$value = 5;
 						}
 						break;

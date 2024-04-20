@@ -3,8 +3,8 @@ Contributors: urkekg, techwebux
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: stock, stock ticker, sotck quote, ticker, trading, forex
 Requires at least: 4.9
-Tested up to: 6.4.2
-Stable tag: 3.23.5
+Tested up to: 6.5.2
+Stable tag: 3.24.4
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -128,7 +128,7 @@ https://youtu.be/_tSQ5-ODVfs
 
 == Screenshots ==
 
-1. Global plugin settings page (version 3.2.0)
+1. Global plugin settings page (version 3.23.5)
 2. Widget settings
 3. Stock ticker in action
 4. Stock ticker in Customizer > top Widgets top
@@ -274,7 +274,11 @@ array(2) {
 
 == Changelog ==
 
-= 3.24.5 (20231216) =
+= 3.24.3 (20240420) =
+* Fix: API Key Tier always show as Free in plugin settings
+* Tested: WordPress 6.5.2 with Twenty Twenty-Three 1.4 and PHP 8.3.6
+
+= 3.23.5 (20231216) =
 * Security: Fix XSS in shortvode() method (reported by resecured.io via patchstack)
 * Tested: WordPress 6.4.2 with Twenty Twenty-Three 1.3 and PHP 8.2.13
 * Change: Discard symbols that contains carret and equals sign
