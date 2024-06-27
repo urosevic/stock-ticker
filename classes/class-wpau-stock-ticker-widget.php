@@ -20,7 +20,7 @@
  */
 class Wpau_Stock_Ticker_Widget extends WP_Widget {
 	/**
-	 * Sets up the widgets name etc
+	 * Sets up the widget name etc
 	 */
 	public function __construct() {
 		// Widget actual processes.
@@ -258,7 +258,7 @@ class Wpau_Stock_Ticker_Widget extends WP_Widget {
 /**
  * Register widget
  */
-function stock_ticker_init() {
+function wpau_stock_ticker_widget_init() {
 	register_widget( 'Wpau_Stock_Ticker_Widget' );
 }
-add_action( 'widgets_init', 'stock_ticker_init' );
+add_action( 'widgets_init', 'wpau_stock_ticker_widget_init' );
