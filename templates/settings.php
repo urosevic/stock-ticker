@@ -16,8 +16,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 global $wpau_stockticker;
 ?>
 <div class="wrap" id="stock_ticker_settings">
-	<h2><?php printf( __( '%s Settings', 'stock-ticker' ), $wpau_stockticker->plugin_name ); ?></h2>
-	<em><?php printf( __( 'Plugin version: %s', 'stock-ticker' ), $wpau_stockticker::VER ); ?></em>
+	<h2>
+		<?php
+		printf(
+			// translators: %s is replaced with plugin name
+			__( '%s Settings', 'stock-ticker' ),
+			$wpau_stockticker->plugin_name
+		);
+		?>
+	</h2>
+	<em>
+		<?php
+		printf(
+			// translators: %s is replaced with plugin version number
+			__( 'Plugin version: %s', 'stock-ticker' ),
+			WPAU_STOCK_TICKER_VER
+		);
+		?>
+	</em>
 	<div class="stock_ticker_wrapper">
 		<div class="content_container">
 			<form method="post" action="options.php">
@@ -35,7 +51,7 @@ global $wpau_stockticker;
 					<li><a href="https://wordpress.org/support/plugin/stock-ticker/reviews/#new-post" class="button button-primary" target="_blank">
 						<?php
 						printf(
-							/* translators: %s is replaced with plugin name */
+							// translators: %s is replaced with plugin name
 							__( 'Review %s', 'stock-ticker' ),
 							__( 'Stock Ticker', 'stock-ticker' )
 						);
@@ -48,8 +64,11 @@ global $wpau_stockticker;
 				<div class="description">
 					<?php
 					printf(
+						// translators: %1$s is replaced with plugin name, %2$s is replaced with stock resources service name
 						'<p>' . __( '%1$s retrieve stock exchange data from %2$s. The author of Stock Ticker can not guarantee that stock prices are always accurate.', 'stock-ticker' ) . '</p>' .
+						// translators: %1$s is replaced with plugin name
 						'<p>' . __( 'The information displayed by the %1$s is for informational and educational purposes only, not a investment advice. Seek a duly licensed professional for investment advice.', 'stock-ticker' ) . '</p>' .
+						// translators: %1$s is replaced with plugin name
 						'<p>' . __( 'The author of %1$s does not accept liability or responsibility for your use of the plugin, including but not limited to trading and investment results.', 'stock-ticker' ) . '</p>',
 						'<strong>' . __( 'Stock Ticker', 'stock-ticker' ) . '</strong>',
 						'<strong>Alpha Vantage</strong>'
@@ -63,7 +82,15 @@ global $wpau_stockticker;
 	<div class="help">
 		<div class="overview">
 			<h2><?php esc_attr_e( 'Help', 'stock-ticker' ); ?></h2>
-			<p><?php printf( esc_attr__( 'To insert %1$s to content, use shortcode %2$s where:', 'stock-ticker' ), esc_attr__( 'Stock Ticker', 'stock-ticker' ), '<code>[stock_ticker symbols="" show="" number_format="" decimals="" static="" speed="" class=""]</code>' ); ?>
+			<p>
+				<?php
+				printf(
+					// translators: %1$s is replaced with plugin name, %2$s is replaced with shortcode example
+					esc_attr__( 'To insert %1$s to content, use shortcode %2$s where:', 'stock-ticker' ),
+					esc_attr__( 'Stock Ticker', 'stock-ticker' ),
+					'<code>[stock_ticker symbols="" show="" number_format="" decimals="" static="" speed="" class=""]</code>'
+				);
+				?>
 			<p class="description"><strong><?php esc_attr_e( 'IMPORTANT', 'stock-ticker' ); ?></strong> <?php esc_attr_e( 'All shortcode parameters and values should be lowercase, except symbols which must be uppercase!', 'stock-ticker' ); ?></p>
 			<dl>
 				<dt class="head"><?php esc_attr_e( 'Parameter', 'stock-ticker' ); ?></dt>
@@ -76,6 +103,12 @@ global $wpau_stockticker;
 				<dd>
 					<?php
 					printf(
+						/*
+						 * translators: %1$s is replaced with shortvode attribue `name`,
+						 * %2$s with translated label `Company Name`,
+						 * %3$s with shortvode attribute value `symbol`, and
+						 * %4$s with translated label `Stock Symbol`
+						 */
 						esc_attr__( 'Can be %1$s to represent the company with %2$s, or %3$s to represent the company with %4$s', 'stock-ticker' ),
 						'<code>name</code>',
 						esc_attr__( 'Company Name', 'stock-ticker' ) . ' ' . esc_attr__( '(default)', 'stock-ticker' ),
@@ -89,9 +122,15 @@ global $wpau_stockticker;
 				<dd>
 					<?php
 					printf(
+						// translators: %1$s is replaced with explained `cd`, `dc` and `sd` options, while %1$s is replaced with explained `sc` option
 						esc_attr__( 'Override default number format for values (default from this settings page used if no custom set by shortcode). Valid options are: %1$s and %2$s', 'stock-ticker' ),
-						sprintf( '<code>cd</code> %1$s <em>0,000.00</em>; <code>dc</code> %1$s <em>0.000,00</em>; <code>sd</code> %1$s <em>0 000.00</em>', __( 'for', 'stock-ticker' ) ),
-						sprintf( '<code>sc</code> %s <em>0 000,00</em>', __( 'for', 'stock-ticker' )
+						sprintf(
+							'<code>cd</code> %1$s <em>0,000.00</em>; <code>dc</code> %1$s <em>0.000,00</em>; <code>sd</code> %1$s <em>0 000.00</em>',
+							__( 'for', 'stock-ticker' )
+						),
+						sprintf(
+							'<code>sc</code> %s <em>0 000,00</em>',
+							__( 'for', 'stock-ticker' )
 						)
 					);
 					?>
@@ -101,6 +140,7 @@ global $wpau_stockticker;
 				<dd>
 					<?php
 					printf(
+						// translators: %1$s is replaced with formatted number 1, 2 and 3, while %2$s is replaced with formatted number 4
 						esc_attr__( 'Override default number of decimal places for values (default from this settings page used if no custom set by shortcode). Valid options are: %1$s and %2$s', 'stock-ticker' ),
 						'<code>1</code>, <code>2</code>, <code>3</code>',
 						'<code>4</code>'
@@ -112,6 +152,7 @@ global $wpau_stockticker;
 				<dd>
 					<?php
 					printf(
+						// translators: %1$s is replaced with formatted number `1`, while %2$s is replaced with formatted keyword `true`
 						esc_attr__( 'Disables scrolling ticker and makes it static if set to %1$s or %2$s', 'stock-ticker' ),
 						'<code>1</code>',
 						'<code>true</code>'
@@ -122,6 +163,7 @@ global $wpau_stockticker;
 				<dd>
 					<?php
 					printf(
+						// translators: %1$s is replaced with formatted number `1`, while %2$s is replaced with formatted keyword `true`
 						esc_attr__( 'To start with pre-filled instead empty ticker set to %1$s or %2$s', 'stock-ticker' ),
 						'<code>1</code>',
 						'<code>true</code>'
@@ -133,6 +175,7 @@ global $wpau_stockticker;
 				<dd>
 					<?php
 					printf(
+						// translators: %1$s is replaced with formatted number `1`, while %2$s is replaced with formatted keyword `true`
 						esc_attr__( 'If there are fewer items than visible on the ticker, set this to %1$s or %2$s to make it continuous', 'stock-ticker' ),
 						'<code>1</code>',
 						'<code>true</code>'
