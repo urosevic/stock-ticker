@@ -3,8 +3,8 @@ Contributors: urkekg, techwebux
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
 Tags: stock, stock ticker, sotck quote, ticker, trading, forex
 Requires at least: 4.9
-Tested up to: 6.5.2
-Stable tag: 3.24.4
+Tested up to: 6.5.5
+Stable tag: 3.24.6
 Requires PHP: 5.6
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
@@ -274,7 +274,12 @@ array(2) {
 
 == Changelog ==
 
-= 3.24.3 (20240420) =
+= 3.24.6 (20240628) =
+* Fix: Stored Cross-Site Scripting discovered by Dale Mavers via Wordfence
+* Change: Code simplification
+* Tested: WordPress 6.5.5 with Twenty Twenty-Four 1.1 and PHP 8.3.7
+
+= 3.24.4 (20240420) =
 * Fix: API Key Tier always show as Free in plugin settings
 * Tested: WordPress 6.5.2 with Twenty Twenty-Three 1.4 and PHP 8.3.6
 
@@ -356,7 +361,7 @@ array(2) {
 * Fix: Safer fix for Checkbox options
 
 = 3.0.5.2 (20180228) =
-* Fix: Checkbox options can not be disabled (`Intraday, `Auto Refresh`, `Load assets on all pages`). Thanks to @cmyee for reporting bug.
+* Fix: Checkbox options can not be disabled (`Intraday`, `Auto Refresh`, `Load assets on all pages`). Thanks to @cmyee for reporting bug.
 * Fix: `Cache Timeout` can not be saved and always reset to zero on settings update.
 
 = 3.0.5.1 (20180204) =
