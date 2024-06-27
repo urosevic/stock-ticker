@@ -10,7 +10,6 @@
  */
 
 function au_stockticker_update() {
-
 	// no PHP timeout for running updates
 	set_time_limit( 0 );
 
@@ -18,7 +17,7 @@ function au_stockticker_update() {
 	$current_db_ver = (int) get_option( 'stockticker_db_ver', 0 );
 
 	// this is the target version that we need to reach
-	$target_db_ver = (int) Wpau_Stock_Ticker::DB_VER;
+	$target_db_ver = (int) WPAU_STOCK_TICKER_DB_VER;
 
 	// run update routines one by one until the current version number
 	// reaches the target version number
@@ -39,18 +38,16 @@ function au_stockticker_update() {
 	}
 
 	// Update plugin version number
-	update_option( 'stockticker_version', Wpau_Stock_Ticker::VER );
-
+	update_option( 'stockticker_version', WPAU_STOCK_TICKER_VER );
 } // END function au_stockticker_update()
-
 
 /**
  * Migrate pre-3.0.0 to 3.0.0 version
  */
 function au_stockticker_update_routine_1() {
-
 	// Move settings from old option to new option and delete old option
-	if ( $old_option_value = get_option( 'stock_ticker_defaults' ) ) {
+	$old_option_value = get_option( 'stock_ticker_defaults' );
+	if ( $old_option_value ) {
 		add_option( 'stockticker_defaults', $old_option_value );
 		delete_option( 'stock_ticker_defaults' );
 	}
@@ -96,14 +93,13 @@ function au_stockticker_update_routine_1() {
 
 	// clear temporary vars
 	unset( $old_option_value, $defaults );
-
 } // END function au_stockticker_update_routine_1()
 
 function au_stockticker_update_routine_2() {
 	// Create database table for stock data caching since version 0.2.99alpha6
 	global $wpdb;
 
-	$table_name = $wpdb->prefix . 'stock_ticker_data';
+	$table_name      = $wpdb->prefix . 'stock_ticker_data';
 	$charset_collate = $wpdb->get_charset_collate();
 
 	$sql = "CREATE TABLE $table_name (
@@ -123,16 +119,14 @@ function au_stockticker_update_routine_2() {
 		UNIQUE `symbol` (`symbol`)
 	) $charset_collate;";
 
-	require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	dbDelta( $sql );
-
 } // END function au_stockticker_update_routine_2()
 
 function au_stockticker_update_routine_3() {
 	// Delete all transients as we don't use them anymore since 0.2.99alpha7
 	global $wpdb;
 	$ret = $wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE '%\_transient\_stockticker\_av\_%' OR option_name LIKE '%\_transient\_timeout\_stockticker\_av\_%'" );
-
 } // END function au_stockticker_update_routine_3()
 
 function au_stockticker_update_routine_4() {
@@ -143,8 +137,8 @@ function au_stockticker_update_routine_4() {
 
 	// Because WordPress dbDelta missing features as noted in ticket https://core.trac.wordpress.org/ticket/40357
 	// We must to run direct primary key switch
-	$wpdb->query("ALTER TABLE $table_name DROP PRIMARY KEY");
-	$wpdb->query("ALTER TABLE $table_name ADD id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST");
+	$wpdb->query( "ALTER TABLE $table_name DROP PRIMARY KEY" );
+	$wpdb->query( "ALTER TABLE $table_name ADD id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST" );
 
 	// Delete unused keys
 	delete_option( 'stockticker_av_latest' );
@@ -164,7 +158,8 @@ function au_stockticker_update_routine_6() {
 	// Fix issue with skipped upgrades for DB VER from 1 to 4
 
 	// remove legacy settings if they remain
-	if ( $old_option = get_option( 'stock_ticker_defaults' ) ) {
+	$old_option = get_option( 'stock_ticker_defaults' );
+	if ( $old_option ) {
 		if ( false !== $old_option ) {
 			delete_option( 'stock_ticker_defaults' );
 		}
@@ -172,8 +167,8 @@ function au_stockticker_update_routine_6() {
 
 	// create stockticker table if missing
 	global $wpdb;
-	$table_name = $table_name = $wpdb->prefix . 'stock_ticker_data';
-	if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) != $table_name ) {
+	$table_name = $wpdb->prefix . 'stock_ticker_data';
+	if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) !== $table_name ) {
 		//table not in database. Create new table
 		$charset_collate = $wpdb->get_charset_collate();
 
@@ -195,7 +190,7 @@ function au_stockticker_update_routine_6() {
 			UNIQUE `symbol` (`symbol`)
 		) $charset_collate;";
 
-		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql );
 	}
 
@@ -205,7 +200,6 @@ function au_stockticker_update_routine_6() {
 	// Delete temporary options used in alpha's
 	delete_option( 'stockticker_av_latest' );
 	delete_option( 'stockticker_av_latest_timestamp' );
-
 } // END function au_stockticker_update_routine_6()
 
 // Intraday setting since 3.0.5
@@ -223,9 +217,11 @@ function au_stockticker_update_routine_8() {
 	if ( ! empty( $defaults['refresh'] ) ) {
 		try {
 			$upload_dir = wp_upload_dir();
-			$js = sprintf( 'var stockTickers = setInterval(function(){ stocktickers_load() }, %s);', intval( $defaults['refresh_timeout'] ) * 1000 );
+			$js         = sprintf( 'var stockTickers = setInterval(function(){ stocktickers_load() }, %s);', intval( $defaults['refresh_timeout'] ) * 1000 );
 			file_put_contents( $upload_dir['basedir'] . '/stock-ticker-refresh.js', $js, LOCK_EX );
-		} catch ( Exception $w ) {}
+		} catch ( Exception $w ) {
+			//
+		}
 	}
 } // END function au_stockticker_update_routine_8()
 
@@ -237,7 +233,9 @@ function au_stockticker_update_routine_9() {
 			unset( $defaults['intraday'] );
 			$defaults['av_api_tier'] = 5; // 5 = free
 			update_option( 'stockticker_defaults', $defaults );
-		} catch ( Exception $w ) {}
+		} catch ( Exception $w ) {
+			//
+		}
 	}
 } // END function au_stockticker_update_routine_9()
 
@@ -260,14 +258,16 @@ function au_stockticker_update_routine_10() {
 				unset( $defaults['refresh'] );
 				// Regenerate reload JS if required.
 				$upload_dir = wp_upload_dir();
-				$js = sprintf( 'var stockTickers = setInterval(function(){ stocktickers_load() }, %s);', intval( $defaults['reload_timeout'] ) * 1000 );
+				$js         = sprintf( 'var stockTickers = setInterval(function(){ stocktickers_load() }, %s);', intval( $defaults['reload_timeout'] ) * 1000 );
 				file_put_contents( $upload_dir['basedir'] . '/stock-ticker-reload.js', $js, LOCK_EX );
 			} else {
 				$defaults['reload'] = false;
 			}
 
 			update_option( 'stockticker_defaults', $defaults );
-		} catch ( Exception $w ) {}
+		} catch ( Exception $w ) {
+			//
+		}
 	}
 } // END function au_stockticker_update_routine_10()
 
@@ -296,6 +296,8 @@ function au_stockticker_update_routine_11() {
 			}
 
 			update_option( 'stockticker_defaults', $defaults );
-		} catch ( Exception $w ) {}
+		} catch ( Exception $w ) {
+			//
+		}
 	}
 } // END function au_stockticker_update_routine_11()
