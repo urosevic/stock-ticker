@@ -1,9 +1,9 @@
 === Stock Ticker ===
 Contributors: urkekg, techwebux
 Donate link: https://urosevic.net/wordpress/donate/?donate_for=stock-ticker
-Tags: stock, stock ticker, sotck quote, ticker, trading, forex
+Tags: stock ticker, stock, ticker, trading, forex
 Requires at least: 4.9
-Tested up to: 6.5.5
+Tested up to: 6.7.1
 Stable tag: 3.24.6
 Requires PHP: 5.6
 License: GPLv3
