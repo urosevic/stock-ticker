@@ -156,6 +156,7 @@ class Wpau_Stock_Ticker_Settings {
 				'items'       => array(
 					''    => esc_attr__( 'End of Day', 'stock-ticker' ),
 					'delayed'   => esc_attr__( '15 Minute Delay', 'stock-ticker' ),
+					'realtime'   => esc_attr__( 'Realtime', 'stock-ticker' ),
 				),
 				'value'       => $this->defaults['avapientitlement'],
 			)
@@ -796,8 +797,8 @@ class Wpau_Stock_Ticker_Settings {
 					}
 					break;
 				case 'avapientitlement':
-					if ( ! in_array( (string) $value, array( '', 'delayed' ), true ) ) {
-						$value = 5;
+					if ( ! in_array( (string) $value, array( '', 'delayed', 'realtime' ), true ) ) {
+						$value = '';
 					}
 					break;
 				case 'symbols':
