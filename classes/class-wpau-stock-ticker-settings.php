@@ -143,6 +143,23 @@ class Wpau_Stock_Ticker_Settings {
 				'value'       => $this->defaults['av_api_tier'],
 			)
 		);
+		
+		add_settings_field(
+			$this->option_name . 'avapientitlement',
+			__( 'API Entitlement', 'stock-ticker' ),
+			array( &$this, 'settings_field_select' ),
+			$this->slug,
+			'wpau_stock_ticker',
+			array(
+				'field'       => $this->option_name . '[avapientitlement]',
+				'description' => __( 'If you have applied for an entitlement through a premium API key, select the entitlement you would like to use. Otherwise, select End of Day.', 'stock-ticker' ),
+				'items'       => array(
+					''    => esc_attr__( 'End of Day', 'stock-ticker' ),
+					'delayed'   => esc_attr__( '15 Minute Delay', 'stock-ticker' ),
+				),
+				'value'       => $this->defaults['avapientitlement'],
+			)
+		);
 
 		add_settings_field(
 			$this->option_name . 'all_symbols',
@@ -775,6 +792,11 @@ class Wpau_Stock_Ticker_Settings {
 					break;
 				case 'av_api_tier':
 					if ( ! in_array( (int) $value, array( 5, 30, 75, 150, 300, 600, 1200 ), true ) ) {
+						$value = 5;
+					}
+					break;
+				case 'avapientitlement':
+					if ( ! in_array( (string) $value, array( '', 'delayed' ), true ) ) {
 						$value = 5;
 					}
 					break;
