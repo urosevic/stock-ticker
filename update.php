@@ -301,3 +301,14 @@ function au_stockticker_update_routine_11() {
 		}
 	}
 } // END function au_stockticker_update_routine_11()
+
+
+// Add entitlement setting
+function au_stockticker_update_routine_12() {
+	$defaults = get_option( 'stockticker_defaults' );
+	
+	if ( ! isset( $defaults['avapientitlement'] ) ) {
+		$defaults['avapientitlement'] = '';
+		update_option( 'stockticker_defaults', $defaults );
+	}
+} // END function au_stockticker_update_routine_12()

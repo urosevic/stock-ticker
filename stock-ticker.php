@@ -36,7 +36,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'WPAU_STOCK_TICKER_VER', '3.24.6' );
-define( 'WPAU_STOCK_TICKER_DB_VER', 11 );
+define( 'WPAU_STOCK_TICKER_DB_VER', 12 );
 define( 'WPAU_STOCK_TICKER_DIR', __DIR__ );
 define( 'WPAU_STOCK_TICKER_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'WPAU_STOCK_TICKER_PLUGIN_FILE', plugin_basename( __FILE__ ) );

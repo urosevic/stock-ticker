@@ -196,27 +196,28 @@ class Wpau_Stock_Ticker {
 	public function init_options() {
 
 		$init = array(
-			'all_symbols'     => 'AAPL,MSFT,INTC',
-			'symbols'         => 'AAPL,MSFT,INTC',
-			'show'            => 'name',
-			'zero'            => '#454545',
-			'minus'           => '#D8442F',
-			'plus'            => '#009D59',
-			'cache_timeout'   => '180', // 3 minutes
-			'template'        => '%company% %price% %change% %changep%',
-			'error_message'   => 'Unfortunately, we could not get stock quotes this time.',
-			'legend'          => "AAPL;Apple Inc.\nFB;Facebook, Inc.\nCSCO;Cisco Systems, Inc.\nGOOG;Google Inc.\nINTC;Intel Corporation\nLNKD;LinkedIn Corporation\nMSFT;Microsoft Corporation\nTWTR;Twitter, Inc.\nBABA;Alibaba Group Holding Limited\nIBM;International Business Machines Corporationn\n.DJI;Dow Jones Industrial Average\nEURGBP;Euro (€) ⇨ British Pound Sterling (£)",
-			'style'           => 'font-family:"Open Sans",Helvetica,Arial,sans-serif;font-weight:normal;font-size:14px;',
-			'timeout'         => 4,
-			'reload'          => false,
-			'reload_timeout'  => 5 * MINUTE_IN_SECONDS,
-			'speed'           => 50,
-			'globalassets'    => false,
-			'avapikey'        => '',
-			'loading_message' => 'Loading stock data...',
-			'number_format'   => 'dc', // dot comma
-			'decimals'        => 2,
-			'av_api_tier'     => 5, // 5 = free
+			'all_symbols'      => 'AAPL,MSFT,INTC',
+			'symbols'          => 'AAPL,MSFT,INTC',
+			'show'             => 'name',
+			'zero'             => '#454545',
+			'minus'            => '#D8442F',
+			'plus'             => '#009D59',
+			'cache_timeout'    => '180', // 3 minutes
+			'template'         => '%company% %price% %change% %changep%',
+			'error_message'    => 'Unfortunately, we could not get stock quotes this time.',
+			'legend'           => "AAPL;Apple Inc.\nFB;Facebook, Inc.\nCSCO;Cisco Systems, Inc.\nGOOG;Google Inc.\nINTC;Intel Corporation\nLNKD;LinkedIn Corporation\nMSFT;Microsoft Corporation\nTWTR;Twitter, Inc.\nBABA;Alibaba Group Holding Limited\nIBM;International Business Machines Corporationn\n.DJI;Dow Jones Industrial Average\nEURGBP;Euro (€) ⇨ British Pound Sterling (£)",
+			'style'            => 'font-family:"Open Sans",Helvetica,Arial,sans-serif;font-weight:normal;font-size:14px;',
+			'timeout'          => 4,
+			'reload'           => false,
+			'reload_timeout'   => 5 * MINUTE_IN_SECONDS,
+			'speed'            => 50,
+			'globalassets'     => false,
+			'avapikey'         => '',
+			'loading_message'  => 'Loading stock data...',
+			'number_format'    => 'dc', // dot comma
+			'decimals'         => 2,
+			'av_api_tier'      => 5, // 5 = free
+			'avapientitlement' => '', // empty = end of day
 		);
 
 		add_option( $this->plugin_option, $init, '', 'no' );
@@ -596,6 +597,10 @@ class Wpau_Stock_Ticker {
 		} else {
 			$extra_params = '';
 		}
+		
+		if( isset( $this->defaults['avapientitlement'] ) && '' !== $this->defaults['avapientitlement'] ) {
+			$extra_params .= '&entitlement=' . $this->defaults['avapientitlement'];
+		}
 
 		// Define AplhaVantage API URL
 		$feed_url = sprintf(
@@ -620,6 +625,13 @@ class Wpau_Stock_Ticker {
 			// Get response from AV and parse it - look for error
 			$json         = wp_remote_retrieve_body( $response );
 			$response_arr = json_decode( $json, true );
+			
+			// 15 minute delayed data uses the key "Global Quote - DATA DELAYED BY 15 MINUTES" and needs to be remapped.
+			$first_key = array_key_first( $response_arr );
+			if ( ! isset( $response_arr['Global Quote'] ) && stristr( $first_key, 'Global Quote' ) ) {
+				// Create the "Global Quote" key from a different "Global Quote" key.
+				$response_arr['Global Quote'] = $response_arr[ $first_key ];
+			}
 
 			// If we got some error from AV, log to self::log and return none
 			if ( ! empty( $response_arr['Error Message'] ) ) {
@@ -1324,7 +1336,11 @@ class Wpau_Stock_Ticker {
 		// Define AplhaVantage API URL
 		self::log( "Using GLOBAL_QUOTE for {$symbol}..." );
 		$feed_url = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=' . $defaults['avapikey'] . '&datatype=json&symbol=' . $symbol;
-
+		
+		if( isset( $this->defaults['avapientitlement'] ) && '' !== $this->defaults['avapientitlement'] ) {
+			$feed_url .= '&entitlement=' . $this->defaults['avapientitlement'];
+		}
+		
 		$wparg = array(
 			'timeout' => intval( $defaults['timeout'] ),
 		);
@@ -1342,6 +1358,14 @@ class Wpau_Stock_Ticker {
 			// Get response from AV and parse it - look for error
 			$json         = wp_remote_retrieve_body( $response );
 			$response_arr = json_decode( $json, true );
+			
+			// 15 minute delayed data uses the key "Global Quote - DATA DELAYED BY 15 MINUTES" and needs to be remapped.
+			$first_key = array_key_first( $response_arr );
+			if ( ! isset( $response_arr['Global Quote'] ) && stristr( $first_key, 'Global Quote' ) ) {
+				// Create the "Global Quote" key from a different "Global Quote" key.
+				$response_arr['Global Quote'] = $response_arr[ $first_key ];
+			}
+			
 			// If we got some error from AV, log to self::log and return none
 			if ( ! empty( $response_arr['Error Message'] ) ) {
 				return 'Stock Ticker connected to AlphaVantage.co but got error: ' . $response_arr['Error Message'];
