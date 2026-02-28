@@ -873,11 +873,30 @@ class Wpau_Stock_Ticker {
 
 		// No results were returned?
 		if ( empty( $q ) ) {
-			return "{$out_start}{$out_error_msg}{$out_end}";
+			$html = "{$out_start}{$out_error_msg}{$out_end}";
+		} else {
+			$html = "{$out_start}{$q}{$out_end}";
 		}
 
-		// Print ticker content if we have it.
-		return "{$out_start}{$q}{$out_end}";
+		// Filter output content.
+		$html = wp_kses(
+			$html,
+			array(
+				'ul'   => array(
+					'class' => true,
+				),
+				'li'   => array(
+					'class' => true,
+				),
+				'span' => array(
+					'class' => true,
+					'title' => true,
+				),
+			)
+		);
+
+		// Return safe content.
+		return $html;
 	}
 	// END public function stock_ticker()
 
