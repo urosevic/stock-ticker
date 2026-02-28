@@ -154,9 +154,9 @@ class Wpau_Stock_Ticker_Settings {
 				'field'       => $this->option_name . '[avapientitlement]',
 				'description' => __( 'If you have applied for an entitlement through a premium API key, select the entitlement you would like to use. Otherwise, select End of Day.', 'stock-ticker' ),
 				'items'       => array(
-					''    => esc_attr__( 'End of Day', 'stock-ticker' ),
-					'delayed'   => esc_attr__( '15 Minute Delay', 'stock-ticker' ),
-					'realtime'   => esc_attr__( 'Realtime', 'stock-ticker' ),
+					''         => esc_attr__( 'End of Day', 'stock-ticker' ),
+					'delayed'  => esc_attr__( '15 Minute Delay', 'stock-ticker' ),
+					'realtime' => esc_attr__( 'Realtime', 'stock-ticker' ),
 				),
 				'value'       => $this->defaults['avapientitlement'],
 			)

@@ -133,12 +133,10 @@ function au_stockticker_update_routine_4() {
 	// Add id as a primary column for 0.2.99alpha10
 	global $wpdb;
 
-	$table_name = $wpdb->prefix . 'stock_ticker_data';
-
 	// Because WordPress dbDelta missing features as noted in ticket https://core.trac.wordpress.org/ticket/40357
 	// We must to run direct primary key switch
-	$wpdb->query( "ALTER TABLE $table_name DROP PRIMARY KEY" );
-	$wpdb->query( "ALTER TABLE $table_name ADD id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST" );
+	$wpdb->query( "ALTER TABLE {$wpdb->prefix}stock_ticker_data DROP PRIMARY KEY" );
+	$wpdb->query( "ALTER TABLE {$wpdb->prefix}stock_ticker_data ADD id INT(10) NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST" );
 
 	// Delete unused keys
 	delete_option( 'stockticker_av_latest' );
@@ -168,7 +166,7 @@ function au_stockticker_update_routine_6() {
 	// create stockticker table if missing
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'stock_ticker_data';
-	if ( $wpdb->get_var( "SHOW TABLES LIKE '$table_name'" ) !== $table_name ) {
+	if ( $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}stock_ticker_data'" ) !== $table_name ) {
 		//table not in database. Create new table
 		$charset_collate = $wpdb->get_charset_collate();
 
@@ -306,7 +304,7 @@ function au_stockticker_update_routine_11() {
 // Add entitlement setting
 function au_stockticker_update_routine_12() {
 	$defaults = get_option( 'stockticker_defaults' );
-	
+
 	if ( ! isset( $defaults['avapientitlement'] ) ) {
 		$defaults['avapientitlement'] = '';
 		update_option( 'stockticker_defaults', $defaults );

@@ -597,8 +597,8 @@ class Wpau_Stock_Ticker {
 		} else {
 			$extra_params = '';
 		}
-		
-		if( isset( $this->defaults['avapientitlement'] ) && '' !== $this->defaults['avapientitlement'] ) {
+
+		if ( isset( $this->defaults['avapientitlement'] ) && '' !== $this->defaults['avapientitlement'] ) {
 			$extra_params .= '&entitlement=' . $this->defaults['avapientitlement'];
 		}
 
@@ -625,7 +625,7 @@ class Wpau_Stock_Ticker {
 			// Get response from AV and parse it - look for error
 			$json         = wp_remote_retrieve_body( $response );
 			$response_arr = json_decode( $json, true );
-			
+
 			// 15 minute delayed data uses the key "Global Quote - DATA DELAYED BY 15 MINUTES" and needs to be remapped.
 			$first_key = array_key_first( $response_arr );
 			if ( ! isset( $response_arr['Global Quote'] ) && stristr( $first_key, 'Global Quote' ) ) {
@@ -1336,11 +1336,11 @@ class Wpau_Stock_Ticker {
 		// Define AplhaVantage API URL
 		self::log( "Using GLOBAL_QUOTE for {$symbol}..." );
 		$feed_url = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&apikey=' . $defaults['avapikey'] . '&datatype=json&symbol=' . $symbol;
-		
-		if( isset( $this->defaults['avapientitlement'] ) && '' !== $this->defaults['avapientitlement'] ) {
+
+		if ( isset( $this->defaults['avapientitlement'] ) && '' !== $this->defaults['avapientitlement'] ) {
 			$feed_url .= '&entitlement=' . $this->defaults['avapientitlement'];
 		}
-		
+
 		$wparg = array(
 			'timeout' => intval( $defaults['timeout'] ),
 		);
@@ -1358,14 +1358,14 @@ class Wpau_Stock_Ticker {
 			// Get response from AV and parse it - look for error
 			$json         = wp_remote_retrieve_body( $response );
 			$response_arr = json_decode( $json, true );
-			
+
 			// 15 minute delayed data uses the key "Global Quote - DATA DELAYED BY 15 MINUTES" and needs to be remapped.
 			$first_key = array_key_first( $response_arr );
 			if ( ! isset( $response_arr['Global Quote'] ) && stristr( $first_key, 'Global Quote' ) ) {
 				// Create the "Global Quote" key from a different "Global Quote" key.
 				$response_arr['Global Quote'] = $response_arr[ $first_key ];
 			}
-			
+
 			// If we got some error from AV, log to self::log and return none
 			if ( ! empty( $response_arr['Error Message'] ) ) {
 				return 'Stock Ticker connected to AlphaVantage.co but got error: ' . $response_arr['Error Message'];
