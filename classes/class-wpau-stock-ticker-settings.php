@@ -143,7 +143,7 @@ class Wpau_Stock_Ticker_Settings {
 				'value'       => $this->defaults['av_api_tier'],
 			)
 		);
-		
+
 		add_settings_field(
 			$this->option_name . 'avapientitlement',
 			__( 'API Entitlement', 'stock-ticker' ),
@@ -830,7 +830,15 @@ class Wpau_Stock_Ticker_Settings {
 					}
 					break;
 				case 'template':
-					$value = strip_tags( $value, '<span><em><strong>' );
+					$allowed_html = array(
+						'span'   => array(
+							'class' => array(),
+							'style' => array(),
+						),
+						'em'     => array(),
+						'strong' => array(),
+					);
+					$value        = wp_kses( $value, $allowed_html );
 					break;
 				case 'cache_timeout':
 					$value = (int) $value;
